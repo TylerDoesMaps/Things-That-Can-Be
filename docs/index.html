@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Things That Can Be</title>
+<link rel="stylesheet" href="vendor/maplibre-gl.css">
+<link rel="stylesheet" href="site.css">
+</head>
+<body class="map-page">
+<header class="top">
+  <h1>Things That Can Be</h1>
+  <nav>
+    <a href="index.html" aria-current="page">Map</a>
+    <a href="containment.html">Containment</a>
+    <a href="flow.html">Connections</a>
+  </nav>
+</header>
+<main class="stage">
+  <div id="map" aria-label="Map"></div>
+  <div id="labels" aria-hidden="true"></div>
+  <form id="layers" aria-label="Layers"></form>
+  <aside id="infobox" hidden></aside>
+</main>
+<script src="vendor/maplibre-gl.js"></script>
+<script src="vendor/topojson-client.min.js"></script>
+<script src="map.js"></script>
+</body>
+</html>

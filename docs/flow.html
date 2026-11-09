@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Connections</title>
+<link rel="stylesheet" href="site.css">
+</head>
+<body>
+<header class="top">
+  <h1>Things That Can Be</h1>
+  <nav>
+    <a href="index.html">Map</a>
+    <a href="containment.html">Containment</a>
+    <a href="flow.html" aria-current="page">Connections</a>
+  </nav>
+</header>
+<main class="page wide">
+  <div class="groups" id="groups"></div>
+  <div id="dead"></div>
+  <div id="chart"></div>
+</main>
+<script src="vendor/mermaid.min.js"></script>
+<script>
+mermaid.initialize({ startOnLoad: false, securityLevel: "strict", theme: "neutral", flowchart: { htmlLabels: true, useMaxWidth: false } });
+const safe = (s) => s.replace(/"/g, "'");
+
+fetch("flow.json").then((r) => r.json()).then(({ edges, nodes, dead }) => {
+  const host = document.getElementById("groups");
+  const chart = document.getElementById("chart");
+  const groups = ["All", ...new Set(edges.map((e) => e.group))];
+  if (dead.length) document.getElementById("dead").textContent = `Does nothing: ${dead.join(", ")}`;
+  let run = 0;
+  async function draw(group) {
+    [...host.children].forEach((b) => b.setAttribute("aria-pressed", String(b.textContent === group)));
+    const picked = group === "All" ? edges : edges.filter((e) => e.group === group);
+    const id = new Map(nodes.map((n, i) => [n, `n${i}`]));
+    const used = new Set(picked.flatMap((e) => [e.source, e.target]));
+    const lines = ["flowchart LR"];
+    used.forEach((n) => lines.push(`${id.get(n)}["${safe(n)}"]`));
+    picked.forEach((e) => lines.push(`${id.get(e.source)} -->|"${safe(e.effect)}"| ${id.get(e.target)}`));
+    const { svg } = await mermaid.render(`g${++run}`, lines.join("\n"));
+    chart.innerHTML = svg;
+  }
+  groups.forEach((g) => {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.textContent = g;
+    b.addEventListener("click", () => draw(g));
+    host.append(b);
+  });
+  draw("All");
+});
+</script>
+</body>
+</html>

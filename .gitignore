@@ -1,0 +1,6 @@
+.DS_Store
+__pycache__/
+raw/
+*.zip
+*l2*.csv
+*l2*.csv.gz

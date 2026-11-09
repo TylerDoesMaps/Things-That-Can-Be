@@ -21,12 +21,13 @@ def acs(table, vintage):
     return d.set_index("fips")
 
 
-def num(d, table, n):
-    col = f"{table.upper()}_E{n:03d}"
+def num(d, table, n, kind="E"):
+    col = f"{table.upper()}_{kind}{n:03d}"
     return pd.to_numeric(d[col], errors="coerce")
 
 
 def demographics(vintage):
+    """Returns college counts and their survey error for each race, plus age, income and citizens."""
     out = pd.DataFrame()
     total = acs("b15003", vintage)
     all_25 = num(total, "b15003", 1)
@@ -36,26 +37,48 @@ def demographics(vintage):
         d = acs(table, vintage)
         everyone = num(d, table, 1).reindex(all_25.index).fillna(0)
         college = (num(d, table, 6) + num(d, table, 11)).reindex(all_25.index).fillna(0)
-        out[f"{race}_col"], out[f"{race}_non"] = college, everyone - college
+        margin = (num(d, table, 6, "M") ** 2 + num(d, table, 11, "M") ** 2).reindex(all_25.index).fillna(0) ** 0.5
+        out[f"{race}_n"], out[f"{race}_c"] = everyone, college
+        out[f"{race}_se"] = margin / 1.645
         taken_all, taken_col = taken_all + everyone, taken_col + college
-    out["oth_col"] = (all_col - taken_col).clip(lower=0)
-    out["oth_non"] = ((all_25 - taken_all) - (all_col - taken_col)).clip(lower=0)
-    groups = [f"{r}_{e}" for r in ("wnh", "blk", "hsp", "asn", "oth") for e in ("col", "non")]
-    shares = out[groups].div(out[groups].sum(axis=1), axis=0).round(4)
-    shares["adults_25"] = all_25
+    out["oth_n"] = (all_25 - taken_all).clip(lower=0)
+    out["oth_c"] = (all_col - taken_col).clip(lower=0)
+    out["oth_c"] = out[["oth_c", "oth_n"]].min(axis=1)
+    out["oth_se"] = float("nan")
+    out["adults_25"] = all_25
 
     age = acs("b01001", vintage)
     band = lambda a, b: sum(num(age, "b01001", n) + num(age, "b01001", n + 24) for n in range(a, b + 1))
     young, mid, older, senior = band(7, 11), band(12, 14), band(15, 19), band(20, 25)
     vap = young + mid + older + senior
-    shares["vap"] = vap
+    out["vap"] = vap
     for name, value in [("age_18_29", young), ("age_30_44", mid), ("age_45_64", older), ("age_65", senior)]:
-        shares[name] = (value / vap).round(4)
-    shares["pop"] = num(acs("b01003", vintage), "b01003", 1)
-    shares["cvap"] = num(acs("b29001", vintage), "b29001", 1)
+        out[name] = (value / vap).round(4)
+    out["pop"] = num(acs("b01003", vintage), "b01003", 1)
+    out["cvap"] = num(acs("b29001", vintage), "b29001", 1)
     income = num(acs("b19013", vintage), "b19013", 1)
-    shares["income"] = income.where(income > 0)
-    return shares
+    out["income"] = income.where(income > 0)
+    return out
+
+
+def college_rates(frame):
+    """Blends each county's college rate with its state's, weighted by how reliable the county's number is."""
+    rates = pd.DataFrame(index=frame.index)
+    for race in ("wnh", "blk", "hsp", "asn", "oth"):
+        n, c = frame[f"{race}_n"], frame[f"{race}_c"]
+        state = frame.groupby("ST")[[f"{race}_c", f"{race}_n"]].transform("sum")
+        prior = (state[f"{race}_c"] / state[f"{race}_n"]).clip(0.01, 0.99)
+        rate = (c / n).where(n > 0)
+        sampling = 2 * prior * (1 - prior) / n.clip(lower=1)
+        survey = (frame[f"{race}_se"] / n.clip(lower=1)) ** 2
+        variance = pd.concat([survey, sampling], axis=1).max(axis=1)
+        solid = n >= 1000
+        spread = ((rate - prior)[solid] ** 2).mean() - variance[solid].mean()
+        spread = max(float(spread), 1e-4)
+        weight = spread / (spread + variance)
+        rates[race] = (weight * rate + (1 - weight) * prior).where(n > 0, prior)
+        print(race, "spread", round(spread ** 0.5, 3), "median trust", round(float(weight.median()), 2), flush=True)
+    return rates
 
 
 counties = [f["properties"] for f in json.loads((WORK / "county.geojson").read_text())["features"]]
@@ -63,6 +86,20 @@ base = pd.DataFrame(counties).set_index("GEOID").rename(columns={"NAME": "name"}
 modern, old = demographics(2024), demographics(2021)
 demo = pd.concat([modern[~modern.index.str.startswith("09")], old[old.index.str.startswith("09")]])
 table = base.join(demo)
+
+# Race comes from the 2020 census count of adults; the survey only supplies each race's college rate.
+census = pd.read_csv(RAW / "pl_county.csv", dtype={"fips": str}).set_index("fips").reindex(table.index)
+adults = census.total
+race_share = pd.DataFrame({
+    "wnh": census.white, "blk": census.black, "hsp": census.hispanic, "asn": census.asian + census.nhpi,
+    "oth": census.aian + census.other + census.multi,
+}).div(adults, axis=0)
+rates = college_rates(table)
+for race in rates.columns:
+    table[f"{race}_col"] = (race_share[race] * rates[race]).round(4)
+    table[f"{race}_non"] = (race_share[race] * (1 - rates[race])).round(4)
+table["adults_2020"] = adults
+table = table.drop(columns=[c for c in table.columns if c.endswith(("_n", "_c", "_se"))])
 
 urban = pd.read_excel(RAW / "2020_UA_COUNTY.xlsx", dtype=str)
 urban["fips"] = urban.STATE.str.zfill(2) + urban.COUNTY.str.zfill(3)
@@ -110,7 +147,6 @@ for year, v in votes.items():
 
 rel = pd.read_excel(RAW / "rel.xlsx", sheet_name="2020 County Summary", dtype={"FIPS": str})
 rel["FIPS"] = rel.FIPS.str.zfill(5)
-table["adherents"] = pd.to_numeric(rel.set_index("FIPS")["Adherents as % of Population"], errors="coerce").reindex(table.index).round(4)
 
 table["in_model"] = (~table.ST.isin(["AK", "HI"])).astype(int)
 
@@ -142,12 +178,19 @@ groups = pd.read_excel(RAW / "groups.xlsx", sheet_name="2020 Group by County", d
 groups = groups[groups.FIPS.notna() & groups["Group Code"].notna()].copy()
 groups["FIPS"] = groups.FIPS.str.zfill(5)
 groups["trad"] = [tradition(c, str(n)) for c, n in zip(groups["Group Code"], groups["Group Name"])]
+SOUTH = {"01", "05", "10", "11", "12", "13", "21", "22", "24", "28", "37", "40", "45", "47", "48", "51", "54"}
+groups.loc[(groups["Group Code"] == "500") & groups.FIPS.str[:2].isin(SOUTH), "trad"] = "rel_evangelical"
 groups["n"] = pd.to_numeric(groups["Adherents"], errors="coerce").fillna(0)
 by_trad = groups.pivot_table(index="FIPS", columns="trad", values="n", aggfunc="sum").fillna(0)
 population = pd.to_numeric(rel.set_index("FIPS")["2020 Population"], errors="coerce")
 shares = by_trad.div(population.reindex(by_trad.index), axis=0).round(4)
 table = table.join(shares)
 table["rel_unclaimed"] = (1 - table[list(by_trad.columns)].sum(axis=1)).clip(lower=0).round(4)
+# Membership counts only work as comparisons: 1.0 is the national average, 2.0 is twice it.
+rel_cols = [*by_trad.columns, "rel_unclaimed"]
+weights = table["pop"].where(table.in_model == 1)
+for col in rel_cols:
+    table[col] = (table[col] / ((table[col] * weights).sum() / weights[table[col].notna()].sum())).round(2)
 
 table.index.name = "fips"
 table.to_csv(DATA / "county.csv")

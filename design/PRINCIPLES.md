@@ -9,14 +9,17 @@
 7. **One election function.** A contest is a set of voters, some candidates and an environment. President is the largest case.
 8. **Data lives where it was measured.** Every variable records its source, year, native level and how it reaches a neighborhood.
 9. **Every mechanic does something.** Every connection is an entry in `design/connections.csv`, with a label for its effect. Charts are generated from that list. Anything with no outgoing line fails the check.
+10. **Groups vote by state and region, never by county.** A group has one rate per state or region. Each county's fixed local lean absorbs the rest.
+11. **Religion is a comparison.** Congregation counts show how a place differs from the national average, not how many people belong.
 
 ## Data levels
 
 | Data | Measured at | How it reaches a neighborhood |
 |---|---|---|
 | Population, race, age | Block | Added directly |
+| College rate within race | County (survey, blended with state by reliability) | Allocated by adult population |
 | Turnout, party | Block (L2) | Added directly |
-| Education, income | Block group | Allocated by adult population |
+| Income | Block group | Allocated by adult population |
 | Election results | Precinct | Allocated by voters |
 | Religion | County | Inherited |
 

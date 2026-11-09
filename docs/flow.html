@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Connections</title>
 <link rel="stylesheet" href="site.css">
+<script src="theme.js"></script>
 </head>
 <body>
 <header class="top">
@@ -22,7 +23,8 @@
 </main>
 <script src="vendor/mermaid.min.js"></script>
 <script>
-mermaid.initialize({ startOnLoad: false, securityLevel: "strict", theme: "neutral", flowchart: { htmlLabels: true, useMaxWidth: false } });
+window.addEventListener("themechange", () => location.reload());
+mermaid.initialize({ startOnLoad: false, securityLevel: "strict", theme: document.documentElement.dataset.theme === "dark" ? "dark" : "neutral", flowchart: { htmlLabels: true, useMaxWidth: false } });
 const safe = (s) => s.replace(/"/g, "'");
 
 fetch("flow.json").then((r) => r.json()).then(({ edges, nodes, dead }) => {

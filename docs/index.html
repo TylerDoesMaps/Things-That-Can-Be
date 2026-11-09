@@ -6,6 +6,7 @@
 <title>Things That Can Be</title>
 <link rel="stylesheet" href="vendor/maplibre-gl.css">
 <link rel="stylesheet" href="site.css">
+<script src="theme.js"></script>
 </head>
 <body class="map-page">
 <header class="top">
@@ -19,7 +20,9 @@
 <main class="stage">
   <div id="map" aria-label="Map"></div>
   <div id="labels" aria-hidden="true"></div>
+  <div id="tip" role="status" hidden></div>
   <form id="layers" aria-label="Layers"></form>
+  <aside id="support"></aside>
   <aside id="infobox" hidden></aside>
 </main>
 <script src="vendor/maplibre-gl.js"></script>

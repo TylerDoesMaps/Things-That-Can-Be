@@ -36,7 +36,9 @@ Promise.all([
   fetch("data/containment.json").then((r) => r.json()),
   fetch("data/florida.json").then((r) => r.json()),
   fetch("data/precincts2024.json").then((r) => r.json()),
-]).then(([c, fl, p24]) => {
+  fetch("data/county_coverage.json").then((r) => r.json()),
+]).then(([c, fl, p24, cov]) => {
+  table("coverage", ["Field", "Counties", "Missing"], Object.entries(cov.fields).map(([k, v]) => [k, v, cov.counties - v]), (i) => i > 0);
   const n = c.national;
   table("national", FIT_HEAD, [
     fit("Block", "Block group", n.blocks, 0),

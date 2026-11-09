@@ -40,7 +40,15 @@ const relCache = new Map();
 const enabled = new Set(LAYERS.filter((l) => l.base || l.on).map((l) => l.id));
 let manifest;
 let selection = null;
-let showMargin = true;
+let view = "m";
+const VIEWS = [
+  ["m", "2024 margin", 2024], ["s", "2024 vote share", 2024], ["x24", "Shift from 2020", 2024],
+  ["m20", "2020 margin", 2020], ["x20", "Shift from 2016", 2020], ["m16", "2016 margin", 2016], ["", "None", 0],
+];
+const BREAKS = { m: [0, 5, 10, 15, 20, 25, 30, 35], s: [0, 10, 20, 30, 40, 50, 60, 70], x: [0, 1, 2, 3, 5, 7.5, 10, 15] };
+const breaksFor = (v) => (v === "s" ? BREAKS.s : v.startsWith("x") ? BREAKS.x : BREAKS.m);
+const NOMINEE = { 2024: "Harris", 2020: "Biden", 2016: "Clinton" };
+const viewYear = () => (VIEWS.find((v) => v[0] === view) || [])[2] || 2024;
 
 const map = new maplibregl.Map({
   container: "map",
@@ -83,6 +91,21 @@ function attachVotes(props, votes) {
   if (!votes || !votes[2]) return;
   [props.d, props.r, props.t] = votes;
   props.m = (100 * (votes[0] - votes[1])) / votes[2];
+  props.s = votes[0] >= votes[1] ? (100 * votes[0]) / votes[2] : (-100 * votes[1]) / votes[2];
+}
+
+function attachYears(props, years) {
+  if (!years) return;
+  attachVotes(props, years["2024"]);
+  for (const y of [20, 16]) {
+    const v = years[`20${y}`];
+    if (v && v[2]) {
+      [props[`d${y}`], props[`r${y}`], props[`t${y}`]] = v;
+      props[`m${y}`] = (100 * (v[0] - v[1])) / v[2];
+    }
+  }
+  if (props.m !== undefined && props.m20 !== undefined) props.x24 = props.m - props.m20;
+  if (props.m20 !== undefined && props.m16 !== undefined) props.x20 = props.m20 - props.m16;
 }
 
 function loadLayer(path) {
@@ -119,18 +142,19 @@ function pathsFor(layer, bounds) {
 }
 
 function resultLayer() {
-  if (!showMargin) return null;
-  if (enabled.has("precinct") && map.getZoom() >= 8) return "precinct";
+  if (!view) return null;
+  if ((view === "m" || view === "s") && enabled.has("precinct") && map.getZoom() >= 8) return "precinct";
   if (enabled.has("county")) return "county";
   if (enabled.has("state")) return "state";
   return null;
 }
 
 function marginColor(t) {
+  const breaks = breaksFor(view);
   const stops = [];
-  for (let i = 6; i >= 0; i--) stops.push(-5 * (i + 1), t.rep[i]);
-  for (let i = 0; i <= 7; i++) stops.push(5 * i, t.dem[i]);
-  return ["case", ["has", "m"], ["step", ["get", "m"], t.rep[7], ...stops], t.noData];
+  for (let i = 6; i >= 0; i--) stops.push(-breaks[i + 1], t.rep[i]);
+  for (let i = 0; i <= 7; i++) stops.push(breaks[i], t.dem[i]);
+  return ["case", ["has", view], ["step", ["get", view], t.rep[7], ...stops], t.noData];
 }
 
 function applyPaint() {
@@ -230,12 +254,18 @@ function renderLayerList() {
   const zoom = map.getZoom();
   const t = theme();
   form.textContent = "";
-  form.append(checkbox("2024 margin", showMargin, (on) => {
-    showMargin = on;
+  const select = document.createElement("select");
+  select.id = "view";
+  select.setAttribute("aria-label", "Map view");
+  VIEWS.forEach(([id, name]) => select.add(new Option(name, id)));
+  select.value = view;
+  select.addEventListener("change", () => {
+    view = select.value;
     tip.hidden = true;
     applyPaint();
     setTimeout(drawLabels, 120);
-  }));
+  });
+  form.append(select);
   for (const l of LAYERS) {
     form.append(checkbox(l.label, enabled.has(l.id), (on) => toggle(l.id, on), t[l.id], zoom < l.min));
   }
@@ -396,17 +426,28 @@ function placeName(layer, p) {
   return p.NAME;
 }
 
+function leadText(value) {
+  return `${value >= 0 ? "Democrats" : "Republicans"} +${Math.abs(value).toFixed(1)}%`;
+}
+
 function showTip(point, layer, p) {
   const t = theme();
+  const year = viewYear();
+  const suffix = year === 2024 ? "" : String(year % 100);
+  const [dem, rep, all] = [p[`d${suffix}`], p[`r${suffix}`], p[`t${suffix}`]];
+  if (!all) {
+    tip.hidden = true;
+    return;
+  }
   tip.textContent = "";
   const title = document.createElement("strong");
   title.textContent = placeName(layer, p);
   const total = document.createElement("div");
   total.className = "total";
-  total.textContent = `Total votes: ${fmt(p.t)}`;
+  total.textContent = `${year} total votes: ${fmt(all)}`;
   tip.append(title, total);
-  const other = Math.max(0, p.t - p.d - p.r);
-  const rows = [["Trump", p.r, t.rep[5]], ["Harris", p.d, t.dem[5]], ["Other", other, "#8d8d8d"]]
+  const other = Math.max(0, all - dem - rep);
+  const rows = [["Trump", rep, t.rep[5]], [NOMINEE[year], dem, t.dem[5]], ["Other", other, "#8d8d8d"]]
     .filter((row) => row[1] > 0).sort((a, b) => b[1] - a[1]);
   for (const [name, votes, color] of rows) {
     const row = document.createElement("div");
@@ -414,7 +455,7 @@ function showTip(point, layer, p) {
     const swatch = document.createElement("i");
     swatch.style.background = color;
     const label = document.createElement("b");
-    label.textContent = `${name}: ${pct(votes, p.t)}`;
+    label.textContent = `${name}: ${pct(votes, all)}`;
     const count = document.createElement("span");
     count.textContent = `(${fmt(votes)})`;
     row.append(swatch, label, count);
@@ -422,8 +463,18 @@ function showTip(point, layer, p) {
   }
   const margin = document.createElement("div");
   margin.className = "margin";
-  margin.textContent = `Margin: ${marginText(p)} (${fmt(Math.abs(p.d - p.r))} votes)`;
+  const leader = dem >= rep ? NOMINEE[year] : "Trump";
+  margin.textContent = `Margin: ${leader} +${((100 * Math.abs(dem - rep)) / all).toFixed(1)}% (${fmt(Math.abs(dem - rep))} votes)`;
   tip.append(margin);
+  const shift = year === 2024 ? p.x24 : year === 2020 ? p.x20 : undefined;
+  if (shift !== undefined) {
+    const before = year === 2024 ? p.m20 : p.m16;
+    const now = (dem - rep) / all;
+    const change = document.createElement("div");
+    change.className = "shift";
+    change.textContent = `${Math.sign(before) === Math.sign(now) ? "Held" : "Flipped"}, shift ${leadText(shift)}`;
+    tip.append(change);
+  }
   tip.hidden = false;
   const bounds = mapHost.getBoundingClientRect();
   const w = tip.offsetWidth, h = tip.offsetHeight;
@@ -452,14 +503,16 @@ function addSupport(us) {
 
 map.on("load", async () => {
   manifest = await fetchJson("data/manifest.json");
-  const [states, counties, results] = await Promise.all([
+  const [states, counties, stateYears, countyYears, us] = await Promise.all([
     loadTopo("data/state.json"),
     loadTopo("data/county.json"),
-    fetchJson("data/results/national.json"),
+    fetchJson("data/results/state_years.json"),
+    fetchJson("data/results/county_years.json"),
+    fetchJson("data/results/us_years.json"),
   ]);
-  states.forEach((f) => attachVotes(f.properties, results.state[f.properties.STUSPS]));
-  counties.forEach((f) => attachVotes(f.properties, results.county[f.properties.GEOID]));
-  addSupport(results.us);
+  states.forEach((f) => attachYears(f.properties, stateYears[f.properties.STUSPS]));
+  counties.forEach((f) => attachYears(f.properties, countyYears[f.properties.GEOID]));
+  addSupport(us["2024"]);
 
   map.addSource("state", { type: "geojson", data: { type: "FeatureCollection", features: states } });
   map.addSource("county", { type: "geojson", data: { type: "FeatureCollection", features: counties } });
@@ -498,7 +551,7 @@ map.on("load", async () => {
   map.on("mousemove", (e) => {
     const layer = resultLayer();
     const hit = layer && map.queryRenderedFeatures(e.point, { layers: [`${layer}-fill`] })[0];
-    if (hit && hit.properties.t) showTip(e.point, layer, hit.properties);
+    if (hit) showTip(e.point, layer, hit.properties);
     else tip.hidden = true;
   });
   mapHost.addEventListener("mouseleave", () => { tip.hidden = true; });

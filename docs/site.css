@@ -64,10 +64,12 @@ a:hover { text-decoration: underline; }
 #tip .row { display: flex; align-items: center; gap: 7px; padding: 1px 0; white-space: nowrap; }
 #tip .row i { width: 13px; height: 13px; border: 1px solid rgba(255, 255, 255, 0.55); }
 #tip .row span { opacity: 0.72; }
+#tip .shift { font-style: italic; opacity: 0.85; }
 #tip .margin { margin-top: 6px; padding-top: 6px; border-top: 1px solid rgba(255, 255, 255, 0.3); font-style: italic; }
 
 #layers { position: absolute; z-index: 2; top: 12px; left: 12px; background: var(--panel); border: 1px solid var(--line); padding: 6px 10px; }
 #layers label { display: flex; align-items: center; gap: 7px; padding: 1px 0; cursor: pointer; }
+#view { width: 100%; margin-bottom: 5px; font: inherit; color: var(--ink); background: var(--panel); border: 1px solid var(--line); }
 #layers .off { color: var(--muted); }
 #layers i { width: 16px; height: 0; border-top: 2px solid; display: inline-block; }
 

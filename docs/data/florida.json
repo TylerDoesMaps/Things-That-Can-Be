@@ -1,0 +1,31 @@
+{
+"blocks": 390066,
+"blocks_with_people": 289652,
+"blocks_no_precinct": 565,
+"blocks_no_precinct_people": 2,
+"precincts": 5693,
+"precinct_multi_county": 7,
+"precinct_cross_muni": 832,
+"precinct_cross_cd": 50,
+"precinct_cross_sldu": 58,
+"precinct_cross_sldl": 168,
+"precinct_cross_bg": 4700,
+"bg_cross_precinct": 5060,
+"bg_with_people": 13317,
+"neighborhoods": 6759,
+"neighborhoods_all_blocks": 7998,
+"l2_rows": 390071,
+"l2_rows_matched": 390066,
+"l2_unmatched_ids": [
+"121 - NO BLOCK ",
+"123 - NO BLOCK ",
+"125 - NO BLOCK ",
+"127 - NO BLOCK ",
+"129 - NO BLOCK "
+],
+"l2_voted": 10735854,
+"l2_voted_unmatched": 442,
+"l2_registered": 14904986,
+"results_harris": 4683038,
+"results_trump": 6110127
+}

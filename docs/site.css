@@ -55,7 +55,7 @@ a:hover { text-decoration: underline; }
 .stage { position: relative; flex: 1; min-height: 0; }
 #map { position: absolute; inset: 0; }
 #labels { position: absolute; inset: 0; z-index: 1; pointer-events: none; overflow: hidden; }
-#labels span { position: absolute; transform: translate(-50%, -50%); font-size: 11.5px; color: var(--label); white-space: nowrap; text-shadow: 0 0 2px var(--halo), 0 0 2px var(--halo), 0 0 3px var(--halo); }
+#labels span { position: absolute; left: 0; top: 0; will-change: transform; font-size: 11.5px; color: var(--label); white-space: nowrap; text-shadow: 0 0 2px var(--halo), 0 0 2px var(--halo), 0 0 3px var(--halo); }
 
 #tip { position: absolute; z-index: 3; min-width: 230px; padding: 10px 12px; color: var(--tip-ink); background: var(--tip); border-radius: 6px; pointer-events: none; font-size: 13px; }
 #tip[hidden] { display: none; }

@@ -195,40 +195,37 @@ async function refresh() {
     if (token !== refreshToken) return;
     map.getSource(l.id).setData({ type: "FeatureCollection", features: groups.flat() });
   }));
-  if (token === refreshToken) setTimeout(drawLabels, 120);
   applyPaint();
 }
 
+let cityLabels = [];
+const labelSpans = new Map();
+
 function drawLabels() {
-  labelHost.textContent = "";
-  if (!enabled.has("city") || map.getZoom() < 8) return;
-  const seen = new Set();
-  const features = map.queryRenderedFeatures({ layers: ["city-fill"] }).filter((f) => {
-    if (seen.has(f.properties.GEOID)) return false;
-    seen.add(f.properties.GEOID);
-    return true;
-  });
-  const placed = [];
-  const ranked = features.map((f) => {
-    let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
-    const rings = f.geometry.type === "Polygon" ? [f.geometry.coordinates] : f.geometry.coordinates;
-    rings.forEach((poly) => poly[0].forEach(([x, y]) => {
-      x0 = Math.min(x0, x); x1 = Math.max(x1, x); y0 = Math.min(y0, y); y1 = Math.max(y1, y);
-    }));
-    return { f, cx: (x0 + x1) / 2, cy: (y0 + y1) / 2, size: (x1 - x0) * (y1 - y0) };
-  }).sort((a, b) => b.size - a.size);
-  for (const { f, cx, cy } of ranked.slice(0, 400)) {
-    const p = map.project([cx, cy]);
-    const w = f.properties.NAME.length * 6.2 + 8;
-    const box = [p.x - w / 2, p.y - 9, p.x + w / 2, p.y + 9];
-    if (placed.some((b) => b[0] < box[2] && b[2] > box[0] && b[1] < box[3] && b[3] > box[1])) continue;
-    placed.push(box);
-    const span = document.createElement("span");
-    span.textContent = f.properties.NAME;
-    span.style.left = `${p.x}px`;
-    span.style.top = `${p.y}px`;
-    labelHost.appendChild(span);
-    if (placed.length >= 70) break;
+  const showing = new Set();
+  if (enabled.has("city")) {
+    const zoom = map.getZoom();
+    const bounds = map.getBounds();
+    for (const label of cityLabels) {
+      const [name, lon, lat, minZoom] = label;
+      if (zoom < minZoom || lon < bounds.getWest() || lon > bounds.getEast() || lat < bounds.getSouth() || lat > bounds.getNorth()) continue;
+      showing.add(label);
+      let span = labelSpans.get(label);
+      if (!span) {
+        span = document.createElement("span");
+        span.textContent = name;
+        labelHost.appendChild(span);
+        labelSpans.set(label, span);
+      }
+      const p = map.project([lon, lat]);
+      span.style.transform = `translate(-50%, -50%) translate(${p.x}px, ${p.y}px)`;
+    }
+  }
+  for (const [label, span] of labelSpans) {
+    if (!showing.has(label)) {
+      span.remove();
+      labelSpans.delete(label);
+    }
   }
 }
 
@@ -263,7 +260,6 @@ function renderLayerList() {
     view = select.value;
     tip.hidden = true;
     applyPaint();
-    setTimeout(drawLabels, 120);
   });
   form.append(select);
   for (const l of LAYERS) {
@@ -273,6 +269,7 @@ function renderLayerList() {
 
 function toggle(id, on) {
   on ? enabled.add(id) : enabled.delete(id);
+  drawLabels();
   const visibility = on ? "visible" : "none";
   map.setLayoutProperty(`${id}-line`, "visibility", visibility);
   map.setLayoutProperty(`${id}-sel`, "visibility", visibility);
@@ -547,6 +544,9 @@ map.on("load", async () => {
   }
 
   map.on("moveend", refresh);
+  map.on("move", drawLabels);
+  cityLabels = await fetchJson("data/city_labels.json");
+  drawLabels();
   map.on("zoomend", applyPaint);
   map.on("mousemove", (e) => {
     const layer = resultLayer();

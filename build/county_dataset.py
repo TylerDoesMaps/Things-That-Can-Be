@@ -112,6 +112,43 @@ rel = pd.read_excel(RAW / "rel.xlsx", sheet_name="2020 County Summary", dtype={"
 rel["FIPS"] = rel.FIPS.str.zfill(5)
 table["adherents"] = pd.to_numeric(rel.set_index("FIPS")["Adherents as % of Population"], errors="coerce").reindex(table.index).round(4)
 
+table["in_model"] = (~table.ST.isin(["AK", "HI"])).astype(int)
+
+CATHOLIC, LDS, MUSLIM = {"081"}, {"151"}, {"267"}
+JEWISH = {"270", "271", "275", "276", "FGR", "FGS"}
+BLACK = {"003", "005", "101", "141", "300", "301", "302", "304", "364", "232", "155", "D71", "F58", "E54", "445", "384",
+         "110", "122", "120", "A47", "D59", "D92", "D83", "C22", "FGV", "F57"}
+MAINLINE = {"449", "207", "193", "355", "019", "443", "093", "288", "157", "371", "293", "295", "391", "393", "225",
+            "175", "176", "290", "389", "338", "292", "461"}
+OTHER_FAITH = {"895", "896", "890", "891", "892", "056", "435", "239", "268", "408", "416", "425", "462", "490", "904",
+               "303", "124", "FER", "233", "111"}
+OTHER_CHRISTIAN = {"500", "272", "173", "087"}
+
+
+def tradition(code, name):
+    if code in CATHOLIC: return "rel_catholic"
+    if code in LDS: return "rel_lds"
+    if code in MUSLIM: return "rel_muslim"
+    if code in JEWISH: return "rel_jewish"
+    if code in BLACK: return "rel_black_prot"
+    if code in MAINLINE: return "rel_mainline"
+    if code in OTHER_FAITH: return "rel_other_faith"
+    if code in OTHER_CHRISTIAN or "Orthodox" in name and "Presbyterian" not in name: return "rel_other_christian"
+    if "Catholic" in name: return "rel_other_christian"
+    return "rel_evangelical"
+
+
+groups = pd.read_excel(RAW / "groups.xlsx", sheet_name="2020 Group by County", dtype={"FIPS": str, "Group Code": str})
+groups = groups[groups.FIPS.notna() & groups["Group Code"].notna()].copy()
+groups["FIPS"] = groups.FIPS.str.zfill(5)
+groups["trad"] = [tradition(c, str(n)) for c, n in zip(groups["Group Code"], groups["Group Name"])]
+groups["n"] = pd.to_numeric(groups["Adherents"], errors="coerce").fillna(0)
+by_trad = groups.pivot_table(index="FIPS", columns="trad", values="n", aggfunc="sum").fillna(0)
+population = pd.to_numeric(rel.set_index("FIPS")["2020 Population"], errors="coerce")
+shares = by_trad.div(population.reindex(by_trad.index), axis=0).round(4)
+table = table.join(shares)
+table["rel_unclaimed"] = (1 - table[list(by_trad.columns)].sum(axis=1)).clip(lower=0).round(4)
+
 table.index.name = "fips"
 table.to_csv(DATA / "county.csv")
 

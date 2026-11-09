@@ -66,7 +66,6 @@ Promise.all([
 
   const q = p24.national;
   table("p2024", FIT_HEAD, [
-    fit("Precinct", "County", q.precincts, q.unknown_county),
     fit("Precinct", "Municipality", q.precincts, q.cross_muni),
   ], fitNumeric);
 

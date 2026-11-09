@@ -1,0 +1,462 @@
+{
+"national": {
+"precincts": 163925,
+"official": 147396,
+"unknown_county": 169,
+"cross_muni": 24192,
+"in_one_city": 75469,
+"pieces": 191561
+},
+"states": [
+{
+"state": "AL",
+"precincts": 1945,
+"official": 1945,
+"unknown_county": 0,
+"cross_muni": 808,
+"in_one_city": 261,
+"pieces": 2903
+},
+{
+"state": "AR",
+"precincts": 2681,
+"official": 2681,
+"unknown_county": 0,
+"cross_muni": 359,
+"in_one_city": 1062,
+"pieces": 3058
+},
+{
+"state": "AZ",
+"precincts": 1694,
+"official": 1683,
+"unknown_county": 0,
+"cross_muni": 367,
+"in_one_city": 884,
+"pieces": 2075
+},
+{
+"state": "CA",
+"precincts": 18539,
+"official": 18539,
+"unknown_county": 0,
+"cross_muni": 1224,
+"in_one_city": 11844,
+"pieces": 19784
+},
+{
+"state": "CO",
+"precincts": 3162,
+"official": 3157,
+"unknown_county": 0,
+"cross_muni": 611,
+"in_one_city": 1635,
+"pieces": 3788
+},
+{
+"state": "CT",
+"precincts": 169,
+"official": 169,
+"unknown_county": 169,
+"cross_muni": 8,
+"in_one_city": 14,
+"pieces": 177
+},
+{
+"state": "DC",
+"precincts": 144,
+"official": 144,
+"unknown_county": 0,
+"cross_muni": 3,
+"in_one_city": 141,
+"pieces": 147
+},
+{
+"state": "DE",
+"precincts": 526,
+"official": 526,
+"unknown_county": 0,
+"cross_muni": 116,
+"in_one_city": 77,
+"pieces": 653
+},
+{
+"state": "FL",
+"precincts": 5583,
+"official": 4319,
+"unknown_county": 0,
+"cross_muni": 1071,
+"in_one_city": 1921,
+"pieces": 6701
+},
+{
+"state": "GA",
+"precincts": 2680,
+"official": 1112,
+"unknown_county": 0,
+"cross_muni": 746,
+"in_one_city": 777,
+"pieces": 3486
+},
+{
+"state": "HI",
+"precincts": 235,
+"official": 235,
+"unknown_county": 0,
+"cross_muni": 0,
+"in_one_city": 0,
+"pieces": 235
+},
+{
+"state": "IA",
+"precincts": 1653,
+"official": 1653,
+"unknown_county": 0,
+"cross_muni": 194,
+"in_one_city": 783,
+"pieces": 1854
+},
+{
+"state": "ID",
+"precincts": 960,
+"official": 0,
+"unknown_county": 0,
+"cross_muni": 324,
+"in_one_city": 228,
+"pieces": 1310
+},
+{
+"state": "IL",
+"precincts": 8527,
+"official": 6635,
+"unknown_county": 0,
+"cross_muni": 3233,
+"in_one_city": 4067,
+"pieces": 12297
+},
+{
+"state": "IN",
+"precincts": 5070,
+"official": 5070,
+"unknown_county": 0,
+"cross_muni": 549,
+"in_one_city": 2740,
+"pieces": 5643
+},
+{
+"state": "KS",
+"precincts": 3673,
+"official": 3673,
+"unknown_county": 0,
+"cross_muni": 289,
+"in_one_city": 1637,
+"pieces": 3963
+},
+{
+"state": "KY",
+"precincts": 3207,
+"official": 0,
+"unknown_county": 0,
+"cross_muni": 790,
+"in_one_city": 1109,
+"pieces": 4076
+},
+{
+"state": "LA",
+"precincts": 3646,
+"official": 3646,
+"unknown_county": 0,
+"cross_muni": 802,
+"in_one_city": 1080,
+"pieces": 4480
+},
+{
+"state": "MA",
+"precincts": 2374,
+"official": 2374,
+"unknown_county": 0,
+"cross_muni": 29,
+"in_one_city": 1316,
+"pieces": 2403
+},
+{
+"state": "MD",
+"precincts": 1954,
+"official": 257,
+"unknown_county": 0,
+"cross_muni": 288,
+"in_one_city": 377,
+"pieces": 2262
+},
+{
+"state": "ME",
+"precincts": 493,
+"official": 493,
+"unknown_county": 0,
+"cross_muni": 8,
+"in_one_city": 15,
+"pieces": 501
+},
+{
+"state": "MI",
+"precincts": 3997,
+"official": 3997,
+"unknown_county": 0,
+"cross_muni": 204,
+"in_one_city": 1620,
+"pieces": 4202
+},
+{
+"state": "MN",
+"precincts": 4049,
+"official": 395,
+"unknown_county": 0,
+"cross_muni": 776,
+"in_one_city": 1684,
+"pieces": 4915
+},
+{
+"state": "MO",
+"precincts": 3061,
+"official": 3049,
+"unknown_county": 0,
+"cross_muni": 592,
+"in_one_city": 1355,
+"pieces": 3765
+},
+{
+"state": "MS",
+"precincts": 1730,
+"official": 1730,
+"unknown_county": 0,
+"cross_muni": 513,
+"in_one_city": 240,
+"pieces": 2272
+},
+{
+"state": "MT",
+"precincts": 726,
+"official": 726,
+"unknown_county": 0,
+"cross_muni": 152,
+"in_one_city": 147,
+"pieces": 879
+},
+{
+"state": "NC",
+"precincts": 2655,
+"official": 2655,
+"unknown_county": 0,
+"cross_muni": 1043,
+"in_one_city": 661,
+"pieces": 3858
+},
+{
+"state": "ND",
+"precincts": 380,
+"official": 27,
+"unknown_county": 0,
+"cross_muni": 247,
+"in_one_city": 65,
+"pieces": 1571
+},
+{
+"state": "NE",
+"precincts": 1323,
+"official": 0,
+"unknown_county": 0,
+"cross_muni": 374,
+"in_one_city": 490,
+"pieces": 1832
+},
+{
+"state": "NH",
+"precincts": 238,
+"official": 238,
+"unknown_county": 0,
+"cross_muni": 0,
+"in_one_city": 13,
+"pieces": 238
+},
+{
+"state": "NJ",
+"precincts": 6384,
+"official": 6384,
+"unknown_county": 0,
+"cross_muni": 222,
+"in_one_city": 2704,
+"pieces": 6611
+},
+{
+"state": "NM",
+"precincts": 2165,
+"official": 2165,
+"unknown_county": 0,
+"cross_muni": 423,
+"in_one_city": 1033,
+"pieces": 2609
+},
+{
+"state": "NV",
+"precincts": 1237,
+"official": 1237,
+"unknown_county": 0,
+"cross_muni": 57,
+"in_one_city": 579,
+"pieces": 1294
+},
+{
+"state": "NY",
+"precincts": 12984,
+"official": 12984,
+"unknown_county": 0,
+"cross_muni": 571,
+"in_one_city": 6940,
+"pieces": 13562
+},
+{
+"state": "OH",
+"precincts": 8876,
+"official": 8876,
+"unknown_county": 0,
+"cross_muni": 896,
+"in_one_city": 4835,
+"pieces": 9789
+},
+{
+"state": "OK",
+"precincts": 1439,
+"official": 1439,
+"unknown_county": 0,
+"cross_muni": 532,
+"in_one_city": 251,
+"pieces": 2039
+},
+{
+"state": "OR",
+"precincts": 1303,
+"official": 1104,
+"unknown_county": 0,
+"cross_muni": 275,
+"in_one_city": 409,
+"pieces": 1587
+},
+{
+"state": "PA",
+"precincts": 9144,
+"official": 9144,
+"unknown_county": 0,
+"cross_muni": 218,
+"in_one_city": 4791,
+"pieces": 9363
+},
+{
+"state": "RI",
+"precincts": 39,
+"official": 39,
+"unknown_county": 0,
+"cross_muni": 4,
+"in_one_city": 4,
+"pieces": 43
+},
+{
+"state": "SC",
+"precincts": 2308,
+"official": 2308,
+"unknown_county": 0,
+"cross_muni": 959,
+"in_one_city": 266,
+"pieces": 3326
+},
+{
+"state": "SD",
+"precincts": 626,
+"official": 242,
+"unknown_county": 0,
+"cross_muni": 289,
+"in_one_city": 167,
+"pieces": 1336
+},
+{
+"state": "TN",
+"precincts": 1858,
+"official": 1858,
+"unknown_county": 0,
+"cross_muni": 558,
+"in_one_city": 574,
+"pieces": 2456
+},
+{
+"state": "TX",
+"precincts": 9718,
+"official": 9718,
+"unknown_county": 0,
+"cross_muni": 2047,
+"in_one_city": 5065,
+"pieces": 12011
+},
+{
+"state": "UT",
+"precincts": 2678,
+"official": 2678,
+"unknown_county": 0,
+"cross_muni": 223,
+"in_one_city": 2038,
+"pieces": 2901
+},
+{
+"state": "VA",
+"precincts": 2536,
+"official": 2536,
+"unknown_county": 0,
+"cross_muni": 156,
+"in_one_city": 681,
+"pieces": 2693
+},
+{
+"state": "VT",
+"precincts": 237,
+"official": 237,
+"unknown_county": 0,
+"cross_muni": 13,
+"in_one_city": 4,
+"pieces": 251
+},
+{
+"state": "WA",
+"precincts": 7747,
+"official": 7747,
+"unknown_county": 0,
+"cross_muni": 459,
+"in_one_city": 4491,
+"pieces": 8209
+},
+{
+"state": "WI",
+"precincts": 3503,
+"official": 3503,
+"unknown_county": 0,
+"cross_muni": 209,
+"in_one_city": 1947,
+"pieces": 3712
+},
+{
+"state": "WV",
+"precincts": 1638,
+"official": 1638,
+"unknown_county": 0,
+"cross_muni": 308,
+"in_one_city": 294,
+"pieces": 1957
+},
+{
+"state": "WY",
+"precincts": 431,
+"official": 431,
+"unknown_county": 0,
+"cross_muni": 53,
+"in_one_city": 153,
+"pieces": 484
+}
+]
+}

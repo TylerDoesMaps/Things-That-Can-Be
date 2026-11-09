@@ -120,5 +120,5 @@ audit["l2_registered"] = int(l2.reg_all.sum())
 audit["results_harris"] = int(round(pd.to_numeric(pre.G24PREDHAR, errors="coerce").sum()))
 audit["results_trump"] = int(round(pd.to_numeric(pre.G24PRERTRU, errors="coerce").sum()))
 
-OUT.write_text(json.dumps(audit, indent=0))
+OUT.write_text(json.dumps({k: v for k, v in audit.items() if not k.startswith("l2")}, indent=0))
 print(json.dumps(audit, indent=1))

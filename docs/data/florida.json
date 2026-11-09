@@ -14,18 +14,6 @@
 "bg_with_people": 13317,
 "neighborhoods": 6759,
 "neighborhoods_all_blocks": 7998,
-"l2_rows": 390071,
-"l2_rows_matched": 390066,
-"l2_unmatched_ids": [
-"121 - NO BLOCK ",
-"123 - NO BLOCK ",
-"125 - NO BLOCK ",
-"127 - NO BLOCK ",
-"129 - NO BLOCK "
-],
-"l2_voted": 10735854,
-"l2_voted_unmatched": 442,
-"l2_registered": 14904986,
 "results_harris": 4683038,
 "results_trump": 6110127
 }

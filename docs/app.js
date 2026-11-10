@@ -206,3 +206,5 @@ Promise.all([fetch("data/states.json").then((r) => r.json()), fetch("data/distri
   if (map.loaded() && map.getLayer("state-border")) render(); else board();
 });
 tabs();
+
+new ResizeObserver(() => map.resize()).observe($("map"));

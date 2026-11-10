@@ -1,0 +1,188 @@
+{
+ "county": {
+  "precincts": 164034,
+  "split": 244,
+  "votes": 154161773,
+  "votes_in_split": 320343,
+  "votes_minority_side": 16541,
+  "split_pct": 0.1,
+  "votes_in_split_pct": 0.2,
+  "votes_minority_side_pct": 0.01,
+  "units": 3053,
+  "area": {
+   "median": 0.0,
+   "p95": 0.01,
+   "over_1pt": 1,
+   "over_5pt": 0,
+   "worst": [
+    1.0,
+    "51620"
+   ]
+  },
+  "whole": {
+   "median": 0.0,
+   "p95": 0.0,
+   "over_1pt": 2,
+   "over_5pt": 0,
+   "worst": [
+    2.0,
+    "40113"
+   ]
+  }
+ },
+ "city": {
+  "precincts": 164034,
+  "split": 28076,
+  "votes": 154161773,
+  "votes_in_split": 32705354,
+  "votes_minority_side": 5873893,
+  "split_pct": 17.1,
+  "votes_in_split_pct": 21.2,
+  "votes_minority_side_pct": 3.81,
+  "units": 10136,
+  "area": {
+   "median": 0.07,
+   "p95": 2.34,
+   "over_1pt": 1291,
+   "over_5pt": 158,
+   "worst": [
+    33.4,
+    "1312120"
+   ]
+  },
+  "whole": {
+   "median": 0.01,
+   "p95": 3.46,
+   "over_1pt": 1321,
+   "over_5pt": 312,
+   "worst": [
+    138.7,
+    "4803708"
+   ]
+  }
+ },
+ "township": {
+  "precincts": 75147,
+  "split": 3105,
+  "votes": 59994780,
+  "votes_in_split": 2248740,
+  "votes_minority_side": 202544,
+  "split_pct": 4.1,
+  "votes_in_split_pct": 3.7,
+  "votes_minority_side_pct": 0.34,
+  "units": 8221,
+  "area": {
+   "median": 0.0,
+   "p95": 0.46,
+   "over_1pt": 205,
+   "over_5pt": 31,
+   "worst": [
+    15.9,
+    "2713107714"
+   ]
+  },
+  "whole": {
+   "median": 0.0,
+   "p95": 0.07,
+   "over_1pt": 84,
+   "over_5pt": 11,
+   "worst": [
+    10.5,
+    "2001559250"
+   ]
+  }
+ },
+ "cd": {
+  "precincts": 164034,
+  "split": 1057,
+  "votes": 154161773,
+  "votes_in_split": 1638519,
+  "votes_minority_side": 247599,
+  "split_pct": 0.6,
+  "votes_in_split_pct": 1.1,
+  "votes_minority_side_pct": 0.16,
+  "units": 428,
+  "area": {
+   "median": 0.01,
+   "p95": 0.1,
+   "over_1pt": 0,
+   "over_5pt": 0,
+   "worst": [
+    0.4,
+    "4709"
+   ]
+  },
+  "whole": {
+   "median": 0.0,
+   "p95": 0.13,
+   "over_1pt": 2,
+   "over_5pt": 1,
+   "worst": [
+    5.0,
+    "4402"
+   ]
+  }
+ },
+ "sldu": {
+  "precincts": 164034,
+  "split": 2113,
+  "votes": 154161773,
+  "votes_in_split": 4144715,
+  "votes_minority_side": 821141,
+  "split_pct": 1.3,
+  "votes_in_split_pct": 2.7,
+  "votes_minority_side_pct": 0.53,
+  "units": 1883,
+  "area": {
+   "median": 0.01,
+   "p95": 0.33,
+   "over_1pt": 9,
+   "over_5pt": 0,
+   "worst": [
+    2.6,
+    "01009"
+   ]
+  },
+  "whole": {
+   "median": 0.0,
+   "p95": 0.7,
+   "over_1pt": 71,
+   "over_5pt": 7,
+   "worst": [
+    27.0,
+    "09010"
+   ]
+  }
+ },
+ "sldl": {
+  "precincts": 162567,
+  "split": 4768,
+  "votes": 152890777,
+  "votes_in_split": 9046474,
+  "votes_minority_side": 2398192,
+  "split_pct": 2.9,
+  "votes_in_split_pct": 5.9,
+  "votes_minority_side_pct": 1.57,
+  "units": 4706,
+  "area": {
+   "median": 0.01,
+   "p95": 0.69,
+   "over_1pt": 141,
+   "over_5pt": 3,
+   "worst": [
+    6.1,
+    "28112"
+   ]
+  },
+  "whole": {
+   "median": 0.0,
+   "p95": 1.57,
+   "over_1pt": 350,
+   "over_5pt": 60,
+   "worst": [
+    35.8,
+    "33721"
+   ]
+  }
+ }
+}

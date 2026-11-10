@@ -1,0 +1,13 @@
+id: creation.personal.windfall
+was: P15
+title: A windfall
+group: Personal
+order: 8150
+type: decision
+level: local
+status: listed
+fires: By chance.
+needs: []
+text: '[A windfall.]'
+answers: []
+leads: Money rises one level.

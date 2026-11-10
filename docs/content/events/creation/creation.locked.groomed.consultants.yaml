@@ -1,0 +1,14 @@
+id: creation.locked.groomed.consultants
+was: L2a
+title: The consultants' first visit
+group: Locked starts
+order: 10030
+type: decision
+level: local
+status: listed
+fires: Needs Groomed. In place of the mentor.
+needs:
+- creation.family.upbringing#groomed
+text: '[The consultants'' first visit.]'
+answers: []
+leads: A consultant in the cast as staff.

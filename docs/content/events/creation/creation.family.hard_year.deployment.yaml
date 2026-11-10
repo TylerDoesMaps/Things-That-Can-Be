@@ -1,0 +1,14 @@
+id: creation.family.hard_year.deployment
+was: B5d
+title: A parent deployed and did not come back the same
+group: Birth and family
+order: 1080
+type: decision
+level: local
+status: listed
+fires: Needs Military family.
+needs:
+- creation.family.upbringing#military
+text: '[A parent deployed and did not come back the same.]'
+answers: []
+leads: Unlocks Anger. Changes the recruiter's answers.

@@ -1,0 +1,14 @@
+id: creation.work.enter.starting_over
+was: W10h
+title: Starting over
+group: Work
+order: 7180
+type: decision
+level: local
+status: listed
+fires: Needs a change of field to anything else.
+needs:
+- creation.work.check_in#change_field
+text: '[Starting over.]'
+answers: []
+leads: That field, first or second rung.

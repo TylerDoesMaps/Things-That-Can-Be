@@ -1,0 +1,14 @@
+id: creation.after_school.overseas
+was: M18c
+title: Overseas
+group: After high school
+order: 5040
+type: decision
+level: local
+status: listed
+fires: After basic training.
+needs:
+- creation.after_school.basic_training
+text: '[Overseas.]'
+answers: []
+leads: A veteran trait. By chance a combat trait or an injury mark.

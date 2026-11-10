@@ -1,0 +1,14 @@
+id: creation.after_school.basic_training
+was: M18b
+title: Basic training
+group: After high school
+order: 5030
+type: decision
+level: local
+status: listed
+fires: Needs enlisting.
+needs:
+- creation.after_school.choice#enlist
+text: '[Basic training.]'
+answers: []
+leads: The Military field, first rung. Always followed by overseas.

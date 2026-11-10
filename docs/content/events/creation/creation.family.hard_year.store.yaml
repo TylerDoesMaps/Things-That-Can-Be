@@ -1,0 +1,15 @@
+id: creation.family.hard_year.store
+was: B5c
+title: The store lost to the chain
+group: Birth and family
+order: 1070
+type: decision
+level: local
+status: listed
+fires: Needs Main Street or New money.
+needs:
+- creation.family.upbringing#main_street
+- creation.family.upbringing#new_money
+text: '[The store lost to the chain.]'
+answers: []
+leads: Unlocks Anger. Makes a change of party possible.

@@ -1,0 +1,48 @@
+id: creation.after_school.choice
+was: M18
+title: What you do after high school
+group: After high school
+order: 5010
+type: decision
+level: local
+status: listed
+fires: Always, at 18.
+needs: []
+text: '[What you do after high school.]'
+answers:
+- id: college
+  text: '[Four-year college.]'
+  needs: []
+  effects: ''
+  note: ''
+- id: selective_college
+  text: '[A selective college.]'
+  needs: []
+  effects: ''
+  note: ''
+- id: community_college
+  text: '[Community college or trade school.]'
+  needs: []
+  effects: ''
+  note: ''
+- id: enlist
+  text: '[Enlist.]'
+  needs: []
+  effects: ''
+  note: ''
+- id: work
+  text: '[Go to work.]'
+  needs: []
+  effects: ''
+  note: ''
+- id: family_business
+  text: '[Stay in the family business.]'
+  needs: []
+  effects: ''
+  note: ''
+- id: drift
+  text: '[Drift.]'
+  needs: []
+  effects: ''
+  note: ''
+leads: One follow-up event.

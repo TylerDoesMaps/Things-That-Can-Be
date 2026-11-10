@@ -1,0 +1,23 @@
+id: creation.school.night_job
+was: H6
+title: The night job
+group: High school
+order: 3060
+type: decision
+level: local
+status: listed
+fires: Needs money level Poor.
+needs: []
+text: '[The night job.]'
+answers:
+- id: keep_going
+  text: '[Keep going to school.]'
+  needs: []
+  effects: ''
+  note: ''
+- id: drop_out
+  text: '[Stop going.]'
+  needs: []
+  effects: ''
+  note: ''
+leads: A Grit lift. Offers dropping out.

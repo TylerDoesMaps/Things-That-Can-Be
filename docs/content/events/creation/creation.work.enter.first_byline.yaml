@@ -1,0 +1,14 @@
+id: creation.work.enter.first_byline
+was: W10c
+title: The first byline
+group: Work
+order: 7130
+type: decision
+level: local
+status: listed
+fires: Needs a change of field to Media.
+needs:
+- creation.work.check_in#change_field
+text: '[The first byline.]'
+answers: []
+leads: Media.

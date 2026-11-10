@@ -1,0 +1,51 @@
+# Every call an event may use. The checker refuses anything not listed here.
+# A call is {whose.what}. "whose" is one of the names under scopes.
+
+person: &person
+  - first_name
+  - last_name
+  - full_name
+  - title
+  - party
+  - job
+  - age
+  - he
+  - him
+  - his
+  - trait.best
+  - trait.worst
+  - trait.random
+  - trait.random_negative
+  - opinion_word
+  - insult
+
+scopes:
+  player: [*person, [office, field, upbringing, faith, motivation, money, hometown]]
+  speaker: [*person]
+  spouse: [*person]
+  parent: [*person]
+  mother: [*person]
+  father: [*person]
+  child: [*person]
+  rival: [*person]
+  patron: [*person]
+  mentor: [*person]
+  boss: [*person]
+  staff.chief: [*person]
+  staff.press: [*person]
+  staff.manager: [*person]
+  world.president: [*person]
+  world.winner: [*person]
+  world.loser: [*person]
+  world.debate.first: [*person]
+  world.debate.second: [*person]
+  world: [[date, year, party_in_power]]
+  place: [[name, county, state, setting, main_street, plant, school, paper, church, bar]]
+  secret: [[worst, newest]]
+  event: [[choice]]
+
+values:
+  place.setting: [urban, suburban, small town, rural]
+  types: [notice, decision, set piece, standing decision, screen]
+  levels: [local, state, federal]
+  statuses: [listed, drafted, written, in game]

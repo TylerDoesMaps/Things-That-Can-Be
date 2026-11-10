@@ -1,0 +1,14 @@
+id: creation.work.enter.ordination
+was: W10d
+title: Ordination
+group: Work
+order: 7140
+type: decision
+level: local
+status: listed
+fires: Needs a change of field to Clergy, with seminary or Church household and a faith you kept.
+needs:
+- creation.work.check_in#change_field
+text: '[Ordination.]'
+answers: []
+leads: Clergy.

@@ -1,0 +1,113 @@
+id: creation.family.upbringing
+was: B1
+title: Choose the home you grew up in
+group: Birth and family
+order: 1010
+type: decision
+level: local
+status: listed
+fires: Always
+needs: []
+text: '[Choose the home you grew up in.]'
+answers:
+- id: family_farm
+  text: '[Family farm.]'
+  needs: []
+  effects: ''
+  note: ''
+- id: hired_hands
+  text: '[Hired hands.]'
+  needs: []
+  effects: ''
+  note: ''
+- id: union_household
+  text: '[Union household.]'
+  needs: []
+  effects: ''
+  note: ''
+- id: main_street
+  text: '[Main Street.]'
+  needs: []
+  effects: ''
+  note: ''
+- id: professional
+  text: '[Professional household.]'
+  needs: []
+  effects: ''
+  note: ''
+- id: public_payroll
+  text: '[Public payroll.]'
+  needs: []
+  effects: ''
+  note: ''
+- id: military
+  text: '[Military family.]'
+  needs: []
+  effects: ''
+  note: ''
+- id: church
+  text: '[Church household.]'
+  needs: []
+  effects: ''
+  note: ''
+- id: immigrant
+  text: '[Immigrant household.]'
+  needs: []
+  effects: ''
+  note: ''
+- id: one_parent
+  text: '[One parent, two jobs.]'
+  needs: []
+  effects: ''
+  note: ''
+- id: old_family
+  text: '[Old family.]'
+  needs: []
+  effects: ''
+  note: ''
+- id: new_money
+  text: '[New money.]'
+  needs: []
+  effects: ''
+  note: ''
+- id: political
+  text: '[Political family.]'
+  needs: []
+  effects: ''
+  note: ''
+- id: campus
+  text: '[Campus household.]'
+  needs: []
+  effects: ''
+  note: ''
+- id: city_block
+  text: '[City block.]'
+  needs: []
+  effects: ''
+  note: ''
+- id: subdivision
+  text: '[Subdivision.]'
+  needs: []
+  effects: ''
+  note: ''
+- id: raised_by_others
+  text: '[Raised by others.]'
+  needs: []
+  effects: ''
+  note: ''
+- id: tribal
+  text: '[Tribal community.]'
+  needs: []
+  effects: ''
+  note: ''
+- id: dynasty
+  text: '[Dynasty. Locked.]'
+  needs: []
+  effects: ''
+  note: ''
+- id: groomed
+  text: '[Groomed. Locked.]'
+  needs: []
+  effects: ''
+  note: ''
+leads: Sets the upbringing. Decides which hard year and which childhood events can fire.

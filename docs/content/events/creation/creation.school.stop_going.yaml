@@ -1,0 +1,15 @@
+id: creation.school.stop_going
+was: H10
+title: You stop going
+group: High school
+order: 3100
+type: decision
+level: local
+status: listed
+fires: Needs being caught with money level Poor, or chosen at the night job.
+needs:
+- creation.school.caught
+- creation.school.night_job#drop_out
+text: '[You stop going.]'
+answers: []
+leads: Locks college after high school. Night school can undo it.

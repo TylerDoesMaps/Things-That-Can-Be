@@ -1,0 +1,13 @@
+id: creation.work.laid_off
+was: W3
+title: Laid off, or the business fails
+group: Work
+order: 7040
+type: decision
+level: local
+status: listed
+fires: By chance at any milestone. Likelier in plant work, retail and small business.
+needs: []
+text: '[Laid off, or the business fails.]'
+answers: []
+leads: Money drops. The next check-in must change field. Unlocks Anger. Makes a change of party possible.

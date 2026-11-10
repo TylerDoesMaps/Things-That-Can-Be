@@ -1,0 +1,13 @@
+id: creation.school.sweetheart
+was: H5
+title: A sweetheart
+group: High school
+order: 3050
+type: decision
+level: local
+status: listed
+fires: Any.
+needs: []
+text: '[A sweetheart.]'
+answers: []
+leads: A tie. By chance, a first child before any marriage.

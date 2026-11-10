@@ -1,0 +1,14 @@
+id: creation.ending.review
+was: E3
+title: The sheet revealed. Name and portrait
+group: The ending
+order: 11030
+type: screen
+level: local
+status: listed
+fires: Always, last.
+needs:
+- creation.ending.why_you_run
+text: '[The sheet revealed. Name and portrait.]'
+answers: []
+leads: January 2025.

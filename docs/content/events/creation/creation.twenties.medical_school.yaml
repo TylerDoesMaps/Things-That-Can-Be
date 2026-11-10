@@ -1,0 +1,14 @@
+id: creation.twenties.medical_school
+was: M22b
+title: Medical school
+group: Age 22
+order: 6030
+type: decision
+level: local
+status: listed
+fires: Needs a degree. Admission is rolled, harder.
+needs:
+- creation.after_school.college_years
+text: '[Medical school.]'
+answers: []
+leads: Medicine.

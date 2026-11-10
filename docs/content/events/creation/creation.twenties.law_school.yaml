@@ -1,0 +1,14 @@
+id: creation.twenties.law_school
+was: M22a
+title: Law school
+group: Age 22
+order: 6020
+type: decision
+level: local
+status: listed
+fires: Needs a degree. Admission is rolled.
+needs:
+- creation.after_school.college_years
+text: '[Law school.]'
+answers: []
+leads: Private law or Public law.

@@ -1,0 +1,15 @@
+id: creation.school.caught
+was: H4
+title: Caught
+group: High school
+order: 3040
+type: decision
+level: local
+status: listed
+fires: Needs trouble, or the playground fight, or chance.
+needs:
+- creation.school.known_for#trouble
+- creation.childhood.fight
+text: '[Caught.]'
+answers: []
+leads: A juvenile record as a secret. Starts a drinking build-up. Makes dropping out possible.

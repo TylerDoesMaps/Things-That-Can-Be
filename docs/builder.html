@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Events · Things That Can Be</title>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="builder.css">
+</head>
+<body class="builder">
+<header>
+  <span class="mark">Things That Can Be</span>
+  <nav><a href="index.html">Election Night</a><a href="builder.html" aria-current="page">Events</a></nav>
+</header>
+
+<div class="bench">
+  <aside>
+    <div class="counts" id="counts"></div>
+    <input id="search" type="search" placeholder="Search" aria-label="Search events">
+    <div class="filters">
+      <select id="group" aria-label="Group"></select>
+      <select id="status" aria-label="Status"></select>
+    </div>
+    <button id="new" type="button">New event</button>
+    <ol id="list"></ol>
+  </aside>
+
+  <main>
+    <form id="form" hidden>
+      <div class="row">
+        <label class="wide">ID<input name="id" required pattern="[a-z0-9_]+(\.[a-z0-9_]+)+" spellcheck="false"></label>
+        <label>Old code<input name="was"></label>
+      </div>
+      <div class="row">
+        <label class="wide">Title<input name="title"></label>
+        <label>Group<input name="group" list="groups"><datalist id="groups"></datalist></label>
+        <label class="narrow">Order<input name="order" type="number"></label>
+      </div>
+      <div class="row">
+        <label>Type<select name="type"></select></label>
+        <label>Level<select name="level"></select></label>
+        <label>Status<select name="status"></select></label>
+      </div>
+      <label>Fires when<textarea name="fires" rows="2"></textarea></label>
+      <label>Locked behind, one ID per line<textarea name="needs" rows="3" spellcheck="false"></textarea></label>
+      <label>Text<textarea name="text" rows="9"></textarea></label>
+      <h2>Answers</h2>
+      <div id="answers"></div>
+      <button id="add-answer" type="button">Add answer</button>
+      <label>Leads to<textarea name="leads" rows="2"></textarea></label>
+      <div class="foot">
+        <span id="brackets"></span>
+        <ul id="problems"></ul>
+        <button id="save" type="submit">Save</button>
+        <span id="saved" role="status"></span>
+      </div>
+    </form>
+    <p id="empty">Pick an event.</p>
+  </main>
+
+  <aside class="side">
+    <label>GitHub token<input id="token" type="password" autocomplete="off" spellcheck="false"></label>
+    <h2>Calls</h2>
+    <div id="calls"></div>
+    <h2>Picks</h2>
+    <div id="picks"></div>
+    <h2>Switch</h2>
+    <pre>{when place.setting is rural}
+…
+{otherwise}
+…
+{end}</pre>
+  </aside>
+</div>
+
+<template id="answer">
+  <fieldset class="answer">
+    <div class="row">
+      <label>Answer ID<input data-f="id" pattern="[a-z0-9_]+" spellcheck="false"></label>
+      <button type="button" data-remove>Remove</button>
+    </div>
+    <label>Text<textarea data-f="text" rows="2"></textarea></label>
+    <label>Locked behind, one ID per line<textarea data-f="needs" rows="2" spellcheck="false"></textarea></label>
+    <label>Effects<textarea data-f="effects" rows="2"></textarea></label>
+    <label>Weight and what it does<textarea data-f="note" rows="2"></textarea></label>
+  </fieldset>
+</template>
+
+<script src="vendor/js-yaml.min.js"></script>
+<script src="builder.js"></script>
+</body>
+</html>

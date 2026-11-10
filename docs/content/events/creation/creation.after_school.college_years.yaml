@@ -1,0 +1,40 @@
+id: creation.after_school.college_years
+was: M18a
+title: The college years
+group: After high school
+order: 5020
+type: decision
+level: local
+status: listed
+fires: Needs college.
+needs:
+- creation.after_school.choice#college
+- creation.after_school.choice#selective_college
+text: '[The college years.]'
+answers:
+- id: studies
+  text: '[The studies.]'
+  needs: []
+  effects: ''
+  note: ''
+- id: campus_politics
+  text: '[Campus politics.]'
+  needs: []
+  effects: ''
+  note: ''
+- id: parties
+  text: '[The parties.]'
+  needs: []
+  effects: ''
+  note: ''
+- id: sport
+  text: '[The sport.]'
+  needs: []
+  effects: ''
+  note: ''
+- id: working
+  text: '[Working your way through.]'
+  needs: []
+  effects: ''
+  note: ''
+leads: A degree. Campus politics gives the campaign office an edge. Parties start a drinking build-up.

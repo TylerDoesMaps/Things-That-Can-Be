@@ -1,0 +1,14 @@
+id: creation.school.council_election
+was: H3
+title: The student council election
+group: High school
+order: 3030
+type: decision
+level: local
+status: listed
+fires: Needs student council.
+needs:
+- creation.school.known_for#council
+text: '[The student council election.]'
+answers: []
+leads: Your first election. Gives the campaign office an edge. A loss can start Sore Loser.

@@ -1,0 +1,15 @@
+id: creation.personal.getting_clean
+was: P14
+title: Getting clean
+group: Personal
+order: 8140
+type: decision
+level: local
+status: listed
+fires: After the habit shows, or the health scare.
+needs:
+- creation.personal.habit_shows
+- creation.personal.health_scare
+text: '[Getting clean.]'
+answers: []
+leads: The vice trait is replaced by a recovering one. Opens finding faith.

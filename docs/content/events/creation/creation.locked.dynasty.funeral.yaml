@@ -1,0 +1,14 @@
+id: creation.locked.dynasty.funeral
+was: L1b
+title: The funeral of the relative everyone knew
+group: Locked starts
+order: 10020
+type: decision
+level: local
+status: listed
+fires: Needs Dynasty. At one milestone.
+needs:
+- creation.family.upbringing#dynasty
+text: '[The funeral of the relative everyone knew.]'
+answers: []
+leads: National figures join your cast as ties.

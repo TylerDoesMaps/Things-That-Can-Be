@@ -1,0 +1,15 @@
+id: creation.family.hard_year.lost_election
+was: B5e
+title: A parent lost an election, or was caught at something
+group: Birth and family
+order: 1090
+type: decision
+level: local
+status: listed
+fires: Needs Political family or Dynasty.
+needs:
+- creation.family.upbringing#political
+- creation.family.upbringing#dynasty
+text: '[A parent lost an election, or was caught at something.]'
+answers: []
+leads: Unlocks Anger. Gives The family name a second reading.

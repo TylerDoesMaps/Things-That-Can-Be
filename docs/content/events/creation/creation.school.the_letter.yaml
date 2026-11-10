@@ -1,0 +1,16 @@
+id: creation.school.the_letter
+was: H8
+title: The letter
+group: High school
+order: 3080
+type: decision
+level: local
+status: listed
+fires: Needs books or debate, or a teacher noticing you, or Statecraft at 2 or more.
+needs:
+- creation.school.known_for#books
+- creation.school.known_for#debate
+- creation.childhood.teacher_notices
+text: '[The letter.]'
+answers: []
+leads: A selective college after high school.

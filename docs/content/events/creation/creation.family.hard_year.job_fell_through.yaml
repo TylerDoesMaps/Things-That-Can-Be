@@ -1,0 +1,14 @@
+id: creation.family.hard_year.job_fell_through
+was: B5l
+title: The job fell through and the family moved
+group: Birth and family
+order: 1160
+type: decision
+level: local
+status: listed
+fires: Needs Campus household.
+needs:
+- creation.family.upbringing#campus
+text: '[The job fell through and the family moved.]'
+answers: []
+leads: Unlocks Anger. Opens the new kid.

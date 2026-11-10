@@ -1,0 +1,17 @@
+id: creation.childhood.new_kid
+was: C2
+title: You are the new kid again
+group: Childhood
+order: 2020
+type: decision
+level: local
+status: listed
+fires: Needs brought here as a child, Military family, moved again, or the job that fell through.
+needs:
+- creation.family.origins#brought_as_child
+- creation.family.upbringing#military
+- creation.family.hard_year.moved_again
+- creation.family.hard_year.job_fell_through
+text: '[You are the new kid again.]'
+answers: []
+leads: An outsider or an adaptable trait.

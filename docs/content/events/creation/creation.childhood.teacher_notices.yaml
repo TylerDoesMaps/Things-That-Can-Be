@@ -1,0 +1,13 @@
+id: creation.childhood.teacher_notices
+was: C3
+title: A teacher notices you
+group: Childhood
+order: 2030
+type: decision
+level: local
+status: listed
+fires: Any.
+needs: []
+text: '[A teacher notices you.]'
+answers: []
+leads: Gives the letter an edge.

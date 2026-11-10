@@ -1,0 +1,33 @@
+id: creation.family.table_politics
+was: B3
+title: What your parents said about politics at the table
+group: Birth and family
+order: 1030
+type: decision
+level: local
+status: listed
+fires: Always
+needs: []
+text: '[What your parents said about politics at the table.]'
+answers:
+- id: republican
+  text: '[Republicans.]'
+  needs: []
+  effects: ''
+  note: ''
+- id: democratic
+  text: '[Democrats.]'
+  needs: []
+  effects: ''
+  note: ''
+- id: split
+  text: '[A split house.]'
+  needs: []
+  effects: ''
+  note: ''
+- id: none
+  text: '[Nothing. It never came up.]'
+  needs: []
+  effects: ''
+  note: ''
+leads: Parents' party. Sets what with them and against them mean in the debate.

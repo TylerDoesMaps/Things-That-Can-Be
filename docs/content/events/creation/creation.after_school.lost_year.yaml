@@ -1,0 +1,14 @@
+id: creation.after_school.lost_year
+was: M18e
+title: The lost year
+group: After high school
+order: 5060
+type: decision
+level: local
+status: listed
+fires: Needs drift.
+needs:
+- creation.after_school.choice#drift
+text: '[The lost year.]'
+answers: []
+leads: By chance a vice build-up, a secret, or a turn that opens every answer at 22.

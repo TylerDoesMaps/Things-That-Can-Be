@@ -1,0 +1,14 @@
+id: creation.school.big_game
+was: H2
+title: The big game
+group: High school
+order: 3020
+type: decision
+level: local
+status: listed
+fires: Needs the team.
+needs:
+- creation.school.known_for#team
+text: '[The big game.]'
+answers: []
+leads: A first taste of being known locally.

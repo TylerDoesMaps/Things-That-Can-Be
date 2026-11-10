@@ -1,0 +1,16 @@
+id: creation.childhood.on_stage
+was: C7
+title: 'On a stage: the pageant, the recital'
+group: Childhood
+order: 2070
+type: decision
+level: local
+status: listed
+fires: Needs Church household, Campus household or Old family.
+needs:
+- creation.family.upbringing#church
+- creation.family.upbringing#campus
+- creation.family.upbringing#old_family
+text: '[On a stage: the pageant, the recital.]'
+answers: []
+leads: A Charisma lift.

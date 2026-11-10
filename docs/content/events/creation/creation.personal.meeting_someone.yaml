@@ -1,0 +1,13 @@
+id: creation.personal.meeting_someone
+was: P1
+title: Meeting someone
+group: Personal
+order: 8010
+type: decision
+level: local
+status: listed
+fires: Age 20 to 45, single. By chance, or after a sweetheart.
+needs: []
+text: '[Meeting someone.]'
+answers: []
+leads: The wedding.

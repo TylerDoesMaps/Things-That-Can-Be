@@ -1,0 +1,26 @@
+# Words and phrases that change with circumstances, written once.
+# Use in an event as {pick: name}. Each needs an "otherwise" line.
+
+watch_party:
+  by: place.setting
+  urban: "[a bar on {place.main_street}, shoulder to shoulder]"
+  suburban: "[a neighbour's finished basement]"
+  small town: "[the back room at the VFW]"
+  rural: "[the co-op, on folding chairs]"
+  otherwise: "[someone's living room]"
+
+home:
+  by: place.setting
+  urban: "[the apartment]"
+  suburban: "[the house on the cul-de-sac]"
+  small town: "[the house two blocks off {place.main_street}]"
+  rural: "[the place out on the county road]"
+  otherwise: "[home]"
+
+hangout:
+  by: place.setting
+  urban: "[the corner]"
+  suburban: "[the parking lot behind the mall]"
+  small town: "[the Sonic]"
+  rural: "[the grain elevator]"
+  otherwise: "[the usual place]"

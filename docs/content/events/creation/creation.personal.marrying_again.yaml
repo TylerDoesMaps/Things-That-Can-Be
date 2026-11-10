@@ -1,0 +1,15 @@
+id: creation.personal.marrying_again
+was: P8
+title: Marrying again
+group: Personal
+order: 8080
+type: decision
+level: local
+status: listed
+fires: After the divorce, or losing a spouse.
+needs:
+- creation.personal.divorce
+- creation.personal.losing_family
+text: '[Marrying again.]'
+answers: []
+leads: A new spouse in the cast.

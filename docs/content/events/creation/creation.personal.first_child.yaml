@@ -1,0 +1,16 @@
+id: creation.personal.first_child
+was: P3
+title: The first child
+group: Personal
+order: 8030
+type: decision
+level: local
+status: listed
+fires: After the wedding. Or by chance after a sweetheart or meeting someone.
+needs:
+- creation.personal.wedding
+- creation.school.sweetheart
+- creation.personal.meeting_someone
+text: '[The first child.]'
+answers: []
+leads: A child in the cast. Free time drops. Opens cutting back at work.

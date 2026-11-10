@@ -1,0 +1,15 @@
+id: creation.personal.betrayed
+was: P22
+title: Betrayed
+group: Personal
+order: 8220
+type: decision
+level: local
+status: listed
+fires: By chance after opening a business or joining something.
+needs:
+- creation.work.opening_the_business
+- creation.personal.joining_something
+text: '[Betrayed.]'
+answers: []
+leads: A rival in the cast. Unlocks Anger.

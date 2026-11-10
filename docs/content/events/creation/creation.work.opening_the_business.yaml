@@ -1,0 +1,14 @@
+id: creation.work.opening_the_business
+was: W8
+title: Opening the business
+group: Work
+order: 7090
+type: decision
+level: local
+status: listed
+fires: Needs start a business.
+needs:
+- creation.work.check_in#start_business
+text: '[Opening the business.]'
+answers: []
+leads: Small business, first rung.

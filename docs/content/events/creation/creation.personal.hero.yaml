@@ -1,0 +1,13 @@
+id: creation.personal.hero
+was: P23
+title: The day you were a hero
+group: Personal
+order: 8230
+type: decision
+level: local
+status: listed
+fires: Rare. Likelier in police, fire, medicine or the military.
+needs: []
+text: '[The day you were a hero.]'
+answers: []
+leads: An earned mark and reach.

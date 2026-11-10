@@ -1,0 +1,58 @@
+id: creation.school.known_for
+was: H1
+title: What you were known for
+group: High school
+order: 3010
+type: decision
+level: local
+status: listed
+fires: Always. Farm club needs a rural place.
+needs: []
+text: '[What you were known for.]'
+answers:
+- id: team
+  text: '[The team.]'
+  needs: []
+  effects: ''
+  note: ''
+- id: debate
+  text: '[Debate.]'
+  needs: []
+  effects: ''
+  note: ''
+- id: council
+  text: '[Student council.]'
+  needs: []
+  effects: ''
+  note: ''
+- id: arts
+  text: '[Band or theatre.]'
+  needs: []
+  effects: ''
+  note: ''
+- id: job
+  text: '[A job.]'
+  needs: []
+  effects: ''
+  note: ''
+- id: trouble
+  text: '[Trouble.]'
+  needs: []
+  effects: ''
+  note: ''
+- id: books
+  text: '[Books.]'
+  needs: []
+  effects: ''
+  note: ''
+- id: farm_club
+  text: '[Farm club.]'
+  needs: []
+  effects: ''
+  note: ''
+- id: cadets
+  text: '[Cadets.]'
+  needs: []
+  effects: ''
+  note: ''
+leads: Decides which high school event follows.

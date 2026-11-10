@@ -1,0 +1,13 @@
+id: creation.childhood.after_school
+was: C1
+title: After school, around ten
+group: Childhood
+order: 2010
+type: decision
+level: local
+status: listed
+fires: Always
+needs: []
+text: '[After school, around ten.]'
+answers: []
+leads: A personality trait and a stat from what you tried and how it went.

@@ -1,0 +1,15 @@
+id: creation.family.hard_year.farm
+was: B5a
+title: The farm nearly went under
+group: Birth and family
+order: 1050
+type: decision
+level: local
+status: listed
+fires: One hard year always fires. This one needs Family farm or Hired hands.
+needs:
+- creation.family.upbringing#family_farm
+- creation.family.upbringing#hired_hands
+text: '[The farm nearly went under.]'
+answers: []
+leads: Unlocks Anger at the ending. Makes a change of party possible.

@@ -1,0 +1,14 @@
+id: creation.family.hard_year.money_gone
+was: B5m
+title: The money turned out to be gone
+group: Birth and family
+order: 1170
+type: decision
+level: local
+status: listed
+fires: Needs Old family.
+needs:
+- creation.family.upbringing#old_family
+text: '[The money turned out to be gone.]'
+answers: []
+leads: Unlocks Anger. Money level drops two.

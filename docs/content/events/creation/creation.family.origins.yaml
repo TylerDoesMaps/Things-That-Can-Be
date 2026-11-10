@@ -1,0 +1,28 @@
+id: creation.family.origins
+was: B2
+title: Born here, brought here as a child, or arrived as an adult
+group: Birth and family
+order: 1020
+type: decision
+level: local
+status: listed
+fires: Always. Military family cannot answer born here.
+needs: []
+text: '[Born here, brought here as a child, or arrived as an adult.]'
+answers:
+- id: born_here
+  text: '[Born here.]'
+  needs: []
+  effects: ''
+  note: ''
+- id: brought_as_child
+  text: '[Brought here as a child.]'
+  needs: []
+  effects: ''
+  note: ''
+- id: arrived_as_adult
+  text: '[Arrived as an adult.]'
+  needs: []
+  effects: ''
+  note: ''
+leads: Brought as a child opens the new kid. Arrived as an adult requires the move here.

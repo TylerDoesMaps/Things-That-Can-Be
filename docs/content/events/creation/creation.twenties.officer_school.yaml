@@ -1,0 +1,15 @@
+id: creation.twenties.officer_school
+was: M22e
+title: Officer school
+group: Age 22
+order: 6060
+type: decision
+level: local
+status: listed
+fires: Needs basic training with a degree, or the recruiter with college.
+needs:
+- creation.after_school.basic_training
+- creation.school.recruiter
+text: '[Officer school.]'
+answers: []
+leads: Military at the officer rungs.

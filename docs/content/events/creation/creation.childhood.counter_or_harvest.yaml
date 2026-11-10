@@ -1,0 +1,16 @@
+id: creation.childhood.counter_or_harvest
+was: C6
+title: You work the counter, or the harvest
+group: Childhood
+order: 2060
+type: decision
+level: local
+status: listed
+fires: Needs Family farm, Hired hands or Main Street.
+needs:
+- creation.family.upbringing#family_farm
+- creation.family.upbringing#hired_hands
+- creation.family.upbringing#main_street
+text: '[You work the counter, or the harvest.]'
+answers: []
+leads: The family field after high school, with an edge.

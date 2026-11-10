@@ -1,0 +1,14 @@
+id: creation.personal.another_child
+was: P4
+title: Another child
+group: Personal
+order: 8040
+type: decision
+level: local
+status: listed
+fires: After the first child.
+needs:
+- creation.personal.first_child
+text: '[Another child.]'
+answers: []
+leads: Another child in the cast.

@@ -1,0 +1,13 @@
+id: creation.childhood.fight
+was: C4
+title: The fight on the playground
+group: Childhood
+order: 2040
+type: decision
+level: local
+status: listed
+fires: Any.
+needs: []
+text: '[The fight on the playground.]'
+answers: []
+leads: Makes being caught more likely.

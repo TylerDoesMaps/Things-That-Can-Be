@@ -1,0 +1,14 @@
+id: creation.party.pick_a_side
+was: D2
+title: You finally pick a side
+group: The debate and party
+order: 4020
+type: decision
+level: local
+status: listed
+fires: Needs neither at the debate. Fires at a later presidential election.
+needs:
+- creation.party.debate#neither
+text: '[You finally pick a side.]'
+answers: []
+leads: Your party.

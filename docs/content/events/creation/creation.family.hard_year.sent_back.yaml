@@ -1,0 +1,14 @@
+id: creation.family.hard_year.sent_back
+was: B5h
+title: A relative was sent back
+group: Birth and family
+order: 1120
+type: decision
+level: local
+status: listed
+fires: Needs Immigrant household.
+needs:
+- creation.family.upbringing#immigrant
+text: '[A relative was sent back.]'
+answers: []
+leads: Unlocks Anger. Makes a change of party possible.

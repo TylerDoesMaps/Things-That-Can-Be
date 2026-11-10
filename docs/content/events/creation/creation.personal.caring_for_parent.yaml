@@ -1,0 +1,13 @@
+id: creation.personal.caring_for_parent
+was: P10
+title: Caring for a parent
+group: Personal
+order: 8100
+type: decision
+level: local
+status: listed
+fires: From 40 with a parent alive. Earlier after the illness.
+needs: []
+text: '[Caring for a parent.]'
+answers: []
+leads: Free time drops.

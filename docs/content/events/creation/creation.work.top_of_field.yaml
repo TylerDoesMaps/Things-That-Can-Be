@@ -1,0 +1,14 @@
+id: creation.work.top_of_field
+was: W6
+title: The top of the field
+group: Work
+order: 7070
+type: decision
+level: local
+status: listed
+fires: Needs a promotion that lands on the last rung.
+needs:
+- creation.work.promotion
+text: '[The top of the field.]'
+answers: []
+leads: Reach and money. Makes someone asking you possible.

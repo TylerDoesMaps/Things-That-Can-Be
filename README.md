@@ -4,10 +4,23 @@ Election night view: https://tylerdoesmaps.github.io/Things-That-Can-Be/
 
 - `docs/` the site
 - `docs/presets/` national presets
+- `docs/content/` every event, the call registry and the shared word list
+- `docs/builder.html` the event builder
 - `docs/tiles/` map tiles for each level
 - `docs/data/` 2024 results by city, township and district, and the method comparison
 - `build/` scripts that rebuild everything (`build/run.sh`)
 - `resources/` source files that cannot be downloaded again
+
+## Events
+
+Each event is one file in `docs/content/events/`, named by its ID. The game and the builder read the same files.
+
+- **IDs** are lowercase words joined by dots, broad to specific: `creation.school.caught`. An ID never changes and is never reused. An answer is `event#answer`.
+- **Calls** go in curly braces. `{player.first_name}` fills in a value. `{pick: watch_party}` takes a phrase from `picks.yaml`. `{when place.setting is rural}` … `{otherwise}` … `{end}` swaps whole lines.
+- **Square brackets** mark text still to be written. The builder counts them.
+- `docs/content/registry.yaml` lists every call that exists. `build/check_content.py` refuses unknown calls and locks that point at nothing, and rebuilds `docs/content/index.json`.
+
+Saving from the builder needs a GitHub token with write access to this repository's contents, pasted into the builder. It is kept in that browser only.
 
 ## National presets
 

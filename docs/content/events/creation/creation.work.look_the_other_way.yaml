@@ -1,0 +1,23 @@
+id: creation.work.look_the_other_way
+was: W5
+title: Asked to look the other way
+group: Work
+order: 7060
+type: decision
+level: local
+status: listed
+fires: By chance at the second rung or higher in business, finance, law, police or government.
+needs: []
+text: '[Asked to look the other way.]'
+answers:
+- id: refuse
+  text: '[Refuse.]'
+  needs: []
+  effects: ''
+  note: ''
+- id: go_along
+  text: '[Go along.]'
+  needs: []
+  effects: ''
+  note: ''
+leads: 'Refuse: an enemy. Go along: a secret.'

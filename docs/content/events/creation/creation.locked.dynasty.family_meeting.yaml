@@ -1,0 +1,14 @@
+id: creation.locked.dynasty.family_meeting
+was: L1a
+title: The family meeting about your future
+group: Locked starts
+order: 10010
+type: decision
+level: local
+status: listed
+fires: Needs Dynasty. Around 21.
+needs:
+- creation.family.upbringing#dynasty
+text: '[The family meeting about your future.]'
+answers: []
+leads: Sets which fields the family will back at 22.

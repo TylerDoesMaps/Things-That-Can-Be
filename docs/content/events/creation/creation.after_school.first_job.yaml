@@ -1,0 +1,16 @@
+id: creation.after_school.first_job
+was: M18d
+title: The first job
+group: After high school
+order: 5050
+type: decision
+level: local
+status: listed
+fires: Needs work, community college or trade school, or the family business.
+needs:
+- creation.after_school.choice#work
+- creation.after_school.choice#community_college
+- creation.after_school.choice#family_business
+text: '[The first job.]'
+answers: []
+leads: A field at its first rung. Your first boss joins the cast.

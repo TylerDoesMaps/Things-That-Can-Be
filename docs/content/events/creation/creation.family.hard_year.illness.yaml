@@ -1,0 +1,13 @@
+id: creation.family.hard_year.illness
+was: B5f
+title: A parent got sick and the money went
+group: Birth and family
+order: 1100
+type: decision
+level: local
+status: listed
+fires: Any upbringing.
+needs: []
+text: '[A parent got sick and the money went.]'
+answers: []
+leads: Unlocks Anger. Caring for a parent comes earlier.

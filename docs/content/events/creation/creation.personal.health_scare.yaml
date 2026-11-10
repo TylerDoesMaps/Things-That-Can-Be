@@ -1,0 +1,13 @@
+id: creation.personal.health_scare
+was: P12
+title: The health scare
+group: Personal
+order: 8120
+type: decision
+level: local
+status: listed
+fires: From 45 by chance. Earlier with a vice trait.
+needs: []
+text: '[The health scare.]'
+answers: []
+leads: A health mark. Offers getting clean. Opens finding faith.

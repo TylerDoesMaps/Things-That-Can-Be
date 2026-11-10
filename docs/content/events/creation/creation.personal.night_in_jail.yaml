@@ -1,0 +1,14 @@
+id: creation.personal.night_in_jail
+was: P21
+title: A night in jail
+group: Personal
+order: 8210
+type: decision
+level: local
+status: listed
+fires: Needs a vice trait, or being caught, or rare chance.
+needs:
+- creation.school.caught
+text: '[A night in jail.]'
+answers: []
+leads: A public record, or a secret if it is kept quiet.

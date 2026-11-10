@@ -1,0 +1,14 @@
+id: creation.work.promotion
+was: W1
+title: The promotion
+group: Work
+order: 7020
+type: decision
+level: local
+status: listed
+fires: Needs a push, roll won.
+needs:
+- creation.work.check_in#push
+text: '[The promotion.]'
+answers: []
+leads: The next rung. More money, less free time.

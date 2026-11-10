@@ -1,0 +1,15 @@
+id: creation.faith.finding_it
+was: X2
+title: Finding it
+group: Faith
+order: 9020
+type: decision
+level: local
+status: listed
+fires: Needs no faith at home, or having left. By chance after a loss.
+needs:
+- creation.family.sunday#none
+- creation.faith.kept_or_left#left
+text: '[Finding it.]'
+answers: []
+leads: A faith held as a convert.

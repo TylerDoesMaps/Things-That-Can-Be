@@ -1,0 +1,14 @@
+id: creation.personal.they_elect_you
+was: P18
+title: They elect you
+group: Personal
+order: 8180
+type: decision
+level: local
+status: listed
+fires: After joining something. Rolled.
+needs:
+- creation.personal.joining_something
+text: '[They elect you.]'
+answers: []
+leads: Your first time leading anything. Unlocks Duty.

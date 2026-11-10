@@ -1,0 +1,15 @@
+id: creation.childhood.little_ones
+was: C9
+title: Minding the little ones
+group: Childhood
+order: 2090
+type: decision
+level: local
+status: listed
+fires: Needs One parent, two jobs or Raised by others.
+needs:
+- creation.family.upbringing#one_parent
+- creation.family.upbringing#raised_by_others
+text: '[Minding the little ones.]'
+answers: []
+leads: A Grit lift. Siblings become stronger ties.

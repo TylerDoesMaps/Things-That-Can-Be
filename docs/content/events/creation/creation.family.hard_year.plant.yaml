@@ -1,0 +1,15 @@
+id: creation.family.hard_year.plant
+was: B5b
+title: The plant closed, or the strike went long
+group: Birth and family
+order: 1060
+type: decision
+level: local
+status: listed
+fires: Needs Union household or City block.
+needs:
+- creation.family.upbringing#union_household
+- creation.family.upbringing#city_block
+text: '[The plant closed, or the strike went long.]'
+answers: []
+leads: Unlocks Anger. Gives the strike an edge. Makes a change of party possible.

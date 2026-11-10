@@ -1,0 +1,23 @@
+id: creation.family.sunday
+was: B4
+title: What Sunday looked like
+group: Birth and family
+order: 1040
+type: decision
+level: local
+status: listed
+fires: Always
+needs: []
+text: '[What Sunday looked like.]'
+answers:
+- id: faith
+  text: '[A faith, to be chosen from a list.]'
+  needs: []
+  effects: ''
+  note: ''
+- id: none
+  text: '[Nothing in particular.]'
+  needs: []
+  effects: ''
+  note: ''
+leads: The faith you were raised in, or none.

@@ -1,0 +1,14 @@
+id: creation.family.hard_year.land_fight
+was: B5n
+title: A fight over land or belonging
+group: Birth and family
+order: 1180
+type: decision
+level: local
+status: listed
+fires: Needs Tribal community.
+needs:
+- creation.family.upbringing#tribal
+text: '[A fight over land or belonging.]'
+answers: []
+leads: Unlocks Anger. Gives the local fight an edge.

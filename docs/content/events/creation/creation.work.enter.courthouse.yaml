@@ -1,0 +1,14 @@
+id: creation.work.enter.courthouse
+was: W10f
+title: The courthouse job
+group: Work
+order: 7160
+type: decision
+level: local
+status: listed
+fires: Needs a change of field to Government staff.
+needs:
+- creation.work.check_in#change_field
+text: '[The courthouse job.]'
+answers: []
+leads: Government staff.

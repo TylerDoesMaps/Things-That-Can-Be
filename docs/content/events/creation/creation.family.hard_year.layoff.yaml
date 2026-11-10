@@ -1,0 +1,16 @@
+id: creation.family.hard_year.layoff
+was: B5j
+title: The layoff
+group: Birth and family
+order: 1140
+type: decision
+level: local
+status: listed
+fires: Needs Subdivision, Professional household or Public payroll.
+needs:
+- creation.family.upbringing#subdivision
+- creation.family.upbringing#professional
+- creation.family.upbringing#public_payroll
+text: '[The layoff.]'
+answers: []
+leads: Unlocks Anger. Money level drops one.

@@ -1,0 +1,14 @@
+id: creation.work.enter.academy
+was: W10a
+title: The academy
+group: Work
+order: 7110
+type: decision
+level: local
+status: listed
+fires: Needs a change of field to Police or Fire.
+needs:
+- creation.work.check_in#change_field
+text: '[The academy.]'
+answers: []
+leads: That field, first rung.

@@ -1,0 +1,15 @@
+id: creation.personal.coming_home
+was: P26
+title: Coming home
+group: Personal
+order: 8260
+type: decision
+level: local
+status: listed
+fires: Required if you left your starting place for school or service and did not arrive as an adult.
+needs:
+- creation.after_school.college_years
+- creation.after_school.basic_training
+text: '[Coming home.]'
+answers: []
+leads: A trait for having left and come back.

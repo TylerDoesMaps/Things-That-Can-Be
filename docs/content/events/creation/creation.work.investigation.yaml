@@ -1,0 +1,14 @@
+id: creation.work.investigation
+was: W9
+title: The lawsuit, or the investigation
+group: Work
+order: 7100
+type: decision
+level: local
+status: listed
+fires: By chance in small business, finance, medicine, real estate. Or after going along.
+needs:
+- creation.work.look_the_other_way#go_along
+text: '[The lawsuit, or the investigation.]'
+answers: []
+leads: A secret becomes a public record, or you are cleared.

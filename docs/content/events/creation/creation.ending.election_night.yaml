@@ -1,0 +1,13 @@
+id: creation.ending.election_night
+was: E1
+title: Election night, 2024
+group: The ending
+order: 11010
+type: set piece
+level: federal
+status: listed
+fires: Always, after the last milestone. No choices.
+needs: []
+text: '[Election night, 2024.]'
+answers: []
+leads: Introduces the seed's national figures.

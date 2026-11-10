@@ -1,0 +1,14 @@
+id: creation.work.night_school
+was: W11
+title: Night school
+group: Work
+order: 7190
+type: decision
+level: local
+status: listed
+fires: Needs go back to school, having stopped going or without a degree.
+needs:
+- creation.work.check_in#school
+text: '[Night school.]'
+answers: []
+leads: Removes the lock from stopping school. A degree by the next milestone.

@@ -1,0 +1,13 @@
+id: creation.personal.debt
+was: P16
+title: The debt
+group: Personal
+order: 8160
+type: decision
+level: local
+status: listed
+fires: By chance. Certain after Poor chooses college, or a business opened without money.
+needs: []
+text: '[The debt.]'
+answers: []
+leads: Money falls one level.

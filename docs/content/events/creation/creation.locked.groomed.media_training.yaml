@@ -1,0 +1,14 @@
+id: creation.locked.groomed.media_training
+was: L2b
+title: Media training
+group: Locked starts
+order: 10040
+type: decision
+level: local
+status: listed
+fires: Needs Groomed. Alongside the choice after high school.
+needs:
+- creation.family.upbringing#groomed
+text: '[Media training.]'
+answers: []
+leads: 'A Charisma lift. A secret: who paid for it.'

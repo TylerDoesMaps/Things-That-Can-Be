@@ -1,0 +1,16 @@
+id: creation.personal.someone_asks
+was: P20
+title: Someone asks you
+group: Personal
+order: 8200
+type: decision
+level: local
+status: listed
+fires: Needs wide reach, or money Well off or better, or being elected to lead, or the top of your field, or Political family.
+needs:
+- creation.personal.they_elect_you
+- creation.work.top_of_field
+- creation.family.upbringing#political
+text: '[Someone asks you.]'
+answers: []
+leads: A patron in the cast. Unlocks Someone asked you.

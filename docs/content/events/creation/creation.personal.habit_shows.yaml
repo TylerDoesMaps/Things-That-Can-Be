@@ -1,0 +1,23 @@
+id: creation.personal.habit_shows
+was: P13
+title: The habit shows
+group: Personal
+order: 8130
+type: decision
+level: local
+status: listed
+fires: Needs a drinking or gambling build-up complete.
+needs: []
+text: '[The habit shows.]'
+answers:
+- id: face_it
+  text: '[Face it.]'
+  needs: []
+  effects: ''
+  note: ''
+- id: hide_it
+  text: '[Hide it.]'
+  needs: []
+  effects: ''
+  note: ''
+leads: The trait. Hiding it makes a secret.

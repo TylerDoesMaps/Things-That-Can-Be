@@ -1,0 +1,15 @@
+id: creation.school.recruiter
+was: H7
+title: The recruiter
+group: High school
+order: 3070
+type: decision
+level: local
+status: listed
+fires: Needs cadets or Military family.
+needs:
+- creation.school.known_for#cadets
+- creation.family.upbringing#military
+text: '[The recruiter.]'
+answers: []
+leads: Enlisting with an edge. Opens officer school later.

@@ -1,0 +1,13 @@
+id: creation.work.made_your_name
+was: W4
+title: The moment that made your name
+group: Work
+order: 7050
+type: decision
+level: local
+status: listed
+fires: By chance at the second rung or higher.
+needs: []
+text: '[The moment that made your name.]'
+answers: []
+leads: An earned mark and wider reach.

@@ -1,0 +1,19 @@
+id: creation.party.switch
+was: D3
+title: You change parties
+group: The debate and party
+order: 4030
+type: decision
+level: local
+status: listed
+fires: Once at most. Needs a setback you can blame on your party, or a wedding to someone of the other party.
+needs:
+- creation.family.hard_year.farm
+- creation.family.hard_year.plant
+- creation.family.hard_year.store
+- creation.family.hard_year.sent_back
+- creation.work.laid_off
+- creation.personal.wedding
+text: '[You change parties.]'
+answers: []
+leads: Your party changes. A trait marks you as a convert.

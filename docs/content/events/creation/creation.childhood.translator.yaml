@@ -1,0 +1,14 @@
+id: creation.childhood.translator
+was: C5
+title: You translate for your parents
+group: Childhood
+order: 2050
+type: decision
+level: local
+status: listed
+fires: Needs Immigrant household.
+needs:
+- creation.family.upbringing#immigrant
+text: '[You translate for your parents.]'
+answers: []
+leads: A Diplomacy lift.

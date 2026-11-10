@@ -1,0 +1,14 @@
+id: creation.work.enter.campaign_office
+was: W10e
+title: The campaign office
+group: Work
+order: 7150
+type: decision
+level: local
+status: listed
+fires: Needs a change of field to Political work.
+needs:
+- creation.work.check_in#change_field
+text: '[The campaign office.]'
+answers: []
+leads: Political work. A local politician joins the cast as a patron.

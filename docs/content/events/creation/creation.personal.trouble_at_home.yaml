@@ -1,0 +1,29 @@
+id: creation.personal.trouble_at_home
+was: P5
+title: Trouble at home
+group: Personal
+order: 8050
+type: decision
+level: local
+status: listed
+fires: Married. Likelier with little free time, a vice trait, or a recent promotion.
+needs:
+- creation.personal.wedding
+text: '[Trouble at home.]'
+answers:
+- id: work_at_it
+  text: '[Work at it.]'
+  needs: []
+  effects: ''
+  note: ''
+- id: drift
+  text: '[Drift.]'
+  needs: []
+  effects: ''
+  note: ''
+- id: stray
+  text: '[Stray.]'
+  needs: []
+  effects: ''
+  note: ''
+leads: Drift can lead to divorce. Stray leads to the affair.

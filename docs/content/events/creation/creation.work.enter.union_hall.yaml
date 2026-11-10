@@ -1,0 +1,15 @@
+id: creation.work.enter.union_hall
+was: W10g
+title: The union hall
+group: Work
+order: 7170
+type: decision
+level: local
+status: listed
+fires: Needs joining the strike, or Union household.
+needs:
+- creation.work.strike#join
+- creation.family.upbringing#union_household
+text: '[The union hall.]'
+answers: []
+leads: Organized labor.

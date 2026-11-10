@@ -1,0 +1,13 @@
+id: creation.personal.losing_family
+was: P11
+title: Losing a spouse or a child
+group: Personal
+order: 8110
+type: decision
+level: local
+status: listed
+fires: Rare.
+needs: []
+text: '[Losing a spouse or a child.]'
+answers: []
+leads: A stress mark. Unlocks A cause. Opens finding faith.

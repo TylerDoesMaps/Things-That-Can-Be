@@ -1,0 +1,29 @@
+id: creation.faith.kept_or_left
+was: X1
+title: Whether you kept it
+group: Faith
+order: 9010
+type: decision
+level: local
+status: listed
+fires: Required if you were raised in a faith. Fires once between 18 and 30.
+needs:
+- creation.family.sunday#faith
+text: '[Whether you kept it.]'
+answers:
+- id: stayed
+  text: '[Stayed.]'
+  needs: []
+  effects: ''
+  note: ''
+- id: drifted
+  text: '[Drifted.]'
+  needs: []
+  effects: ''
+  note: ''
+- id: left
+  text: '[Left.]'
+  needs: []
+  effects: ''
+  note: ''
+leads: Stayed opens seminary and ordination.

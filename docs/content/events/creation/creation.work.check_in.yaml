@@ -1,0 +1,48 @@
+id: creation.work.check_in
+was: W0
+title: Where you are at work
+group: Work
+order: 7010
+type: decision
+level: local
+status: listed
+fires: Every milestone from 26.
+needs: []
+text: '[Where you are at work.]'
+answers:
+- id: hold
+  text: '[Hold.]'
+  needs: []
+  effects: ''
+  note: ''
+- id: push
+  text: '[Push for the next rung.]'
+  needs: []
+  effects: ''
+  note: ''
+- id: change_field
+  text: '[Change field.]'
+  needs: []
+  effects: ''
+  note: ''
+- id: school
+  text: '[Go back to school.]'
+  needs: []
+  effects: ''
+  note: ''
+- id: start_business
+  text: '[Start a business.]'
+  needs: []
+  effects: ''
+  note: ''
+- id: cut_back
+  text: '[Cut back for family.]'
+  needs: []
+  effects: ''
+  note: ''
+- id: retire
+  text: '[Retire.]'
+  needs: []
+  effects: ''
+  note: ''
+leads: Decides which work event follows.

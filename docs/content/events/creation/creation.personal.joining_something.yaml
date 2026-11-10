@@ -1,0 +1,48 @@
+id: creation.personal.joining_something
+was: P17
+title: Joining something
+group: Personal
+order: 8170
+type: decision
+level: local
+status: listed
+fires: From 25.
+needs: []
+text: '[Joining something.]'
+answers:
+- id: service_club
+  text: '[A service club.]'
+  needs: []
+  effects: ''
+  note: ''
+- id: church_board
+  text: '[The church board.]'
+  needs: []
+  effects: ''
+  note: ''
+- id: parents_group
+  text: '[The parent-teacher group.]'
+  needs: []
+  effects: ''
+  note: ''
+- id: lodge
+  text: '[A lodge.]'
+  needs: []
+  effects: ''
+  note: ''
+- id: union_local
+  text: '[The union local.]'
+  needs: []
+  effects: ''
+  note: ''
+- id: gun_club
+  text: '[The gun club.]'
+  needs: []
+  effects: ''
+  note: ''
+- id: neighbourhood
+  text: '[The neighbourhood association.]'
+  needs: []
+  effects: ''
+  note: ''
+leads: Ties and reach in your place.

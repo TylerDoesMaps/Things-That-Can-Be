@@ -1,0 +1,14 @@
+id: creation.personal.wedding
+was: P2
+title: The wedding
+group: Personal
+order: 8020
+type: decision
+level: local
+status: listed
+fires: After meeting someone.
+needs:
+- creation.personal.meeting_someone
+text: '[The wedding.]'
+answers: []
+leads: A spouse in the cast, with their own party.

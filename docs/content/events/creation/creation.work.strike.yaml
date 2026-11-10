@@ -1,0 +1,28 @@
+id: creation.work.strike
+was: W7
+title: The strike
+group: Work
+order: 7080
+type: decision
+level: local
+status: listed
+fires: By chance in plant work, trades, trucking, teaching or nursing.
+needs: []
+text: '[The strike.]'
+answers:
+- id: join
+  text: '[Join.]'
+  needs: []
+  effects: ''
+  note: ''
+- id: cross
+  text: '[Cross.]'
+  needs: []
+  effects: ''
+  note: ''
+- id: stay_out
+  text: '[Stay out of it.]'
+  needs: []
+  effects: ''
+  note: ''
+leads: Join opens the union hall. Ties change either way.

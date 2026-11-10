@@ -1,0 +1,13 @@
+id: creation.family.hard_year.divorce
+was: B5g
+title: The divorce
+group: Birth and family
+order: 1110
+type: decision
+level: local
+status: listed
+fires: Any upbringing.
+needs: []
+text: '[The divorce.]'
+answers: []
+leads: Unlocks Anger. One parent becomes a weaker tie.

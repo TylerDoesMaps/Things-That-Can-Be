@@ -1,0 +1,16 @@
+id: creation.personal.name_in_paper
+was: P24
+title: Your name in the paper
+group: Personal
+order: 8240
+type: decision
+level: local
+status: listed
+fires: By chance after making your name, being elected to lead, or being a hero.
+needs:
+- creation.work.made_your_name
+- creation.personal.they_elect_you
+- creation.personal.hero
+text: '[Your name in the paper.]'
+answers: []
+leads: Wider reach.

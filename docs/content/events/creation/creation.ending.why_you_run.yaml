@@ -1,0 +1,44 @@
+id: creation.ending.why_you_run
+was: E2
+title: Why you run
+group: The ending
+order: 11020
+type: decision
+level: local
+status: listed
+fires: Always, after election night.
+needs:
+- creation.ending.election_night
+text: '[Why you run.]'
+answers:
+- id: ambition
+  text: '[Ambition.]'
+  needs: []
+  effects: ''
+  note: ''
+- id: anger
+  text: '[Anger.]'
+  needs: []
+  effects: ''
+  note: ''
+- id: duty
+  text: '[Duty.]'
+  needs: []
+  effects: ''
+  note: ''
+- id: cause
+  text: '[A cause.]'
+  needs: []
+  effects: ''
+  note: ''
+- id: asked
+  text: '[Someone asked you.]'
+  needs: []
+  effects: ''
+  note: ''
+- id: family_name
+  text: '[The family name.]'
+  needs: []
+  effects: ''
+  note: ''
+leads: A motivation trait.

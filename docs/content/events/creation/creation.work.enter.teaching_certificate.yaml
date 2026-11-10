@@ -1,0 +1,14 @@
+id: creation.work.enter.teaching_certificate
+was: W10b
+title: The teaching certificate
+group: Work
+order: 7120
+type: decision
+level: local
+status: listed
+fires: Needs a change of field to School teaching, and a degree.
+needs:
+- creation.work.check_in#change_field
+text: '[The teaching certificate.]'
+answers: []
+leads: School teaching.

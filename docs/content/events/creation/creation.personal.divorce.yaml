@@ -1,0 +1,15 @@
+id: creation.personal.divorce
+was: P7
+title: The divorce
+group: Personal
+order: 8070
+type: decision
+level: local
+status: listed
+fires: After drifting, or the affair found out.
+needs:
+- creation.personal.trouble_at_home#drift
+- creation.personal.affair
+text: '[The divorce.]'
+answers: []
+leads: The spouse becomes an ex in the cast. Money drops.

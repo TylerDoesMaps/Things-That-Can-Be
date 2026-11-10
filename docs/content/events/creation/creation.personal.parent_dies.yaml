@@ -1,0 +1,13 @@
+id: creation.personal.parent_dies
+was: P9
+title: A parent dies
+group: Personal
+order: 8090
+type: decision
+level: local
+status: listed
+fires: By chance from 35, rising with age.
+needs: []
+text: '[A parent dies.]'
+answers: []
+leads: An inheritance sized by your upbringing, or debts. That parent leaves the cast.

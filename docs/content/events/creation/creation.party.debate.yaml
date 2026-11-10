@@ -1,0 +1,28 @@
+id: creation.party.debate
+was: D1
+title: The debate. Two candidates on television, and you believe one of them
+group: The debate and party
+order: 4010
+type: decision
+level: local
+status: listed
+fires: Always, at the first presidential election after you turn 16.
+needs: []
+text: '[The debate. Two candidates on television, and you believe one of them.]'
+answers:
+- id: first
+  text: '[You believed {world.debate.first.last_name}.]'
+  needs: []
+  effects: ''
+  note: ''
+- id: second
+  text: '[You believed {world.debate.second.last_name}.]'
+  needs: []
+  effects: ''
+  note: ''
+- id: neither
+  text: '[You turned it off.]'
+  needs: []
+  effects: ''
+  note: ''
+leads: Your party, with your parents or against them. Neither leaves you unaligned.

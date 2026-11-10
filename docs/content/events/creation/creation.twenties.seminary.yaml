@@ -1,0 +1,15 @@
+id: creation.twenties.seminary
+was: M22d
+title: Seminary
+group: Age 22
+order: 6050
+type: decision
+level: local
+status: listed
+fires: Needs Church household, or a faith you kept.
+needs:
+- creation.family.upbringing#church
+- creation.faith.kept_or_left#stayed
+text: '[Seminary.]'
+answers: []
+leads: Clergy.

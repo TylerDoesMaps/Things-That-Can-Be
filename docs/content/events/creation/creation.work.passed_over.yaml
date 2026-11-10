@@ -1,0 +1,14 @@
+id: creation.work.passed_over
+was: W2
+title: Passed over
+group: Work
+order: 7030
+type: decision
+level: local
+status: listed
+fires: Needs a push, roll lost.
+needs:
+- creation.work.check_in#push
+text: '[Passed over.]'
+answers: []
+leads: A rival in the cast. Unlocks Anger.

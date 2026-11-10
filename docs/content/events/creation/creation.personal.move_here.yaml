@@ -1,0 +1,14 @@
+id: creation.personal.move_here
+was: P25
+title: The move here
+group: Personal
+order: 8250
+type: decision
+level: local
+status: listed
+fires: Required if you arrived as an adult. Fires at one milestone from 22 on.
+needs:
+- creation.family.origins#arrived_as_adult
+text: '[The move here.]'
+answers: []
+leads: An outsider trait.

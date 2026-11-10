@@ -1,0 +1,43 @@
+id: creation.twenties.next_step
+was: M22
+title: The next step
+group: Age 22
+order: 6010
+type: decision
+level: local
+status: listed
+fires: Always, at 22.
+needs: []
+text: '[The next step.]'
+answers:
+- id: enter_field
+  text: '[Enter a field.]'
+  needs: []
+  effects: ''
+  note: ''
+- id: law_school
+  text: '[Law school.]'
+  needs: []
+  effects: ''
+  note: ''
+- id: medical_school
+  text: '[Medical school.]'
+  needs: []
+  effects: ''
+  note: ''
+- id: graduate_school
+  text: '[Graduate school.]'
+  needs: []
+  effects: ''
+  note: ''
+- id: seminary
+  text: '[Seminary.]'
+  needs: []
+  effects: ''
+  note: ''
+- id: officer_school
+  text: '[Officer school.]'
+  needs: []
+  effects: ''
+  note: ''
+leads: Entering a field, or a school.

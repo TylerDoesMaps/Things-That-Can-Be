@@ -1,0 +1,15 @@
+id: creation.childhood.living_room_campaign
+was: C8
+title: A campaign in your living room
+group: Childhood
+order: 2080
+type: decision
+level: local
+status: listed
+fires: Needs Political family or Dynasty.
+needs:
+- creation.family.upbringing#political
+- creation.family.upbringing#dynasty
+text: '[A campaign in your living room.]'
+answers: []
+leads: Gives the campaign office an edge.

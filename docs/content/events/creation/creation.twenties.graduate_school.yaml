@@ -1,0 +1,14 @@
+id: creation.twenties.graduate_school
+was: M22c
+title: Graduate school
+group: Age 22
+order: 6040
+type: decision
+level: local
+status: listed
+fires: Needs a degree. Admission is rolled.
+needs:
+- creation.after_school.college_years
+text: '[Graduate school.]'
+answers: []
+leads: Higher education. Corporate, Banking and Government staff at the second rung.

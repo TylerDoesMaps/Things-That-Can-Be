@@ -1,0 +1,14 @@
+id: creation.family.hard_year.church_split
+was: B5i
+title: The congregation split and your family was on the losing side
+group: Birth and family
+order: 1130
+type: decision
+level: local
+status: listed
+fires: Needs Church household.
+needs:
+- creation.family.upbringing#church
+text: '[The congregation split and your family was on the losing side.]'
+answers: []
+leads: Unlocks Anger. Leans the faith question toward leaving.

@@ -1,0 +1,13 @@
+id: creation.personal.local_fight
+was: P19
+title: 'A local fight: a zoning vote, a school closing'
+group: Personal
+order: 8190
+type: decision
+level: local
+status: listed
+fires: From 25 by chance. Certain once after joining something.
+needs: []
+text: '[A local fight: a zoning vote, a school closing.]'
+answers: []
+leads: An ally and an enemy in the cast. Unlocks A cause.

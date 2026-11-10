@@ -1,0 +1,14 @@
+id: creation.personal.affair
+was: P6
+title: The affair
+group: Personal
+order: 8060
+type: decision
+level: local
+status: listed
+fires: Needs straying, or a philandering build-up complete.
+needs:
+- creation.personal.trouble_at_home#stray
+text: '[The affair.]'
+answers: []
+leads: A secret. By chance the Adulterer trait.

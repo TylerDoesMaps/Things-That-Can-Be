@@ -1,0 +1,14 @@
+id: creation.family.hard_year.moved_again
+was: B5k
+title: You were moved again
+group: Birth and family
+order: 1150
+type: decision
+level: local
+status: listed
+fires: Needs Raised by others.
+needs:
+- creation.family.upbringing#raised_by_others
+text: '[You were moved again.]'
+answers: []
+leads: Unlocks Anger. Opens the new kid.

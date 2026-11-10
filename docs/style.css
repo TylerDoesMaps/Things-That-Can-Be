@@ -15,7 +15,9 @@ body {
 }
 header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 56px; }
 .mark { font-weight: 600; letter-spacing: 0.01em; }
-.page { color: var(--soft); }
+header nav { display: flex; gap: 20px; }
+header nav a { color: var(--soft); text-decoration: none; }
+header nav a[aria-current] { color: var(--ink); }
 
 .board { display: grid; grid-template-columns: 1fr minmax(200px, 2fr) 1fr; align-items: end; gap: 32px; margin-bottom: 56px; }
 .side { display: grid; grid-template-columns: auto auto; column-gap: 14px; align-items: baseline; justify-content: start; }

@@ -1,0 +1,13 @@
+id: creation.school.mentor
+was: H9
+title: A coach or teacher takes you on
+group: High school
+order: 3090
+type: decision
+level: local
+status: listed
+fires: Any.
+needs: []
+text: '[A coach or teacher takes you on.]'
+answers: []
+leads: A mentor in the cast.

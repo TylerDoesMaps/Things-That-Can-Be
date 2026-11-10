@@ -6,6 +6,7 @@ Election night view: https://tylerdoesmaps.github.io/Things-That-Can-Be/
 - `docs/presets/` national presets
 - `docs/content/` every event, the call registry and the shared word list
 - `docs/builder.html` the event builder
+- `docs/map.html` the tiers of government in Kansas, one click at a time
 - `docs/government.html` what government does and who holds each function, shown for one county
 - `docs/tiles/` map tiles for each level
 - `docs/data/` 2024 results by city, township and district, and the method comparison
@@ -28,6 +29,8 @@ Saving from the builder needs a GitHub token with write access to this repositor
 `docs/content/government/functions.yaml` is the fixed list of functions: the Census Bureau's 28 state and local lines, 3 federal ones and 7 split out for politics. Each level that holds a function has a generic department and title, how its head is chosen, whether it sits in a cabinet, and the real Kansas equivalent with a mark for whether that was checked against a source.
 
 `build/government.py` pulls every government in one county, with staff by function, from the 2022 Census of Governments individual unit files.
+
+`build/tiers.py` builds the tier map for one state from Census boundaries. Tier 3 is the county. Tier 4 is every county subdivision: townships, and cities that stand outside any township. Tier 5 is every city that sits inside a township. Run it with another state's code to get that state's layers.
 
 ## National presets
 

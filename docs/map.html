@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Map · Things That Can Be</title>
+<link rel="stylesheet" href="vendor/maplibre-gl.css">
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="map.css">
+</head>
+<body class="tiers">
+<header>
+  <span class="mark">Things That Can Be</span>
+  <nav><a href="index.html">Election Night</a><a href="map.html" aria-current="page">Map</a><a href="builder.html">Events</a><a href="government.html">Government</a></nav>
+</header>
+
+<section class="controls">
+  <div class="tabs" id="tiers"></div>
+  <div class="step"><button id="back" type="button">Back</button><button id="next" type="button">Next</button></div>
+</section>
+
+<main>
+  <div id="map"></div>
+  <div id="tip" hidden></div>
+</main>
+
+<footer><div class="key" id="key"></div></footer>
+
+<script src="vendor/maplibre-gl.js"></script>
+<script src="vendor/pmtiles.js"></script>
+<script src="map.js"></script>
+</body>
+</html>

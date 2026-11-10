@@ -1,0 +1,1311 @@
+# The fixed list of what government does, and who holds each function at each level.
+# 'kansas' is the real equivalent; checked: true means it was confirmed against a source.
+- id: police
+  name: Police protection
+  group: Safety and justice
+  census:
+  - '062'
+  - '162'
+  levels:
+    federal:
+      department: Department of Justice
+      title: Attorney General
+      chosen: appointed
+      by: the President
+      cabinet: true
+    state:
+      department: State Police
+      title: Superintendent
+      chosen: appointed
+      by: the Governor
+      cabinet: false
+      kansas:
+        department: Kansas Highway Patrol
+        title: Superintendent
+        chosen: appointed
+        by: the Governor
+        cabinet: true
+        checked: true
+        note: The Kansas Bureau of Investigation is separate; its director is appointed by the Attorney General (not checked).
+    county:
+      department: Sheriff's Office
+      title: Sheriff
+      chosen: elected
+      kansas:
+        department: Sheriff's Office
+        title: Sheriff
+        chosen: elected
+        checked: true
+    city:
+      department: Police Department
+      title: Chief of Police
+      chosen: appointed
+      by: the city manager or mayor
+      kansas:
+        department: Police Department
+        title: Chief of Police
+        chosen: appointed
+        by: the city governing body or manager
+        checked: false
+- id: fire
+  name: Fire protection
+  group: Safety and justice
+  census:
+  - '024'
+  - '124'
+  levels:
+    federal:
+      department: Fire Administration
+      title: Fire Administrator
+      chosen: appointed
+      by: the President
+      cabinet: false
+    state:
+      department: State Fire Marshal's Office
+      title: State Fire Marshal
+      chosen: appointed
+      by: the Governor
+      cabinet: false
+      kansas:
+        department: Office of the State Fire Marshal
+        title: State Fire Marshal
+        chosen: appointed
+        by: the Governor
+        cabinet: false
+        checked: false
+    city:
+      department: Fire Department
+      title: Fire Chief
+      chosen: appointed
+      by: the city manager or mayor
+      kansas:
+        department: Fire Department
+        title: Fire Chief
+        chosen: appointed
+        by: the city governing body
+        checked: false
+        note: In Rice County every city firefighter is part-time or volunteer.
+    township:
+      department: Township Fire Department
+      title: Fire Chief
+      chosen: appointed
+      by: the township board
+      kansas:
+        department: Township fire protection
+        title: Fire Chief
+        chosen: appointed
+        by: the township board
+        checked: true
+        note: Checked only that Kansas townships may provide fire protection.
+    district:
+      department: Fire District
+      title: Fire Chief
+      chosen: appointed
+      by: the district board
+      kansas:
+        department: Fire District
+        title: Fire Chief
+        chosen: appointed
+        by: the county commission
+        checked: false
+        note: In Kansas the county commission usually governs a fire district.
+- id: ambulance
+  name: Ambulance service
+  group: Safety and justice
+  part_of: fire
+  levels:
+    county:
+      department: Emergency Medical Services
+      title: EMS Director
+      chosen: appointed
+      by: the county commission
+      kansas:
+        department: Emergency Medical Services
+        title: EMS Director
+        chosen: appointed
+        by: the county commission
+        checked: false
+- id: corrections
+  name: Corrections
+  group: Safety and justice
+  census:
+  - '005'
+  levels:
+    federal:
+      department: Bureau of Prisons
+      title: Director
+      chosen: appointed
+      by: the Attorney General
+      cabinet: false
+    state:
+      department: Department of Corrections
+      title: Secretary of Corrections
+      chosen: appointed
+      by: the Governor
+      cabinet: true
+      kansas:
+        department: Department of Corrections
+        title: Secretary of Corrections
+        chosen: appointed
+        by: the Governor
+        cabinet: true
+        checked: true
+    county:
+      department: County Jail
+      title: Sheriff
+      chosen: elected
+      kansas:
+        department: County Jail
+        title: Sheriff
+        chosen: elected
+        checked: true
+        note: The sheriff runs the jail.
+- id: courts
+  name: Courts
+  group: Safety and justice
+  census:
+  - '025'
+  levels:
+    federal:
+      department: Federal Judiciary
+      title: Chief Justice
+      chosen: appointed
+      by: the President
+      cabinet: false
+    state:
+      department: State Courts
+      title: Chief Justice
+      chosen: appointed
+      by: the Governor
+      cabinet: false
+      kansas:
+        department: Kansas Supreme Court
+        title: Chief Justice
+        chosen: appointed
+        by: the Governor, from a nominating commission's list, then retention votes
+        cabinet: false
+        checked: false
+    county:
+      department: District Court
+      title: District Judge
+      chosen: elected
+      kansas:
+        department: District Court
+        title: District Judge
+        chosen: varies
+        checked: false
+        note: Some Kansas judicial districts elect judges and others use merit selection. Rice County's district is not checked.
+    city:
+      department: Municipal Court
+      title: Municipal Judge
+      chosen: appointed
+      by: the city governing body
+      kansas:
+        department: Municipal Court
+        title: Municipal Judge
+        chosen: appointed
+        by: the city governing body
+        checked: false
+- id: prosecution
+  name: Prosecution
+  group: Safety and justice
+  part_of: courts
+  levels:
+    federal:
+      department: United States Attorneys
+      title: United States Attorney
+      chosen: appointed
+      by: the President
+      cabinet: false
+    state:
+      department: Attorney General's Office
+      title: Attorney General
+      chosen: elected
+      cabinet: false
+      kansas:
+        department: Office of the Attorney General
+        title: Attorney General
+        chosen: elected
+        cabinet: false
+        checked: false
+    county:
+      department: County Attorney's Office
+      title: County Attorney
+      chosen: elected
+      kansas:
+        department: County Attorney's Office
+        title: County Attorney
+        chosen: elected
+        checked: true
+    city:
+      department: City Attorney's Office
+      title: City Prosecutor
+      chosen: appointed
+      by: the city governing body
+      kansas:
+        department: City Attorney's Office
+        title: City Attorney
+        chosen: appointed
+        by: the city governing body
+        checked: false
+- id: public_defense
+  name: Public defense
+  group: Safety and justice
+  part_of: courts
+  levels:
+    federal:
+      department: Federal Public Defender
+      title: Federal Public Defender
+      chosen: appointed
+      by: the court of appeals
+      cabinet: false
+    state:
+      department: Public Defender's Office
+      title: State Public Defender
+      chosen: appointed
+      by: a state board
+      cabinet: false
+      kansas:
+        department: Board of Indigents' Defense Services
+        title: Executive Director
+        chosen: appointed
+        by: the board
+        cabinet: false
+        checked: false
+- id: schools
+  name: Elementary and secondary education
+  group: Education
+  census:
+  - '012'
+  - '112'
+  levels:
+    federal:
+      department: Department of Education
+      title: Secretary of Education
+      chosen: appointed
+      by: the President
+      cabinet: true
+    state:
+      department: Department of Education
+      title: Commissioner of Education
+      chosen: appointed
+      by: the state board of education
+      cabinet: false
+      kansas:
+        department: Department of Education
+        title: Commissioner of Education
+        chosen: appointed
+        by: the elected State Board of Education
+        cabinet: false
+        checked: false
+    district:
+      department: School District
+      title: Superintendent
+      chosen: appointed
+      by: the elected school board
+      kansas:
+        department: Unified School District
+        title: Superintendent
+        chosen: appointed
+        by: the elected school board
+        checked: true
+        note: Checked that school boards are elected in November of odd years.
+- id: higher_education
+  name: Higher education
+  group: Education
+  census:
+  - '016'
+  - '018'
+  levels:
+    state:
+      department: Board of Regents
+      title: Chancellor or President
+      chosen: appointed
+      by: the regents
+      cabinet: false
+      kansas:
+        department: Board of Regents
+        title: President
+        chosen: appointed
+        by: regents the Governor appoints
+        cabinet: false
+        checked: false
+    district:
+      department: Community College
+      title: President
+      chosen: appointed
+      by: elected trustees
+      kansas:
+        department: Community College
+        title: President
+        chosen: appointed
+        by: elected trustees
+        checked: false
+- id: other_education
+  name: Other education
+  group: Education
+  census:
+  - '021'
+  levels:
+    state:
+      department: Department of Education
+      title: Commissioner of Education
+      chosen: appointed
+      by: the state board of education
+      cabinet: false
+      kansas:
+        department: Department of Education
+        title: Commissioner of Education
+        chosen: appointed
+        by: the elected State Board of Education
+        cabinet: false
+        checked: false
+- id: libraries
+  name: Libraries
+  group: Education
+  census:
+  - '052'
+  levels:
+    state:
+      department: State Library
+      title: State Librarian
+      chosen: appointed
+      by: the Governor
+      cabinet: false
+      kansas:
+        department: State Library of Kansas
+        title: State Librarian
+        chosen: appointed
+        by: the Governor
+        cabinet: false
+        checked: false
+    city:
+      department: Public Library
+      title: Library Director
+      chosen: appointed
+      by: the library board
+      kansas:
+        department: Public Library
+        title: Library Director
+        chosen: appointed
+        by: a library board the mayor appoints
+        checked: false
+- id: health
+  name: Health
+  group: Health and welfare
+  census:
+  - '032'
+  levels:
+    federal:
+      department: Department of Health and Human Services
+      title: Secretary
+      chosen: appointed
+      by: the President
+      cabinet: true
+    state:
+      department: Department of Health
+      title: Secretary of Health
+      chosen: appointed
+      by: the Governor
+      cabinet: true
+      kansas:
+        department: Department of Health and Environment
+        title: Secretary
+        chosen: appointed
+        by: the Governor
+        cabinet: true
+        checked: true
+    county:
+      department: County Health Department
+      title: Health Officer
+      chosen: appointed
+      by: the county commission
+      kansas:
+        department: County Health Department
+        title: Health Officer
+        chosen: appointed
+        by: the county commission, sitting as the board of health
+        checked: false
+- id: hospitals
+  name: Hospitals
+  group: Health and welfare
+  census:
+  - '040'
+  levels:
+    federal:
+      department: Department of Veterans Affairs
+      title: Secretary
+      chosen: appointed
+      by: the President
+      cabinet: true
+    state:
+      department: State Hospitals
+      title: Secretary
+      chosen: appointed
+      by: the Governor
+      cabinet: true
+      kansas:
+        department: Department for Aging and Disability Services
+        title: Secretary
+        chosen: appointed
+        by: the Governor
+        cabinet: true
+        checked: true
+        note: Checked that the department is in the cabinet, not that it runs the state hospitals.
+    county:
+      department: County Hospital
+      title: Administrator
+      chosen: appointed
+      by: a hospital board
+    district:
+      department: Hospital District
+      title: Administrator
+      chosen: appointed
+      by: the elected district board
+      kansas:
+        department: Hospital District
+        title: Administrator
+        chosen: appointed
+        by: the elected district board
+        checked: false
+        note: Rice County Hospital District 1 is the county's largest employer after the Lyons schools.
+- id: welfare
+  name: Public welfare
+  group: Health and welfare
+  census:
+  - '079'
+  levels:
+    federal:
+      department: Department of Health and Human Services
+      title: Secretary
+      chosen: appointed
+      by: the President
+      cabinet: true
+    state:
+      department: Department of Human Services
+      title: Secretary
+      chosen: appointed
+      by: the Governor
+      cabinet: true
+      kansas:
+        department: Department for Children and Families
+        title: Secretary
+        chosen: appointed
+        by: the Governor
+        cabinet: true
+        checked: true
+    county:
+      department: County Welfare Office
+      title: Director
+      chosen: appointed
+      by: the county commission
+      kansas:
+        department: None
+        title: None
+        chosen: none
+        checked: false
+        note: Kansas runs welfare from the state; counties hold nothing here.
+- id: social_insurance
+  name: Social insurance administration
+  group: Health and welfare
+  census:
+  - '022'
+  levels:
+    federal:
+      department: Social Security Administration
+      title: Commissioner
+      chosen: appointed
+      by: the President
+      cabinet: false
+    state:
+      department: Department of Labor
+      title: Secretary of Labor
+      chosen: appointed
+      by: the Governor
+      cabinet: true
+      kansas:
+        department: Department of Labor
+        title: Secretary of Labor
+        chosen: appointed
+        by: the Governor
+        cabinet: true
+        checked: true
+- id: highways
+  name: Streets and highways
+  group: Getting around
+  census:
+  - '044'
+  levels:
+    federal:
+      department: Department of Transportation
+      title: Secretary of Transportation
+      chosen: appointed
+      by: the President
+      cabinet: true
+    state:
+      department: Department of Transportation
+      title: Secretary of Transportation
+      chosen: appointed
+      by: the Governor
+      cabinet: true
+      kansas:
+        department: Department of Transportation
+        title: Secretary of Transportation
+        chosen: appointed
+        by: the Governor
+        cabinet: true
+        checked: true
+    county:
+      department: Road and Bridge Department
+      title: County Engineer
+      chosen: appointed
+      by: the county commission
+      kansas:
+        department: Road and Bridge Department
+        title: Road Supervisor or County Engineer
+        chosen: appointed
+        by: the county commission
+        checked: true
+        note: Checked that the commission controls roads and department heads, not the title.
+    city:
+      department: Street Department
+      title: Public Works Director
+      chosen: appointed
+      by: the city manager or mayor
+      kansas:
+        department: Street Department
+        title: Public Works Director
+        chosen: appointed
+        by: the city governing body
+        checked: false
+    township:
+      department: Township Roads
+      title: Township Trustee
+      chosen: elected
+      kansas:
+        department: Township Roads
+        title: Township Trustee
+        chosen: elected
+        checked: true
+- id: transit
+  name: Transit
+  group: Getting around
+  census:
+  - '094'
+  levels:
+    federal:
+      department: Department of Transportation
+      title: Secretary of Transportation
+      chosen: appointed
+      by: the President
+      cabinet: true
+    state:
+      department: Department of Transportation
+      title: Secretary of Transportation
+      chosen: appointed
+      by: the Governor
+      cabinet: true
+      kansas:
+        department: Department of Transportation
+        title: Secretary of Transportation
+        chosen: appointed
+        by: the Governor
+        cabinet: true
+        checked: true
+    city:
+      department: Transit Authority
+      title: Director
+      chosen: appointed
+      by: the authority board
+      kansas:
+        department: None in Rice County
+        title: None
+        chosen: none
+        checked: false
+- id: airports
+  name: Airports
+  group: Getting around
+  census:
+  - '001'
+  levels:
+    federal:
+      department: Federal Aviation Administration
+      title: Administrator
+      chosen: appointed
+      by: the President
+      cabinet: false
+    state:
+      department: Department of Transportation
+      title: Aviation Director
+      chosen: appointed
+      by: the Secretary of Transportation
+      cabinet: false
+      kansas:
+        department: Department of Transportation, Division of Aviation
+        title: Director of Aviation
+        chosen: appointed
+        by: the Secretary of Transportation
+        cabinet: false
+        checked: false
+    city:
+      department: Municipal Airport
+      title: Airport Manager
+      chosen: appointed
+      by: the city manager or mayor
+      kansas:
+        department: Municipal Airport
+        title: Airport Manager
+        chosen: appointed
+        by: the city governing body
+        checked: false
+- id: water_transport
+  name: Water transport and terminals
+  group: Getting around
+  census:
+  - '087'
+  levels:
+    federal:
+      department: Army Corps of Engineers
+      title: Chief of Engineers
+      chosen: appointed
+      by: the President
+      cabinet: false
+    state:
+      department: Port Authority
+      title: Director
+      chosen: appointed
+      by: the Governor
+      cabinet: false
+      kansas:
+        department: None
+        title: None
+        chosen: none
+        checked: false
+        note: Kansas has no ports to speak of.
+- id: water
+  name: Water supply
+  group: Utilities
+  census:
+  - '091'
+  levels:
+    state:
+      department: Water Resources Agency
+      title: Director
+      chosen: appointed
+      by: the Governor
+      cabinet: false
+      kansas:
+        department: Kansas Water Office
+        title: Director
+        chosen: appointed
+        by: the Governor
+        cabinet: false
+        checked: false
+    city:
+      department: Water Department
+      title: Utilities Superintendent
+      chosen: appointed
+      by: the city manager or mayor
+      kansas:
+        department: Water Department
+        title: Utilities Superintendent
+        chosen: appointed
+        by: the city governing body
+        checked: false
+    district:
+      department: Rural Water District
+      title: Manager
+      chosen: appointed
+      by: a board its members elect
+      kansas:
+        department: Rural Water District
+        title: Manager
+        chosen: appointed
+        by: a board its members elect
+        checked: false
+- id: sewerage
+  name: Sewerage
+  group: Utilities
+  census:
+  - '080'
+  levels:
+    city:
+      department: Wastewater Department
+      title: Utilities Superintendent
+      chosen: appointed
+      by: the city manager or mayor
+      kansas:
+        department: Wastewater Department
+        title: Utilities Superintendent
+        chosen: appointed
+        by: the city governing body
+        checked: false
+- id: solid_waste
+  name: Solid waste management
+  group: Utilities
+  census:
+  - '081'
+  levels:
+    county:
+      department: Solid Waste Department
+      title: Solid Waste Director
+      chosen: appointed
+      by: the county commission
+      kansas:
+        department: County Landfill
+        title: Solid Waste Director
+        chosen: appointed
+        by: the county commission
+        checked: false
+    city:
+      department: Sanitation Department
+      title: Public Works Director
+      chosen: appointed
+      by: the city manager or mayor
+      kansas:
+        department: Sanitation
+        title: Public Works Director
+        chosen: appointed
+        by: the city governing body
+        checked: false
+- id: electric
+  name: Electric power
+  group: Utilities
+  census:
+  - '092'
+  levels:
+    federal:
+      department: Department of Energy
+      title: Secretary of Energy
+      chosen: appointed
+      by: the President
+      cabinet: true
+    state:
+      department: Utilities Commission
+      title: Chair
+      chosen: appointed
+      by: the Governor
+      cabinet: false
+      kansas:
+        department: Kansas Corporation Commission
+        title: Chair
+        chosen: appointed
+        by: the Governor
+        cabinet: false
+        checked: false
+        note: Regulates private utilities; does not run one.
+    city:
+      department: Municipal Electric Utility
+      title: Utilities Superintendent
+      chosen: appointed
+      by: the city manager or mayor
+      kansas:
+        department: Municipal Electric Utility
+        title: Utilities Superintendent
+        chosen: appointed
+        by: the city governing body
+        checked: false
+        note: Sterling runs its own.
+- id: gas
+  name: Gas supply
+  group: Utilities
+  census:
+  - '093'
+  levels:
+    state:
+      department: Utilities Commission
+      title: Chair
+      chosen: appointed
+      by: the Governor
+      cabinet: false
+      kansas:
+        department: Kansas Corporation Commission
+        title: Chair
+        chosen: appointed
+        by: the Governor
+        cabinet: false
+        checked: false
+    city:
+      department: Municipal Gas Utility
+      title: Utilities Superintendent
+      chosen: appointed
+      by: the city manager or mayor
+      kansas:
+        department: Municipal Gas Utility
+        title: Utilities Superintendent
+        chosen: appointed
+        by: the city governing body
+        checked: false
+- id: housing
+  name: Housing and community development
+  group: Land and place
+  census:
+  - '050'
+  levels:
+    federal:
+      department: Department of Housing and Urban Development
+      title: Secretary
+      chosen: appointed
+      by: the President
+      cabinet: true
+    state:
+      department: Department of Commerce
+      title: Secretary of Commerce
+      chosen: appointed
+      by: the Governor
+      cabinet: true
+      kansas:
+        department: Department of Commerce
+        title: Secretary of Commerce
+        chosen: appointed
+        by: the Governor
+        cabinet: true
+        checked: true
+    city:
+      department: Community Development Department
+      title: Director
+      chosen: appointed
+      by: the city manager or mayor
+    district:
+      department: Housing Authority
+      title: Executive Director
+      chosen: appointed
+      by: a board the mayor appoints
+      kansas:
+        department: Housing Authority
+        title: Executive Director
+        chosen: appointed
+        by: a board the mayor appoints
+        checked: false
+        note: Lyons and Sterling each have one.
+- id: planning
+  name: Planning and zoning
+  group: Land and place
+  part_of: housing
+  levels:
+    county:
+      department: Planning and Zoning
+      title: Zoning Administrator
+      chosen: appointed
+      by: the county commission
+      kansas:
+        department: Planning and Zoning
+        title: Zoning Administrator
+        chosen: appointed
+        by: the county commission
+        checked: true
+        note: Only in counties that have adopted zoning.
+    city:
+      department: Planning Commission
+      title: City Planner
+      chosen: appointed
+      by: the city manager or mayor
+      kansas:
+        department: Planning Commission
+        title: Zoning Administrator
+        chosen: appointed
+        by: the city governing body
+        checked: false
+- id: parks
+  name: Parks and recreation
+  group: Land and place
+  census:
+  - '061'
+  levels:
+    federal:
+      department: Department of the Interior
+      title: Secretary of the Interior
+      chosen: appointed
+      by: the President
+      cabinet: true
+    state:
+      department: Department of Parks
+      title: Secretary
+      chosen: appointed
+      by: the Governor
+      cabinet: true
+      kansas:
+        department: Department of Wildlife and Parks
+        title: Secretary
+        chosen: appointed
+        by: the Governor
+        cabinet: true
+        checked: true
+    city:
+      department: Parks and Recreation
+      title: Director
+      chosen: appointed
+      by: the city manager or mayor
+      kansas:
+        department: Parks and Recreation
+        title: Director
+        chosen: appointed
+        by: the city governing body
+        checked: false
+- id: natural_resources
+  name: Natural resources
+  group: Land and place
+  census:
+  - '059'
+  levels:
+    federal:
+      department: Department of Agriculture
+      title: Secretary of Agriculture
+      chosen: appointed
+      by: the President
+      cabinet: true
+    state:
+      department: Department of Agriculture
+      title: Secretary of Agriculture
+      chosen: appointed
+      by: the Governor
+      cabinet: true
+      kansas:
+        department: Department of Agriculture
+        title: Secretary of Agriculture
+        chosen: appointed
+        by: the Governor
+        cabinet: true
+        checked: true
+    county:
+      department: Noxious Weed Department
+      title: Director
+      chosen: appointed
+      by: the county commission
+      kansas:
+        department: Noxious Weed Department
+        title: Director
+        chosen: appointed
+        by: the county commission
+        checked: false
+    district:
+      department: Conservation District
+      title: District Manager
+      chosen: appointed
+      by: elected supervisors
+      kansas:
+        department: Conservation District
+        title: District Manager
+        chosen: appointed
+        by: elected supervisors
+        checked: false
+        note: Rice County also sits in a watershed district.
+- id: executive
+  name: Governing body and executive
+  group: Running the government
+  part_of: administration
+  levels:
+    federal:
+      department: The Presidency and Congress
+      title: President
+      chosen: elected
+    state:
+      department: Governor's Office and Legislature
+      title: Governor
+      chosen: elected
+      kansas:
+        department: Governor's Office and Legislature
+        title: Governor
+        chosen: elected
+        checked: false
+    county:
+      department: County Commission
+      title: Commission Chair
+      chosen: elected
+      kansas:
+        department: Board of County Commissioners
+        title: Chair
+        chosen: elected
+        checked: true
+        note: The board picks its own chair each January.
+    city:
+      department: City Council
+      title: Mayor
+      chosen: elected
+      kansas:
+        department: City Council or Commission
+        title: Mayor
+        chosen: elected
+        checked: false
+        note: A city administrator, where there is one, is appointed.
+    township:
+      department: Township Board
+      title: Township Trustee
+      chosen: elected
+      kansas:
+        department: Township Board
+        title: Trustee
+        chosen: elected
+        checked: true
+- id: elections
+  name: Elections
+  group: Running the government
+  part_of: administration
+  levels:
+    state:
+      department: Secretary of State's Office
+      title: Secretary of State
+      chosen: elected
+      cabinet: false
+      kansas:
+        department: Office of the Secretary of State
+        title: Secretary of State
+        chosen: elected
+        cabinet: false
+        checked: false
+    county:
+      department: County Clerk's Office
+      title: County Clerk
+      chosen: elected
+      kansas:
+        department: County Clerk's Office
+        title: County Clerk
+        chosen: elected
+        checked: true
+        note: Checked that the clerk is elected. In the four largest counties an appointed election commissioner runs elections instead (not checked).
+- id: finance
+  name: Financial administration
+  group: Running the government
+  census:
+  - '023'
+  levels:
+    federal:
+      department: Department of the Treasury
+      title: Secretary of the Treasury
+      chosen: appointed
+      by: the President
+      cabinet: true
+    state:
+      department: Department of Revenue
+      title: Secretary of Revenue
+      chosen: appointed
+      by: the Governor
+      cabinet: true
+      kansas:
+        department: Department of Revenue
+        title: Secretary of Revenue
+        chosen: appointed
+        by: the Governor
+        cabinet: true
+        checked: true
+        note: The State Treasurer is separate and elected.
+    county:
+      department: County Treasurer's Office
+      title: County Treasurer
+      chosen: elected
+      kansas:
+        department: County Treasurer's Office
+        title: County Treasurer
+        chosen: elected
+        checked: true
+    city:
+      department: Finance Department
+      title: Finance Director
+      chosen: appointed
+      by: the city manager or mayor
+      kansas:
+        department: City Clerk's Office
+        title: City Clerk
+        chosen: appointed
+        by: the city governing body
+        checked: false
+    township:
+      department: Township Treasurer
+      title: Township Treasurer
+      chosen: elected
+      kansas:
+        department: Township Treasurer
+        title: Treasurer
+        chosen: elected
+        checked: true
+- id: assessment
+  name: Property assessment
+  group: Running the government
+  part_of: finance
+  levels:
+    state:
+      department: Property Valuation Division
+      title: Director
+      chosen: appointed
+      by: the Secretary of Revenue
+      cabinet: false
+      kansas:
+        department: Division of Property Valuation
+        title: Director
+        chosen: appointed
+        by: the Secretary of Revenue
+        cabinet: false
+        checked: false
+    county:
+      department: County Appraiser's Office
+      title: County Appraiser
+      chosen: appointed
+      by: the county commission
+      kansas:
+        department: County Appraiser's Office
+        title: County Appraiser
+        chosen: appointed
+        by: the county commission
+        checked: true
+        note: A four-year term starting July 1.
+- id: administration
+  name: Other government administration
+  group: Running the government
+  census:
+  - '029'
+  levels:
+    federal:
+      department: General Services Administration
+      title: Administrator
+      chosen: appointed
+      by: the President
+      cabinet: false
+    state:
+      department: Department of Administration
+      title: Secretary of Administration
+      chosen: appointed
+      by: the Governor
+      cabinet: true
+      kansas:
+        department: Department of Administration
+        title: Secretary of Administration
+        chosen: appointed
+        by: the Governor
+        cabinet: true
+        checked: true
+    county:
+      department: Register of Deeds
+      title: Register of Deeds
+      chosen: elected
+      kansas:
+        department: Register of Deeds
+        title: Register of Deeds
+        chosen: elected
+        checked: true
+    city:
+      department: City Clerk's Office
+      title: City Clerk
+      chosen: appointed
+      by: the city manager or mayor
+      kansas:
+        department: City Clerk's Office
+        title: City Clerk
+        chosen: appointed
+        by: the city governing body
+        checked: false
+    township:
+      department: Township Clerk
+      title: Township Clerk
+      chosen: elected
+      kansas:
+        department: Township Clerk
+        title: Clerk
+        chosen: elected
+        checked: true
+- id: liquor
+  name: Liquor stores
+  group: Everything else
+  census:
+  - '090'
+  levels:
+    state:
+      department: Liquor Control Board
+      title: Director
+      chosen: appointed
+      by: the Governor
+      cabinet: false
+      kansas:
+        department: Alcoholic Beverage Control
+        title: Director
+        chosen: appointed
+        by: the Secretary of Revenue
+        cabinet: false
+        checked: false
+        note: Kansas licenses private stores; the state sells nothing.
+- id: other
+  name: Other and unallocable
+  group: Everything else
+  census:
+  - '089'
+  note: A catch-all. In Rice County it holds emergency management at the county and cemeteries in two cemetery districts.
+  levels:
+    state:
+      department: National Guard
+      title: Adjutant General
+      chosen: appointed
+      by: the Governor
+      cabinet: true
+      kansas:
+        department: Kansas National Guard
+        title: Adjutant General
+        chosen: appointed
+        by: the Governor
+        cabinet: true
+        checked: true
+    county:
+      department: Emergency Management
+      title: Director
+      chosen: appointed
+      by: the county commission
+      kansas:
+        department: Emergency Management
+        title: Director
+        chosen: appointed
+        by: the county commission
+        checked: false
+    township:
+      department: Township Cemetery
+      title: Township Trustee
+      chosen: elected
+      kansas:
+        department: Township Cemetery
+        title: Trustee
+        chosen: elected
+        checked: true
+    district:
+      department: Cemetery District
+      title: Sexton
+      chosen: appointed
+      by: the district board
+      kansas:
+        department: Cemetery District
+        title: Sexton
+        chosen: appointed
+        by: the district board
+        checked: false
+- id: defense
+  name: National defense and international relations
+  group: Federal only
+  census:
+  - '006'
+  levels:
+    federal:
+      department: Department of Defense
+      title: Secretary of Defense
+      chosen: appointed
+      by: the President
+      cabinet: true
+- id: postal
+  name: Postal service
+  group: Federal only
+  census:
+  - '014'
+  levels:
+    federal:
+      department: Postal Service
+      title: Postmaster General
+      chosen: appointed
+      by: the postal board of governors
+      cabinet: false
+- id: space
+  name: Space research and technology
+  group: Federal only
+  census:
+  - '002'
+  levels:
+    federal:
+      department: Space Agency
+      title: Administrator
+      chosen: appointed
+      by: the President
+      cabinet: false

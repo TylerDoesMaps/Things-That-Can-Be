@@ -6,6 +6,7 @@ Election night view: https://tylerdoesmaps.github.io/Things-That-Can-Be/
 - `docs/presets/` national presets
 - `docs/content/` every event, the call registry and the shared word list
 - `docs/builder.html` the event builder
+- `docs/government.html` what government does and who holds each function, shown for one county
 - `docs/tiles/` map tiles for each level
 - `docs/data/` 2024 results by city, township and district, and the method comparison
 - `build/` scripts that rebuild everything (`build/run.sh`)
@@ -21,6 +22,12 @@ Each event is one file in `docs/content/events/`, named by its ID. The game and 
 - `docs/content/registry.yaml` lists every call that exists. `build/check_content.py` refuses unknown calls and locks that point at nothing, and rebuilds `docs/content/index.json`.
 
 Saving from the builder needs a GitHub token with write access to this repository's contents, pasted into the builder. It is kept in that browser only.
+
+## Government
+
+`docs/content/government/functions.yaml` is the fixed list of functions: the Census Bureau's 28 state and local lines, 3 federal ones and 7 split out for politics. Each level that holds a function has a generic department and title, how its head is chosen, whether it sits in a cabinet, and the real Kansas equivalent with a mark for whether that was checked against a source.
+
+`build/government.py` pulls every government in one county, with staff by function, from the 2022 Census of Governments individual unit files.
 
 ## National presets
 

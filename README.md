@@ -35,6 +35,8 @@ Saving from the builder needs a GitHub token with write access to this repositor
 
 `docs/content/government/offices.yaml` is the master list of offices for Kansas: each seat's government, kind, how it is chosen, term, next election and whether the player can hold it, plus the state's rules on running (sore loser, resign to run, holding two offices). Lines not confirmed against a source are marked `checked: false`.
 
+`build/offices.py` counts every office in Kansas county by county from the Census Bureau's 2022 list of governments and writes `docs/data/offices/ks.json`. Each county has its governments, its seats by office and by how they are filled, the districts that cover it, and any real structure entered by hand.
+
 ## National presets
 
 Listed in `docs/presets/presets.json`.

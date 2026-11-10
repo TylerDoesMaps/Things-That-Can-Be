@@ -16,3 +16,11 @@
 .rule .warn { color: var(--rep); }
 @media (max-width: 760px) { .rule { grid-template-columns: 1fr; gap: 2px; } .seats td:nth-child(3) { display: none; } }
 @media (max-width: 760px) { .seats td:nth-child(2) { display: none; } .beside { grid-template-columns: 1fr; } .gov .umbrella .umbrella { padding: 8px; } }
+.counties thead td { color: var(--soft); font-size: 13px; border-top: 0; }
+.counties td { text-align: right; }
+.counties td:first-child { text-align: left; }
+.counties tbody tr[data-i] { cursor: pointer; }
+.counties tbody tr[data-i]:hover { background: #f4f5f7; }
+.counties tr.open > td { text-align: left; padding: 4px 0 16px 16px; white-space: normal; }
+.counties tr.open .seats td:last-child { text-align: right; }
+.counties tr.open .n { margin: 4px 0; }

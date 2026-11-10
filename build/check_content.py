@@ -113,6 +113,8 @@ for eid, (path, event) in events.items():
         "id": eid, "file": str(path.relative_to(ROOT)), "was": event.get("was", ""), "title": event.get("title", ""),
         "group": event.get("group", ""), "order": event.get("order", 0), "type": event.get("type"),
         "level": event.get("level"), "status": event.get("status"), "answers": [a.get("id") for a in answers],
+        "needs": event.get("needs") or [],
+        "gates": [{"answer": a.get("id"), "need": n} for a in answers for n in (a.get("needs") or [])],
         "brackets": sum(len(BRACKET.findall(t or "")) for t in texts),
     })
 

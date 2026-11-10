@@ -27,6 +27,17 @@
 
   <main>
     <form id="form" hidden>
+      <section id="flow" aria-label="Flow">
+        <div class="col" id="flow-in"></div>
+        <div class="col mid"><div class="node here" id="flow-here"></div></div>
+        <div class="col" id="flow-out"></div>
+        <svg id="flow-lines" aria-hidden="true"></svg>
+      </section>
+      <div class="row flow-new">
+        <label>New event after<select id="follow"></select></label>
+        <button id="new-after" type="button">Create</button>
+        <span id="leave" role="status"></span>
+      </div>
       <div class="row">
         <label class="wide">ID<input name="id" required pattern="[a-z0-9_]+(\.[a-z0-9_]+)+" spellcheck="false"></label>
         <label>Old code<input name="was"></label>

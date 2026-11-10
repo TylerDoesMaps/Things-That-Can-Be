@@ -39,3 +39,19 @@ main { min-width: 0; }
 #calls b { font-weight: 600; }
 @media (max-width: 1100px) { .bench { grid-template-columns: 260px minmax(0, 1fr); } .side { grid-column: 1 / -1; position: static; max-height: none; } }
 @media (max-width: 760px) { body.builder { padding: 16px; } .bench { grid-template-columns: 1fr; } .bench aside { position: static; max-height: 50vh; } .row { flex-direction: column; align-items: stretch; } .row .narrow { flex: 1; } }
+
+#flow { position: relative; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr); gap: 72px; align-items: center; padding: 8px 0 4px; }
+#flow .col { display: flex; flex-direction: column; gap: 8px; min-width: 0; position: relative; z-index: 1; }
+#flow .node { border: 1px solid var(--line); border-radius: 4px; padding: 6px 8px; background: #fff; text-align: left; width: 100%; font-size: 13px; line-height: 1.3; overflow-wrap: anywhere; }
+#flow button.node { cursor: pointer; }
+#flow button.node:hover { border-color: var(--ink); }
+#flow .node.here { border: 2px solid var(--ink); font-weight: 600; }
+#flow .node small { display: block; color: var(--soft); font-weight: 400; font-size: 11.5px; }
+#flow .none { color: var(--soft); font-size: 13px; }
+#flow-lines { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; overflow: visible; }
+#flow-lines path { fill: none; stroke: #b5b8be; stroke-width: 1.25; }
+#flow-lines text { font-size: 11px; fill: var(--soft); }
+.flow-new { align-items: end; }
+.flow-new label { flex: 0 1 320px; }
+#leave { color: var(--rep); font-size: 13px; }
+@media (max-width: 760px) { #flow { grid-template-columns: 1fr; gap: 12px; } #flow-lines { display: none; } }

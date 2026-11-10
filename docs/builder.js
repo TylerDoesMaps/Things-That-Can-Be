@@ -114,7 +114,63 @@ function review() {
   $("problems").innerHTML = [...new Set(problems)].map((p) => `<li>${esc(p)}</li>`).join("");
   $("save").disabled = !token || problems.length > 0;
   $("save").textContent = token ? "Save" : "Token needed to save";
+  flow(event);
   return { event, brackets };
+}
+
+// The events this one is locked behind, and the events locked behind it.
+function flow(event) {
+  const split = (need) => { const [id, answer] = need.split("#"); return { id, answer }; };
+  const gather = (pairs) => {
+    const map = new Map();
+    for (const { id, label } of pairs) {
+      if (!map.has(id)) map.set(id, []);
+      if (label && !map.get(id).includes(label)) map.get(id).push(label);
+    }
+    return [...map];
+  };
+  const incoming = gather([
+    ...event.needs.map((n) => ({ id: split(n).id, label: split(n).answer ? `#${split(n).answer}` : "" })),
+    ...event.answers.flatMap((a) => a.needs.map((n) => ({ id: split(n).id, label: `${split(n).answer ? `#${split(n).answer} ` : ""}opens #${a.id}` }))),
+  ]);
+  const outgoing = gather(index.filter((r) => r.id !== event.id).flatMap((r) => [
+    ...(r.needs || []).filter((n) => split(n).id === event.id).map((n) => ({ id: r.id, label: split(n).answer ? `#${split(n).answer}` : "" })),
+    ...(r.gates || []).filter((g) => split(g.need).id === event.id).map((g) => ({ id: r.id, label: `${split(g.need).answer ? `#${split(g.need).answer} ` : ""}opens #${g.answer}` })),
+  ]));
+  const node = ([id, labels]) => {
+    const row = index.find((r) => r.id === id);
+    return `<button type="button" class="node" data-open="${esc(id)}" data-label="${esc(labels.join(", "))}">${esc(row ? row.title : id)}<small>${esc(id)}</small></button>`;
+  };
+  $("flow-in").innerHTML = incoming.length ? incoming.map(node).join("") : '<span class="none">Nothing leads in</span>';
+  $("flow-out").innerHTML = outgoing.length ? outgoing.map(node).join("") : '<span class="none">Nothing leads out</span>';
+  $("flow-here").innerHTML = `${esc(event.title || "Untitled")}<small>${esc(event.id)}</small>`;
+  const follow = $("follow"), keep = follow.value;
+  follow.innerHTML = '<option value="">this event, any answer</option>' + event.answers.filter((a) => a.id).map((a) => `<option value="${esc(a.id)}">#${esc(a.id)}</option>`).join("");
+  if ([...follow.options].some((o) => o.value === keep)) follow.value = keep;
+  requestAnimationFrame(drawFlow);
+}
+
+function drawFlow() {
+  const box = $("flow").getBoundingClientRect(), here = $("flow-here").getBoundingClientRect();
+  if (!box.width) return;
+  const y = (r) => r.top + r.height / 2 - box.top;
+  let svg = "";
+  const link = (from, to, label) => {
+    const x1 = from.right - box.left, x2 = to.left - box.left, mid = (x1 + x2) / 2;
+    svg += `<path d="M${x1} ${y(from)} C${mid} ${y(from)} ${mid} ${y(to)} ${x2 - 5} ${y(to)}"/><path d="M${x2 - 5} ${y(to) - 4} L${x2} ${y(to)} L${x2 - 5} ${y(to) + 4}"/>`;
+    return [mid, label];
+  };
+  for (const el of $("flow-in").querySelectorAll(".node")) {
+    const r = el.getBoundingClientRect();
+    const [mid, label] = link(r, here, el.dataset.label);
+    if (label) svg += `<text x="${r.right - box.left + 6}" y="${y(r) - 5}">${esc(label)}</text>`;
+  }
+  for (const el of $("flow-out").querySelectorAll(".node")) {
+    const r = el.getBoundingClientRect();
+    const [mid, label] = link(here, r, el.dataset.label);
+    if (label) svg += `<text x="${r.left - box.left - 6}" y="${y(r) - 5}" text-anchor="end">${esc(label)}</text>`;
+  }
+  $("flow-lines").innerHTML = svg;
 }
 
 function addAnswer(answer = {}) {
@@ -184,14 +240,43 @@ async function start() {
   list();
 }
 
-$("list").addEventListener("click", (e) => { const li = e.target.closest("li"); if (li) open(li.dataset.id); });
+$("list").addEventListener("click", (e) => { const li = e.target.closest("li"); if (li) leave(li.dataset.id, () => open(li.dataset.id)); });
 for (const id of ["search", "group", "status"]) $(id).addEventListener("input", list);
-form.addEventListener("input", review);
+let dirty = false, leaving = "";
+form.addEventListener("input", (e) => { if (e.target.id === "follow") return; dirty = true; review(); });
+window.addEventListener("resize", drawFlow);
+
+// Leaving an edited event takes a second click, so nothing typed is lost by accident.
+function leave(key, go) {
+  if (dirty && leaving !== key) {
+    leaving = key;
+    $("leave").textContent = "Not saved. Click again to leave.";
+    return;
+  }
+  leaving = "";
+  dirty = false;
+  $("leave").textContent = "";
+  go();
+}
+
+$("flow").addEventListener("click", (e) => {
+  const node = e.target.closest("[data-open]");
+  if (node && index.some((r) => r.id === node.dataset.open)) leave(node.dataset.open, () => open(node.dataset.open));
+});
+$("new-after").addEventListener("click", () => {
+  const from = form.elements.id.value.trim(), answer = $("follow").value;
+  const stem = from.split(".").slice(0, -1).join(".");
+  leave("new-after", () => {
+    fill({ id: `${stem}.`, group: form.elements.group.value, type: "decision", level: form.elements.level.value, status: "drafted",
+      order: (Number(form.elements.order.value) || 0) + 5, needs: [answer ? `${from}#${answer}` : from], text: "[]", answers: [] }, true, null);
+    form.elements.id.focus();
+  });
+});
 $("add-answer").addEventListener("click", () => { addAnswer(); review(); });
-$("new").addEventListener("click", () => {
+$("new").addEventListener("click", () => leave("new", () => {
   fill({ id: "", type: "decision", level: "local", status: "drafted", order: (index.at(-1)?.order || 0) + 10, text: "[]", answers: [] }, true, null);
   form.elements.id.focus();
-});
+}));
 
 $("token").value = token;
 $("token").addEventListener("change", (e) => { token = e.target.value.trim(); store.token = token; start().catch(fail); if (!form.hidden) review(); });
@@ -207,13 +292,14 @@ form.addEventListener("submit", async (e) => {
     const saved = await write(file, jsyaml.dump(event, { lineWidth: -1 }), current.sha, `${current.isNew ? "Add" : "Edit"} ${event.id}`);
     const live = await github("index.json");
     const rows = JSON.parse(decode(live.content)).filter((r) => r.id !== event.id);
-    rows.push({ id: event.id, file, was: event.was, title: event.title, group: event.group, order: event.order, type: event.type, level: event.level, status: event.status, answers: event.answers.map((a) => a.id), brackets });
+    rows.push({ id: event.id, file, was: event.was, title: event.title, group: event.group, order: event.order, type: event.type, level: event.level, status: event.status, answers: event.answers.map((a) => a.id), brackets, needs: event.needs, gates: event.answers.flatMap((a) => a.needs.map((need) => ({ answer: a.id, need }))) });
     rows.sort((a, b) => a.order - b.order || a.id.localeCompare(b.id));
     await write("index.json", JSON.stringify(rows, null, 0) + "\n", live.sha, `Index ${event.id}`);
     index = rows;
     current = { isNew: false, sha: saved.content.sha, file };
     form.elements.id.readOnly = true;
     $("saved").textContent = "Saved";
+    dirty = false;
     list();
   } catch (error) {
     $("saved").textContent = `Not saved. ${error.message}`;

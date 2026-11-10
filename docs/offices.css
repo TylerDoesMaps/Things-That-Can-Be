@@ -1,0 +1,18 @@
+.gov .controls { margin-bottom: 20px; }
+.seats { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 14px; font-variant-numeric: tabular-nums; }
+.seats td { padding: 5px 12px 5px 0; border-top: 1px solid var(--line); vertical-align: top; }
+.seats td:last-child { padding-right: 0; text-align: right; white-space: nowrap; }
+.seats .t { font-weight: 600; }
+.seats .soft, .seats .n { color: var(--soft); }
+.seats .n { font-size: 13px; display: block; }
+.seats .tag { font-size: 12px; color: var(--soft); border: 1px solid var(--line); border-radius: 3px; padding: 0 5px; white-space: nowrap; margin-left: 6px; }
+.seats .tag.warn { color: var(--rep); border-color: var(--rep); }
+.seats .tag.later { border-style: dashed; }
+.beside { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 12px; margin-top: 12px; align-items: start; }
+.beside .umbrella { margin: 0; background: #fff; border-style: dashed; }
+.rule { border-top: 1px solid var(--line); padding: 10px 4px; display: grid; grid-template-columns: 180px 1fr auto; gap: 16px; align-items: baseline; }
+.rule b { font-weight: 600; }
+.rule span { color: var(--soft); font-size: 13px; white-space: nowrap; }
+.rule .warn { color: var(--rep); }
+@media (max-width: 760px) { .rule { grid-template-columns: 1fr; gap: 2px; } .seats td:nth-child(3) { display: none; } }
+@media (max-width: 760px) { .seats td:nth-child(2) { display: none; } .beside { grid-template-columns: 1fr; } .gov .umbrella .umbrella { padding: 8px; } }

@@ -7,6 +7,7 @@ Election night view: https://tylerdoesmaps.github.io/Things-That-Can-Be/
 - `docs/content/` every event, the call registry and the shared word list
 - `docs/builder.html` the event builder
 - `docs/map.html` the tiers of government in Kansas, one click at a time
+- `docs/offices.html` every seat that represents one address, nested by tier
 - `docs/government.html` what government does and who holds each function, shown for one county
 - `docs/tiles/` map tiles for each level
 - `docs/data/` 2024 results by city, township and district, and the method comparison
@@ -31,6 +32,8 @@ Saving from the builder needs a GitHub token with write access to this repositor
 `build/government.py` pulls every government in one county, with staff by function, from the 2022 Census of Governments individual unit files.
 
 `build/tiers.py` builds the tier map for one state from Census boundaries. Tier 3 is the county. Tier 4 is every county subdivision: townships, and cities that stand outside any township. Tier 5 is every city that sits inside a township. Run it with another state's code to get that state's layers.
+
+`docs/content/government/offices.yaml` is the master list of offices for Kansas: each seat's government, kind, how it is chosen, term, next election and whether the player can hold it, plus the state's rules on running (sore loser, resign to run, holding two offices). Lines not confirmed against a source are marked `checked: false`.
 
 ## National presets
 

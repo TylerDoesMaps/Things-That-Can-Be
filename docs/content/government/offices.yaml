@@ -1,0 +1,120 @@
+# Every seat that represents one address, by government. Kansas only for now.
+# kind: executive, legislator, row officer, judge, board.
+# player: yes (can hold now), later (planned, not built first), no.
+# next: the first regular election after the game starts in November 2024. every: years between elections for that seat.
+# checked: true means the line was confirmed against a source in 'source'.
+state: Kansas
+cutoff:
+  people: 15000
+  cap: 30
+  rule: A city or township gets its real structure if it has more than 15,000 people and is among the 30 largest in the state. Everything else below the county uses the state default for its class.
+
+rules:
+- name: Sore loser
+  rule: Anyone who files in a party primary cannot file as an independent for the same general election. Covers national, state, county and township offices.
+  checked: true
+  source: K.S.A. 25-202(c)
+- name: Resign to run
+  rule: None found. A seated official can run for another office without giving up the seat.
+  checked: false
+- name: Two offices at once
+  rule: A person elected to two offices may keep both unless they are incompatible. If they are, taking the second gives up the first.
+  checked: true
+  source: K.S.A. 25-123
+- name: Nonpartisan races
+  rule: City and school board races have no primary by party and no label on the ballot. Party still counts with voters, at reduced weight.
+  checked: false
+
+governments:
+- id: federal
+  tier: 1
+  name: United States
+- id: state
+  tier: 2
+  name: State of Kansas
+- id: county
+  tier: 3
+  name: "{county} County"
+- id: township
+  tier: 4
+  name: "{township} Township"
+- id: city
+  tier: "4 or 5"
+  name: "City of {city}"
+- id: school
+  tier: beside
+  name: "{school}"
+- id: district
+  tier: beside
+  name: Other districts
+
+offices:
+- {id: us.president, government: federal, title: President, kind: executive, seats: 1, area: the country, chosen: elected, partisan: true, term: 4, next: [2028], every: 4, player: yes, checked: true}
+- {id: us.senator, government: federal, title: United States Senator, kind: legislator, seats: 2, area: the state, chosen: elected, partisan: true, term: 6, next: [2026, 2028], every: 6, player: yes, checked: true}
+- {id: us.representative, government: federal, title: United States Representative, kind: legislator, seats: 1, area: "Congressional District {cd}", chosen: elected, partisan: true, term: 2, next: [2026], every: 2, player: yes, checked: false, note: District number not looked up tonight.}
+
+- {id: ks.governor, government: state, title: Governor, kind: executive, seats: 1, area: the state, chosen: elected, partisan: true, term: 4, next: [2026], every: 4, player: yes, checked: false, note: Runs on one ticket with the Lieutenant Governor. Two terms in a row at most.}
+- {id: ks.lieutenant_governor, government: state, title: Lieutenant Governor, kind: executive, seats: 1, area: the state, chosen: elected, partisan: true, term: 4, next: [2026], every: 4, player: yes, checked: false, note: Chosen by the candidate for Governor.}
+- {id: ks.attorney_general, government: state, title: Attorney General, kind: row officer, seats: 1, area: the state, chosen: elected, partisan: true, term: 4, next: [2026], every: 4, player: yes, checked: false}
+- {id: ks.secretary_of_state, government: state, title: Secretary of State, kind: row officer, seats: 1, area: the state, chosen: elected, partisan: true, term: 4, next: [2026], every: 4, player: yes, checked: false}
+- {id: ks.treasurer, government: state, title: State Treasurer, kind: row officer, seats: 1, area: the state, chosen: elected, partisan: true, term: 4, next: [2026], every: 4, player: yes, checked: false}
+- {id: ks.insurance_commissioner, government: state, title: Commissioner of Insurance, kind: row officer, seats: 1, area: the state, chosen: elected, partisan: true, term: 4, next: [2026], every: 4, player: yes, checked: false}
+- {id: ks.senator, government: state, title: State Senator, kind: legislator, seats: 1, of: 40, area: "Senate District {senate}", chosen: elected, partisan: true, term: 4, next: [2028], every: 4, player: yes, checked: false}
+- {id: ks.representative, government: state, title: State Representative, kind: legislator, seats: 1, of: 125, area: "House District {house}", chosen: elected, partisan: true, term: 2, next: [2026], every: 2, player: yes, checked: false}
+- {id: ks.board_of_education, government: state, title: State Board of Education member, kind: board, seats: 1, of: 10, area: a Board of Education district, chosen: elected, partisan: true, term: 4, next: [2026, 2028], every: 4, player: later, checked: false, note: Which district covers this address was not looked up.}
+- {id: ks.supreme_court, government: state, title: Supreme Court Justice, kind: judge, seats: 7, area: the state, chosen: appointed, by: the Governor from a commission's list, partisan: false, term: 6, retained: true, player: later, checked: false}
+- {id: ks.court_of_appeals, government: state, title: Court of Appeals Judge, kind: judge, seats: 14, area: the state, chosen: appointed, by: the Governor with Senate consent, partisan: false, term: 4, retained: true, player: later, checked: false}
+- {id: ks.district_judge, government: state, title: District Judge, kind: judge, area: the 20th Judicial District, chosen: elected, partisan: true, term: 4, next: [2026, 2028], every: 4, player: later, checked: true, source: Ballotpedia Kansas District Courts, note: Barton Ellsworth Rice Russell and Stafford counties. 14 of the 31 districts elect judges by party. The rest appoint and retain. Number of judges not looked up.}
+- {id: ks.magistrate_judge, government: state, title: District Magistrate Judge, kind: judge, seats: 1, area: the county, chosen: elected, partisan: true, term: 4, next: [2028], every: 4, player: later, checked: false}
+
+- {id: county.commissioner, government: county, title: County Commissioner, kind: legislator, seats: 1, of: 3, area: a commission district, chosen: elected, partisan: true, term: 4, next: [2026, 2028], every: 4, player: yes, checked: false, note: One district votes in 2026 and two in 2028. The commission is also the county's executive.}
+- {id: county.clerk, government: county, title: County Clerk, kind: row officer, seats: 1, area: the county, chosen: elected, partisan: true, term: 4, next: [2028], every: 4, player: yes, checked: false}
+- {id: county.treasurer, government: county, title: County Treasurer, kind: row officer, seats: 1, area: the county, chosen: elected, partisan: true, term: 4, next: [2028], every: 4, player: yes, checked: false}
+- {id: county.register_of_deeds, government: county, title: Register of Deeds, kind: row officer, seats: 1, area: the county, chosen: elected, partisan: true, term: 4, next: [2028], every: 4, player: yes, checked: false}
+- {id: county.sheriff, government: county, title: Sheriff, kind: row officer, seats: 1, area: the county, chosen: elected, partisan: true, term: 4, next: [2028], every: 4, player: yes, checked: false}
+- {id: county.attorney, government: county, title: County Attorney, kind: row officer, seats: 1, area: the county, chosen: elected, partisan: true, term: 4, next: [2028], every: 4, player: yes, checked: false, note: Must be a lawyer.}
+
+- {id: township.trustee, government: township, title: Township Trustee, kind: executive, seats: 1, area: the township, chosen: elected, partisan: true, term: 4, next: [2028], every: 4, player: yes, checked: true, source: K.S.A. 25-1601}
+- {id: township.treasurer, government: township, title: Township Treasurer, kind: row officer, seats: 1, area: the township, chosen: elected, partisan: true, term: 4, next: [2028], every: 4, player: yes, checked: true, source: K.S.A. 25-1601}
+- {id: township.clerk, government: township, title: Township Clerk, kind: row officer, seats: 1, area: the township, chosen: elected, partisan: true, term: 4, next: [2026], every: 4, player: yes, checked: true, source: K.S.A. 25-1601}
+
+- {id: city.mayor, government: city, title: Mayor, kind: executive, seats: 1, area: the city, chosen: elected, partisan: false, term: 4, next: [2025, 2027], every: 4, player: yes, checked: false, note: State default. Elections are in November of odd years. Term length varies by city.}
+- {id: city.council.third, government: city, class: third, title: Council Member, kind: legislator, seats: 5, area: the city, chosen: elected, partisan: false, term: 4, next: [2025, 2027], every: 4, player: yes, checked: false, note: State default for a city of the third class, under 2,000 people. All five at large.}
+- {id: city.council.second, government: city, class: second, title: Council Member, kind: legislator, seats: 2, area: a ward, chosen: elected, partisan: false, term: 4, next: [2025, 2027], every: 4, player: yes, checked: false, note: State default for a city of the second class, 2,000 to 15,000 people. Two per ward.}
+- {id: city.administrator, government: city, class: second, title: City Administrator, kind: executive, seats: 1, area: the city, chosen: appointed, by: the Mayor and Council, partisan: false, player: yes, checked: false}
+
+- {id: school.board, government: school, title: School Board Member, kind: board, seats: 7, area: the school district, chosen: elected, partisan: false, term: 4, next: [2025, 2027], every: 4, player: later, checked: false}
+- {id: district.hospital, government: district, title: Hospital District Board Member, kind: board, area: Rice County Hospital District 1, chosen: elected, partisan: false, player: later, checked: false, note: Area not mapped.}
+- {id: district.conservation, government: district, title: Conservation District Supervisor, kind: board, seats: 5, area: Rice County Conservation District, chosen: elected, partisan: false, player: later, checked: false}
+- {id: district.watershed, government: district, title: Watershed District Director, kind: board, area: Upper Little Arkansas River Watershed Joint District 95, chosen: elected, partisan: false, player: later, checked: false, note: Area not mapped.}
+- {id: district.water, government: district, title: Rural Water District Director, kind: board, area: Rice Rural Water District 1, chosen: elected, partisan: false, player: later, checked: false, note: Area not mapped. Chosen by the district's customers.}
+- {id: district.cemetery, government: district, title: Cemetery District Board Member, kind: board, area: a cemetery district, chosen: elected, partisan: false, player: later, checked: false, note: Area not mapped.}
+
+addresses:
+- name: Lyons
+  kind: A city outside any township
+  county: Rice
+  city: Lyons
+  class: second
+  school: Lyons Unified School District 405
+  cd: 1
+  senate: 33
+  house: 113
+- name: Chase
+  kind: A city inside a township
+  county: Rice
+  township: Lincoln
+  city: Chase
+  class: third
+  school: Chase-Raymond Unified School District 401
+  cd: 1
+  senate: 33
+  house: 113
+- name: Rural Eureka Township
+  kind: A township with no city
+  county: Rice
+  township: Eureka
+  school: Central Plains Unified School District 112
+  cd: 1
+  senate: 33
+  house: 113

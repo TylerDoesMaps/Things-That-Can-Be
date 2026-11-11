@@ -8,6 +8,7 @@ Election night view: https://tylerdoesmaps.github.io/Things-That-Can-Be/
 - `docs/builder.html` the event builder
 - `docs/map.html` the tiers of government in Kansas, one click at a time
 - `docs/offices.html` every seat that represents one address, nested by tier
+- `docs/pops.html` the pops of Rice County, with what demographics alone predict against the 2024 result
 - `docs/government.html` what government does and who holds each function, shown for one county
 - `docs/tiles/` map tiles for each level
 - `docs/data/` 2024 results by city, township and district, and the method comparison
@@ -36,6 +37,8 @@ Saving from the builder needs a GitHub token with write access to this repositor
 `docs/content/government/offices.yaml` is the master list of offices for Kansas: each seat's government, kind, how it is chosen, term, next election and whether the player can hold it, plus the state's rules on running (sore loser, resign to run, holding two offices). Lines not confirmed against a source are marked `checked: false`.
 
 `build/offices.py` counts every office in Kansas county by county from the Census Bureau's 2022 list of governments and writes `docs/data/offices/ks.json`. Each county has its governments, its seats by office and by how they are filled, the districts that cover it, and any real structure entered by hand.
+
+`build/pops.py` builds the pops for one county: groups of 100 adults who share race, age and education and live in one precinct piece. It reads Census blocks and American Community Survey tract tables kept outside the repo. The lean, turnout and wealth numbers come from placeholder national rates at the top of the script and are not yet fitted to any result.
 
 ## National presets
 

@@ -1,0 +1,11 @@
+.pops td { text-align: left; }
+.pops td.r { text-align: right; }
+.pops thead td { color: var(--soft); font-size: 13px; border-top: 0; }
+.pops tr.place td { border-top: 0; padding-top: 22px; font-weight: 600; }
+.pie { display: inline-flex; width: 120px; height: 10px; vertical-align: middle; margin-right: 8px; }
+.pie i { display: block; height: 100%; }
+.pie .rep { background: var(--rep); }
+.pie .ind { background: #c9ccd2; }
+.pie .dem { background: var(--dem); }
+.gap { color: var(--soft); }
+@media (max-width: 760px) { .pops td:nth-child(n+3):not(:nth-child(6)) { display: none; } .pie { width: 70px; } }

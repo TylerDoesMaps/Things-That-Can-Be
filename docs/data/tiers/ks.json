@@ -1,1 +1,1 @@
-{"state": "Kansas", "bounds": [[-102.052, 36.993], [-94.588, 40.003]], "counts": {"County": 105, "Township": 1262, "Township, inactive": 134, "City outside any township": 129, "City inside a township": 504}}
+{"state": "Kansas", "bounds": [[-102.052, 36.993], [-94.588, 40.003]], "kinds": [{"kind": "County", "tier": 3, "count": 105}, {"kind": "Township", "tier": 4, "count": 1262}, {"kind": "Township, inactive", "tier": 4, "count": 134}, {"kind": "City outside any township", "tier": 4, "count": 129}, {"kind": "City inside a township", "tier": 5, "count": 504}]}

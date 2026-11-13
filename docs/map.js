@@ -1,24 +1,15 @@
-const TIERS = [
-  { id: "federal", name: "Federal" },
-  { id: "state", name: "State" },
-  { id: "county", name: "County", layer: "county" },
-  { id: "municipal", name: "Municipal", layer: "municipal" },
-  { id: "within", name: "Inside municipal", layer: "within" },
-];
-const KINDS = [
-  { kind: "County", color: "#eef1f6", tier: 2 },
-  { kind: "Township", color: "#d5deec", tier: 3 },
-  { kind: "Township, inactive", color: "#f3f3f0", tier: 3 },
-  { kind: "City outside any township", color: "#1f3a68", tier: 3 },
-  { kind: "City inside a township", color: "#c8862a", tier: 4 },
-];
+const ST = document.body.dataset.state || "fl";
+const NAMES = ["Federal", "State", "County", "Municipal", "Inside municipal"];
+const COLORS = { "County": "#eef1f6", "Township": "#d5deec", "Township, inactive": "#f3f3f0", "City outside any township": "#1f3a68",
+  "City inside a township": "#c8862a", "City": "#1f3a68", "Town": "#4a6a9c", "Village": "#8fa6c9" };
+let TIERS = [];
 const INK = "#16181d", NAVY = "#1f3a68";
 const US = [[-125, 24.2], [-66.6, 49.6]];
 
 let tier = 0, summary = null, hover = "";
 const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
-const color = (kind) => KINDS.find((k) => k.kind === kind).color;
+const color = (kind) => COLORS[kind] || "#1f3a68";
 
 const protocol = new pmtiles.Protocol();
 maplibregl.addProtocol("pmtiles", protocol.tile);
@@ -38,13 +29,6 @@ map.touchZoomRotate.disableRotation();
 map.addControl(new maplibregl.NavigationControl({ showCompass: false }), "top-right");
 new ResizeObserver(() => map.resize()).observe($("map"));
 
-TIERS.forEach((t, i) => {
-  const b = document.createElement("button");
-  b.type = "button";
-  b.innerHTML = `<span class="n">${i + 1}</span>${esc(t.name)}`;
-  b.onclick = () => go(i);
-  $("tiers").append(b);
-});
 $("back").onclick = () => go(tier - 1);
 $("next").onclick = () => go(tier + 1);
 addEventListener("keydown", (e) => {
@@ -53,13 +37,22 @@ addEventListener("keydown", (e) => {
 });
 
 Promise.all([
-  fetch("data/tiers/ks.json").then((r) => r.json()),
+  fetch(`data/tiers/${ST}.json`).then((r) => r.json()),
   new Promise((done) => map.on("load", done)),
 ]).then(([data]) => {
   summary = data;
+  const deepest = Math.max(...summary.kinds.map((k) => k.tier));
+  TIERS = NAMES.slice(0, deepest);
+  TIERS.forEach((name, i) => {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.innerHTML = `<span class="n">${i + 1}</span>${esc(name)}`;
+    b.onclick = () => go(i);
+    $("tiers").append(b);
+  });
   const src = { source: "tiers" };
   const width = (a, b) => ["interpolate", ["linear"], ["zoom"], 4, a, 10, b];
-  map.addSource("tiers", { type: "vector", url: "pmtiles://" + new URL("tiles/tiers-ks.pmtiles", location.href).href });
+  map.addSource("tiers", { type: "vector", url: "pmtiles://" + new URL(`tiles/tiers-${ST}.pmtiles`, location.href).href });
 
   map.addLayer({ id: "us", type: "fill", ...src, "source-layer": "us", paint: { "fill-color": "#eceef1" } });
   map.addLayer({ id: "us-line", type: "line", ...src, "source-layer": "us", paint: { "line-color": "#ffffff", "line-width": width(0.6, 1.2) } });
@@ -68,11 +61,11 @@ Promise.all([
   map.addLayer({ id: "county", type: "fill", ...src, "source-layer": "county", paint: { "fill-color": color("County") } });
   map.addLayer({
     id: "municipal", type: "fill", ...src, "source-layer": "municipal",
-    paint: { "fill-color": ["match", ["get", "kind"], ...KINDS.filter((k) => k.tier === 3).flatMap((k) => [k.kind, k.color]), "#ffffff"] },
+    paint: { "fill-color": ["match", ["get", "kind"], ...summary.kinds.filter((k) => k.tier === 4).flatMap((k) => [k.kind, color(k.kind)]), "#ffffff"] },
   });
   map.addLayer({ id: "municipal-line", type: "line", ...src, "source-layer": "municipal", paint: { "line-color": "#8e9bb3", "line-width": width(0.15, 0.8) } });
-  map.addLayer({ id: "within", type: "fill", ...src, "source-layer": "within", paint: { "fill-color": color("City inside a township") } });
-  map.addLayer({ id: "within-line", type: "line", ...src, "source-layer": "within", minzoom: 8, paint: { "line-color": "#7a4f12", "line-width": 0.6 } });
+  if (deepest >= 5) map.addLayer({ id: "within", type: "fill", ...src, "source-layer": "within", paint: { "fill-color": color("City inside a township") } });
+  if (deepest >= 5) map.addLayer({ id: "within-line", type: "line", ...src, "source-layer": "within", minzoom: 8, paint: { "line-color": "#7a4f12", "line-width": 0.6 } });
   map.addLayer({ id: "county-line", type: "line", ...src, "source-layer": "county", paint: { "line-color": INK, "line-width": width(0.4, 1.4), "line-opacity": 0.7 } });
   map.addLayer({ id: "state-line", type: "line", ...src, "source-layer": "us", filter: ["==", ["get", "here"], true], paint: { "line-color": INK, "line-width": width(1.2, 2.4) } });
   map.addLayer({ id: "hover", type: "line", ...src, "source-layer": "us", filter: ["==", ["get", "name"], ""], paint: { "line-color": INK, "line-width": 2 } });
@@ -87,7 +80,7 @@ function go(to, first) {
   if (!summary || to < 0 || to >= TIERS.length || (to === tier && !first)) return;
   const zoomOut = to === 0, zoomIn = tier === 0 && to > 0;
   tier = to;
-  const on = (id, yes) => map.setLayoutProperty(id, "visibility", yes ? "visible" : "none");
+  const on = (id, yes) => map.getLayer(id) && map.setLayoutProperty(id, "visibility", yes ? "visible" : "none");
   on("state", tier === 1);
   on("state-line", tier >= 1);
   on("county", tier === 2);
@@ -108,12 +101,12 @@ function go(to, first) {
 function key() {
   const rows = tier === 0 ? [["#eceef1", "States and the District of Columbia", 51]]
     : tier === 1 ? [[NAVY, summary.state, ""]]
-    : KINDS.filter((k) => (tier === 2 ? k.tier === 2 : k.tier >= 3 && k.tier <= tier)).map((k) => [k.color, k.kind, summary.counts[k.kind]]);
+    : summary.kinds.filter((k) => (tier === 2 ? k.tier === 3 : k.tier >= 4 && k.tier <= tier + 1)).map((k) => [color(k.kind), k.kind, k.count]);
   $("key").innerHTML = rows.map(([c, k, n]) => `<span><i style="background:${c}"></i><b>${esc(k)}</b>${n === "" ? "" : Number(n).toLocaleString("en-US")}</span>`).join("");
 }
 
 function show(e) {
-  const layers = tier === 0 ? ["us"] : tier === 1 ? ["state"] : tier === 2 ? ["county"] : tier === 3 ? ["municipal"] : ["within", "municipal"];
+  const layers = tier === 0 ? ["us"] : tier === 1 ? ["state"] : tier === 2 ? ["county"] : tier === 3 || !map.getLayer("within") ? ["municipal"] : ["within", "municipal"];
   const found = map.queryRenderedFeatures(e.point, { layers });
   const f = found.find((x) => x.layer.id === "within") || found[0];
   if (!f) return hide();

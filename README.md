@@ -6,6 +6,8 @@ Election night view: https://tylerdoesmaps.github.io/Things-That-Can-Be/
 - `docs/presets/` national presets
 - `docs/content/` every event, the call registry and the shared word list
 - `docs/builder.html` the event builder
+Florida is the working state. The map, offices and pops pages read Florida; the same pages for Kansas are kept as `map-ks.html`, `offices-ks.html` and `pops-ks.html`, linked from `kansas.html`. Each page reads its state from `data-state` on the body, and `nav.js` writes the shared header.
+
 - `docs/map.html` the tiers of government in Kansas, one click at a time
 - `docs/offices.html` every seat that represents one address, nested by tier
 - `docs/pops.html` the pops of Rice County, with what demographics alone predict against the 2024 result
@@ -34,7 +36,7 @@ Saving from the builder needs a GitHub token with write access to this repositor
 
 `build/tiers.py` builds the tier map for one state from Census boundaries. Tier 3 is the county. Tier 4 is every county subdivision: townships, and cities that stand outside any township. Tier 5 is every city that sits inside a township. Run it with another state's code to get that state's layers.
 
-`docs/content/government/offices.yaml` is the master list of offices for Kansas: each seat's government, kind, how it is chosen, term, next election and whether the player can hold it, plus the state's rules on running (sore loser, resign to run, holding two offices). Lines not confirmed against a source are marked `checked: false`.
+`docs/content/government/offices-ks.yaml` and `offices-fl.yaml` are the master lists of offices for each state: each seat's government, kind, how it is chosen, term, next election and whether the player can hold it, plus the state's rules on running (sore loser, resign to run, holding two offices). Lines not confirmed against a source are marked `checked: false`.
 
 `build/offices.py` counts every office in Kansas county by county from the Census Bureau's 2022 list of governments and writes `docs/data/offices/ks.json`. Each county has its governments, its seats by office and by how they are filled, the districts that cover it, and any real structure entered by hand.
 

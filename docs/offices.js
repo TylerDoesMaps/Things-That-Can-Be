@@ -3,7 +3,8 @@ const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<
 const fill = (text, a) => String(text).replace(/\{(\w+)\}/g, (_, k) => a[k] ?? "");
 let data, at = 0;
 
-fetch("content/government/offices.yaml").then((r) => r.text()).then((text) => {
+const ST = document.body.dataset.state || "fl";
+fetch(`content/government/offices-${ST}.yaml`).then((r) => r.text()).then((text) => {
   data = jsyaml.load(text);
   data.addresses.forEach((a, i) => {
     const b = document.createElement("button");
@@ -14,7 +15,7 @@ fetch("content/government/offices.yaml").then((r) => r.text()).then((text) => {
   });
   const all = document.createElement("button");
   all.type = "button";
-  all.textContent = "All of Kansas";
+  all.textContent = "All of " + data.state;
   all.onclick = () => { at = -1; draw(); };
   $("addresses").append(all);
   $("rules").innerHTML = data.rules.map((r) => `<div class="rule"><b>${esc(r.name)}</b><div>${esc(r.rule)}</div><span class="${r.checked ? "" : "warn"}">${r.checked ? esc(r.source) : "unchecked"}</span></div>`).join("")
@@ -47,8 +48,8 @@ function box(gov, a, inner = "") {
   return `<div class="umbrella"><div class="level"><b>${esc(fill(g.name, a))}</b><span class="tag">${label}</span></div>${table(offices, a)}${inner}</div>`;
 }
 
-const HOW = { ballot: "On the ballot", meeting: "Chosen by the district", appointed: "Appointed", mixed: "Elected or retained" };
-const label = (id) => (data.offices.find((o) => o.id === id || o.id.startsWith(id + ".")) || {}).title || ({ "city.council": "City council or commission member", "college.trustee": "Community college trustee", "district.housing": "Housing authority commissioner", "district.library": "Library district board member", "district.drainage": "Drainage district director", "district.other": "Other district board member" })[id] || id;
+const HOW = { ballot: "On the ballot", meeting: "Chosen by the district or its landowners", appointed: "Appointed", mixed: "Elected or retained" };
+const label = (id) => (data.offices.find((o) => o.id === id || o.id.startsWith(id + ".")) || {}).title || ({ "city.council": "City council or commission member", "college.trustee": "Community college trustee", "district.housing": "Housing authority commissioner", "district.library": "Library district board member", "district.drainage": "Drainage district director", "district.other": "Other district board member", "city.mayor": "Mayor", "county.mayor": "County mayor", "district.community": "Community development district supervisor", "district.fire": "Fire district commissioner", "district.parks": "Parks district board member", "district.hospital": "Hospital district board member" })[id] || id;
 const num = (n) => Number(n || 0).toLocaleString("en-US");
 const sum = (seats, how) => Object.values(seats).reduce((n, h) => n + (h[how] || 0), 0);
 
@@ -57,20 +58,20 @@ function seatRows(seats) {
 }
 
 async function whole() {
-  const k = whole.data || (whole.data = await fetch("data/offices/ks.json").then((r) => r.json()));
+  const k = whole.data || (whole.data = await fetch(`data/offices/${ST}.json`).then((r) => r.json()));
   const g = k.governments, local = k.local;
   const ballot = sum(local, "ballot") + sum(k.statewide, "ballot") + sum(k.federal, "ballot");
-  $("place").textContent = "All of Kansas";
+  $("place").textContent = "All of " + data.state;
   $("summary").textContent = `${num(Object.values(g).reduce((a, b) => a + b, 0))} local governments · ${num(ballot)} seats on the ballot · ${num(sum(local, "meeting"))} chosen by a district's own meeting or members · ${num(sum(local, "appointed"))} appointed boards and officers`;
   const part = (title, seats) => `<div class="umbrella"><div class="level"><b>${title}</b></div><table class="seats">${seatRows(seats)}</table></div>`;
   const rows = k.counties.map((c, i) => `<tr data-i="${i}"><td class="t">${esc(c.name)}</td><td>${num(c.people)}</td><td>${num(Object.values(c.governments).reduce((a, b) => a + b, 0))}</td><td>${num(sum(c.seats, "ballot"))}</td><td>${num(sum(c.seats, "meeting") + sum(c.seats, "appointed"))}</td></tr>`).join("");
-  $("stack").innerHTML = part("Federal seats filled from Kansas", k.federal) + part("State", k.statewide) + part("Local, all 105 counties", local)
+  $("stack").innerHTML = part("Federal seats filled from " + data.state, k.federal) + part("State", k.statewide) + (k.notes && k.notes.length ? `<p class="n">${k.notes.map(esc).join(" ")}</p>` : "") + part(`Local, all ${k.counties.length} counties`, local)
     + `<h2>County by county</h2><table class="seats counties"><thead><tr><td>County</td><td>People</td><td>Governments</td><td>On the ballot</td><td>Other seats</td></tr></thead><tbody>${rows}</tbody></table>`;
   $("stack").querySelectorAll("tr[data-i]").forEach((tr) => tr.onclick = () => {
     if (tr.nextSibling && tr.nextSibling.className === "open") return tr.nextSibling.remove();
     const c = k.counties[tr.dataset.i], more = document.createElement("tr");
     more.className = "open";
-    const facts = [`Congress ${c.congress.join(", ")}`, `State Senate ${c.senate.join(", ")}`, `State House ${c.house.join(", ")}`, `Judicial district ${c.judicial}, judges ${c.judges}`, ...c.real, ...c.notes];
+    const facts = [...c.facts, ...c.real, ...c.notes];
     more.innerHTML = `<td colspan="5"><p class="n">${facts.map(esc).join(" · ")}</p><table class="seats">${seatRows(c.seats)}</table></td>`;
     tr.after(more);
   });

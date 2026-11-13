@@ -1,0 +1,114 @@
+# Every seat that represents one address, by government. Florida.
+# kind: executive, legislator, row officer, judge, board.
+# player: yes (can hold now), later (planned, not built first), no.
+# next: the first regular election after the game starts in November 2024. every: years between elections for that seat.
+# checked: true means the line was confirmed against a source in 'source'.
+state: Florida
+cutoff:
+  people: 15000
+  cap: 30
+  rule: A city gets its real structure if it has more than 15,000 people and is among the 30 largest in the state, or if it is the player's home. Florida has no default form of city government, so every other city is given a mayor and four commissioners.
+
+rules:
+- name: Resign to run
+  rule: An officer whose term would overlap must resign to run for another state, district, county, city or federal office. The resignation is filed at least 10 days before qualifying opens and cannot be taken back.
+  checked: true
+  source: F.S. 99.012(3) and (4)
+- name: One office per election
+  rule: Nobody may qualify for more than one office if the terms overlap.
+  checked: true
+  source: F.S. 99.012(2)
+- name: Party switching
+  rule: A party's candidate must have been registered in that party for 365 days before qualifying opens. A candidate with no party must have belonged to none for the same 365 days. This does the work of a sore loser law.
+  checked: true
+  source: F.S. 99.021(1)
+- name: Two offices at once
+  rule: Nobody may hold two state, county or city offices at the same time.
+  checked: false
+- name: Nonpartisan races
+  rule: Judges and school boards have no party on the ballot. Most cities are nonpartisan by their own charter. Party still counts with voters, at reduced weight.
+  checked: false
+- name: Open and closed primaries
+  rule: Primaries are closed to other parties' voters. If the primary winner would face nobody in November, every voter may vote in it, unless a write-in candidate files.
+  checked: false
+- name: Term limits
+  rule: Governor two terms in a row. Legislators and school board members eight years in a row.
+  checked: false
+
+governments:
+- id: federal
+  tier: 1
+  name: United States
+- id: state
+  tier: 2
+  name: State of Florida
+- id: county
+  tier: 3
+  name: "{county} County"
+- id: city
+  tier: 4
+  name: "City of {city}"
+- id: school
+  tier: beside
+  name: "{school}"
+- id: district
+  tier: beside
+  name: Other districts
+
+offices:
+- {id: us.president, government: federal, title: President, kind: executive, seats: 1, area: the country, chosen: elected, partisan: true, term: 4, next: [2028], every: 4, player: yes, checked: true}
+- {id: us.senator, government: federal, title: United States Senator, kind: legislator, seats: 2, area: the state, chosen: elected, partisan: true, term: 6, next: [2026, 2028], every: 6, player: yes, checked: false, note: One seat has a special election in 2026 to finish a term.}
+- {id: us.representative, government: federal, title: United States Representative, kind: legislator, seats: 1, of: 28, area: "Congressional District {cd}", chosen: elected, partisan: true, term: 2, next: [2026], every: 2, player: yes, checked: true, source: Census district lines}
+
+- {id: fl.governor, government: state, title: Governor, kind: executive, seats: 1, area: the state, chosen: elected, partisan: true, term: 4, next: [2026], every: 4, player: yes, checked: false, note: Runs on one ticket with the Lieutenant Governor.}
+- {id: fl.lieutenant_governor, government: state, title: Lieutenant Governor, kind: executive, seats: 1, area: the state, chosen: elected, partisan: true, term: 4, next: [2026], every: 4, player: yes, checked: false, note: Chosen by the candidate for Governor.}
+- {id: fl.attorney_general, government: state, title: Attorney General, kind: row officer, seats: 1, area: the state, chosen: elected, partisan: true, term: 4, next: [2026], every: 4, player: yes, checked: false, note: Sits in the Cabinet.}
+- {id: fl.chief_financial_officer, government: state, title: Chief Financial Officer, kind: row officer, seats: 1, area: the state, chosen: elected, partisan: true, term: 4, next: [2026], every: 4, player: yes, checked: false, note: Sits in the Cabinet.}
+- {id: fl.agriculture_commissioner, government: state, title: Commissioner of Agriculture, kind: row officer, seats: 1, area: the state, chosen: elected, partisan: true, term: 4, next: [2026], every: 4, player: yes, checked: false, note: Sits in the Cabinet.}
+- {id: fl.senator, government: state, title: State Senator, kind: legislator, seats: 1, of: 40, area: "Senate District {senate}", chosen: elected, partisan: true, term: 4, next: [2026, 2028], every: 4, player: yes, checked: false, note: Which year this district votes was not looked up.}
+- {id: fl.representative, government: state, title: State Representative, kind: legislator, seats: 1, of: 120, area: "House District {house}", chosen: elected, partisan: true, term: 2, next: [2026], every: 2, player: yes, checked: false}
+- {id: fl.state_attorney, government: state, title: State Attorney, kind: row officer, seats: 1, of: 20, area: "the {circuit} Judicial Circuit", chosen: elected, partisan: true, term: 4, next: [2028], every: 4, player: yes, checked: false, note: Must be a lawyer.}
+- {id: fl.public_defender, government: state, title: Public Defender, kind: row officer, seats: 1, of: 20, area: "the {circuit} Judicial Circuit", chosen: elected, partisan: true, term: 4, next: [2028], every: 4, player: yes, checked: false, note: Must be a lawyer.}
+- {id: fl.supreme_court, government: state, title: Supreme Court Justice, kind: judge, seats: 7, area: the state, chosen: appointed, by: the Governor from a commission's list, partisan: false, term: 6, retained: true, player: later, checked: false}
+- {id: fl.appeal_judge, government: state, title: District Court of Appeal Judge, kind: judge, area: the First District, chosen: appointed, by: the Governor from a commission's list, partisan: false, term: 6, retained: true, player: later, checked: false}
+- {id: fl.circuit_judge, government: state, title: Circuit Judge, kind: judge, area: "the {circuit} Judicial Circuit", chosen: elected, partisan: false, term: 6, next: [2026, 2028], every: 6, player: later, checked: false, note: Franklin Gadsden Jefferson Leon Liberty and Wakulla counties. Number of judges not looked up.}
+- {id: fl.county_judge, government: state, title: County Judge, kind: judge, seats: 1, area: the county, chosen: elected, partisan: false, term: 6, next: [2026, 2028], every: 6, player: later, checked: false}
+
+- {id: county.commissioner, government: county, title: County Commissioner, kind: legislator, seats: 1, of: 5, area: a commission district, chosen: elected, partisan: true, term: 4, next: [2026, 2028], every: 4, player: yes, checked: false, note: Two districts vote in 2026 and three in 2028. Whether the whole county votes on each district was not looked up.}
+- {id: county.clerk, government: county, title: Clerk of the Circuit Court, kind: row officer, seats: 1, area: the county, chosen: elected, partisan: true, term: 4, next: [2028], every: 4, player: yes, checked: true, source: Jefferson County}
+- {id: county.property_appraiser, government: county, title: Property Appraiser, kind: row officer, seats: 1, area: the county, chosen: elected, partisan: true, term: 4, next: [2028], every: 4, player: yes, checked: true, source: Jefferson County}
+- {id: county.sheriff, government: county, title: Sheriff, kind: row officer, seats: 1, area: the county, chosen: elected, partisan: true, term: 4, next: [2028], every: 4, player: yes, checked: true, source: Jefferson County}
+- {id: county.elections, government: county, title: Supervisor of Elections, kind: row officer, seats: 1, area: the county, chosen: elected, partisan: true, term: 4, next: [2028], every: 4, player: yes, checked: true, source: Jefferson County}
+- {id: county.tax_collector, government: county, title: Tax Collector, kind: row officer, seats: 1, area: the county, chosen: elected, partisan: true, term: 4, next: [2028], every: 4, player: yes, checked: true, source: Jefferson County}
+
+- {id: city.council, government: city, class: monticello, title: City Council Member, kind: legislator, seats: 5, area: the city, chosen: elected, partisan: false, term: 4, next: [2026, 2028], every: 4, player: yes, checked: true, source: City of Monticello, note: All five are elected citywide in numbered groups. Election years not looked up.}
+- {id: city.mayor.chosen, government: city, class: monticello, title: Mayor, kind: executive, seats: 1, area: the city, chosen: appointed, by: the City Council from its own members each January, partisan: false, player: yes, checked: true, source: City of Monticello}
+- {id: city.manager, government: city, class: monticello, title: City Manager, kind: executive, seats: 1, area: the city, chosen: appointed, by: the City Council, partisan: false, player: yes, checked: false}
+- {id: city.clerk, government: city, class: monticello, title: City Clerk and Treasurer, kind: row officer, seats: 1, area: the city, chosen: elected, partisan: false, term: 4, player: yes, checked: false, note: Believed to be elected. Not confirmed.}
+- {id: city.police_chief, government: city, class: monticello, title: Police Chief, kind: row officer, seats: 1, area: the city, chosen: elected, partisan: false, term: 4, player: yes, checked: false, note: Believed to be elected. Not confirmed.}
+- {id: city.mayor, government: city, class: generic, title: Mayor, kind: executive, seats: 1, area: the city, chosen: elected, partisan: false, term: 4, player: yes, checked: false, note: Stand-in for any city without its own structure entered.}
+- {id: city.council.generic, government: city, class: generic, title: City Commissioner, kind: legislator, seats: 4, area: the city, chosen: elected, partisan: false, term: 4, player: yes, checked: false, note: Stand-in for any city without its own structure entered.}
+
+- {id: school.board, government: school, title: School Board Member, kind: board, seats: 5, area: the school district, chosen: elected, partisan: false, term: 4, next: [2026, 2028], every: 4, player: later, checked: true, source: Florida School Boards Association 2024}
+- {id: school.superintendent, government: school, title: Superintendent of Schools, kind: executive, seats: 1, area: the school district, chosen: elected, partisan: true, term: 4, next: [2028], every: 4, player: later, checked: true, source: Florida School Boards Association 2024, note: Elected in 38 counties and appointed by the board in 29.}
+- {id: district.conservation, government: district, title: Soil and Water Conservation District Supervisor, kind: board, seats: 5, area: Jefferson Soil and Water Conservation District, chosen: elected, partisan: false, term: 4, player: later, checked: false}
+
+addresses:
+- name: Monticello
+  kind: A city
+  county: Jefferson
+  city: Monticello
+  class: monticello
+  school: Jefferson County School District
+  cd: 2
+  senate: 3
+  house: 9
+  circuit: Second
+- name: Rural Jefferson County
+  kind: Outside any city
+  county: Jefferson
+  school: Jefferson County School District
+  cd: 2
+  senate: 3
+  house: 9
+  circuit: Second

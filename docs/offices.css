@@ -24,3 +24,8 @@
 .counties tr.open > td { text-align: left; padding: 4px 0 16px 16px; white-space: normal; }
 .counties tr.open .seats td:last-child { text-align: right; }
 .counties tr.open .n { margin: 4px 0; }
+.seats { background: #fff; border: 1px solid var(--rule); font-size: 13.5px; }
+.seats td { border: 1px solid var(--line); padding: 4px 8px; }
+.seats td:last-child { padding-right: 8px; }
+.seats thead td { background: var(--pale); color: var(--ink); font-weight: 700; font-size: 13px; border-top: 1px solid var(--line); }
+.rule { border-top: 1px solid var(--line); }

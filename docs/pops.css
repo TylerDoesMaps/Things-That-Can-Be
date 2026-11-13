@@ -9,3 +9,5 @@
 .pie .dem { background: var(--dem); }
 .gap { color: var(--soft); }
 @media (max-width: 760px) { .pops td:nth-child(n+3):not(:nth-child(6)) { display: none; } .pie { width: 70px; } }
+.pops tr.place td { background: var(--pale); font-weight: 700; padding-top: 4px; border-top: 1px solid var(--line); }
+.pops tr.place td { text-align: left; }

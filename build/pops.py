@@ -4,13 +4,15 @@
 Inputs: 2020 Census blocks (adults by race, group quarters), American Community Survey tract tables (age, education,
 income, industry, tenure, children, citizenship), 2024 precincts. The outputs here come from demographics alone:
 nothing is fitted to the 2024 result, which is kept only for comparison.
-Usage: pops.py RAW_DIR WORK_DIR STATE_ABBR STATE_FIPS COUNTY_FIPS OUT_JSON
+Leader names are stand-ins drawn from short lists; the party is drawn from the pop's own split.
+Usage: pops.py RAW_DIR WORK_DIR STATE_ABBR STATE_FIPS COUNTY_FIPS OUT_JSON [PRECINCT_PREFIX]
 """
 import io
 import json
 import math
 import sys
 import zipfile
+import zlib
 from collections import defaultdict
 from pathlib import Path
 
@@ -19,6 +21,8 @@ import numpy as np
 import pandas as pd
 
 RAW, WORK, ST, SF, CF, OUT = Path(sys.argv[1]), Path(sys.argv[2]), sys.argv[3], sys.argv[4], sys.argv[5], Path(sys.argv[6])
+PREFIX = sys.argv[7] if len(sys.argv) > 7 else SF + CF
+TOWNSHIP_STATES = set("CT IL IN KS ME MA MI MN MO NE NH NJ NY ND OH PA RI SD VT WI".split())
 SIZE = 100
 RACES = ["White", "Black", "Hispanic", "Asian", "Other"]
 AGES = ["18 to 29", "30 to 44", "45 to 64", "65 and over"]
@@ -34,6 +38,15 @@ AGE_TILT = [-0.25, -0.05, 0.12, 0.02]
 AREA_TILT = {"urban": -0.45, "suburban": 0.0, "small town": 0.35, "rural": 0.55}
 INDEPENDENT = [0.42, 0.38, 0.32, 0.26]
 TURNOUT = [[0.38, 0.52, 0.68], [0.48, 0.62, 0.76], [0.58, 0.70, 0.82], [0.64, 0.76, 0.85]]
+
+FIRST = {"White": "James Mary Robert Linda William Susan David Karen Thomas Nancy Charles Betty Daniel Carol Mark Sandra Paul Donna Steven Ruth Gary Sharon Larry Brenda Dale Peggy Wayne Glenda Travis Kayla".split(),
+         "Black": "Willie Gloria Reginald Denise Curtis Yolanda Darnell Latoya Marcus Tamika Alvin Bernice Terrence Keisha Leroy Ernestine Cedric Shanice Otis Vernell".split(),
+         "Hispanic": "Jose Maria Luis Carmen Carlos Rosa Miguel Ana Jorge Lucia Rafael Elena Hector Marisol Raul Yolanda Julio Beatriz".split(),
+         "Asian": "Wei Mei Hung Linh Raj Priya Jin Soo Minh Anh Kenji Yuki Arun Lakshmi".split()}
+LAST = {"White": "Walker Bishop Thompson Reams Hightower Boland Clark Sauls Barfield Cooksey Morris Lacy Watkins Hale Stokes Kinsey Braswell Fulford Cone Merritt Hagan Tuten Shiver Boyd Joyner".split(),
+        "Black": "Washington Jefferson Robinson Jackson Footman Gallon Brinson Seabrooks Mitchell Hall Bellamy Crumity Norton Ghent Proctor Barrington Rivers Francis".split(),
+        "Hispanic": "Garcia Rodriguez Martinez Hernandez Lopez Gonzalez Perez Sanchez Ramirez Torres Flores Rivera Morales Ortiz".split(),
+        "Asian": "Nguyen Chen Patel Kim Tran Li Singh Park Pham Wang".split()}
 
 
 def acs(table, geo):
@@ -67,7 +80,7 @@ pts = gpd.GeoDataFrame(b, geometry=gpd.points_from_xy(b.lon.astype(float), b.lat
 
 # ---- where each block is: precinct and city
 prec = gpd.read_file(WORK / f"pgeo/{ST}.geojson", engine="pyogrio").to_crs(4269)
-prec = prec[prec.p.str.startswith(SF + CF)]
+prec = prec[prec.p.str.startswith(PREFIX)]
 j = gpd.sjoin(pts, prec[["p", "geometry"]], how="left", predicate="within").drop(columns="index_right")
 miss = j.p.isna()
 if miss.any():
@@ -78,6 +91,8 @@ places = places[~places.CLASSFP.str[0].isin(["U", "M"])][["NAME", "geometry"]].r
 j = gpd.sjoin(j, places, how="left", predicate="within").drop(columns="index_right")
 subs = gpd.read_file(f"zip://{RAW}/tiger/{SF}_cousub.zip", engine="pyogrio")[["NAME", "geometry"]].rename(columns={"NAME": "township"})
 j = gpd.sjoin(j, subs, how="left", predicate="within").drop(columns="index_right")
+if ST not in TOWNSHIP_STATES:
+    j["township"] = None
 j = j[~j.index.duplicated()]
 j["city"] = j.city.fillna("")
 j["piece"] = j.p + "|" + j.city
@@ -116,7 +131,7 @@ for t in tracts:
         if v.sum() < 30:
             g = acs("b01001", geo_id)
             v = np.array([both(g, c, 24) for c in AGE_CELLS["all"]])
-        age[r] = v / v.sum()
+        age[r] = v / v.sum() if v.sum() else np.full(4, 0.25)
     g = acs("b15001", geo_id)
     raw = []  # survey age bands: 18-24, 25-34, 35-44, 45-64, 65+
     for start in (3, 11, 19, 27, 35):
@@ -237,7 +252,15 @@ for n, p in enumerate(pops):
     p["turnout"] = TURNOUT[p["_a"]][p["_e"]]
     money = INCOMES.index(p["income"]) / 3 * 60 + p["_a"] * 6 + p["_e"] * 8
     p["wealth"] = round(max(0, money - 35) / 63 * 100)
-    p["leader"] = None
+    draw = zlib.crc32(f"{p['piece']}|{n}".encode())
+    first = FIRST[p["race"] if p["race"] in FIRST else "White"]
+    last = LAST[p["race"] if p["race"] in LAST else "White"]
+    spot, mark = (draw % 1000) / 1000, 0
+    for party, share in zip(["rep", "ind", "dem"], p["pie"]):
+        mark += share
+        if spot < mark:
+            break
+    p["leader"] = {"name": f"{first[draw // 7 % len(first)]} {last[draw // 131 % len(last)]}", "party": party}
     del p["_a"], p["_e"]
 seen = defaultdict(int)
 for p in sorted(pops, key=lambda p: (p["piece"], RACES.index(p["race"]), p["age"], p["education"])):
@@ -247,7 +270,7 @@ for p in sorted(pops, key=lambda p: (p["piece"], RACES.index(p["race"]), p["age"
 # ---- comparison with 2024, not used above
 votes = json.load(open(RAW / f"nyt/results/{ST}.json"))
 check = []
-for pr in sorted({p["precinct"] for p in pops} | {k for k in votes if k.startswith(SF + CF)}):
+for pr in sorted({p["precinct"] for p in pops} | {k for k in votes if k.startswith(PREFIX)}):
     mine = [p for p in pops if p["precinct"] == pr]
     cast = sum(SIZE * p["turnout"] for p in mine)
     rep = sum(SIZE * p["turnout"] * p["lean"] for p in mine)
@@ -256,8 +279,8 @@ for pr in sorted({p["precinct"] for p in pops} | {k for k in votes if k.startswi
                   "predicted_rep": round(rep / cast, 3) if cast else None, "actual_votes": t, "actual_rep": round(r / (d + r), 3) if d + r else None})
 cast = sum(c["predicted_votes"] for c in check)
 rep = sum(SIZE * p["turnout"] * p["lean"] for p in pops)
-actual = [sum(votes[k][i] for k in votes if k.startswith(SF + CF)) for i in range(3)]
-summary = {"adults": round(float(M.sum())), "pops": len(pops), "pieces": int((np.array([seen[p] for p in pieces]) > 0).sum()), "pieces_without_a_pop": int(sum(1 for p in pieces if not seen[p])),
+actual = [sum(votes[k][i] for k in votes if k.startswith(PREFIX)) for i in range(3)]
+summary = {"name": f"{gpd.read_file(f'zip://{RAW}/geo/cb_county.zip', engine='pyogrio', read_geometry=False).query('STATEFP == @SF and COUNTYFP == @CF').NAMELSAD.iloc[0]}, {gpd.read_file(f'zip://{RAW}/geo/cb_state.zip', engine='pyogrio', read_geometry=False).query('STATEFP == @SF').NAME.iloc[0]}", "adults": round(float(M.sum())), "pops": len(pops), "pieces": int((np.array([seen[p] for p in pieces]) > 0).sum()), "pieces_without_a_pop": int(sum(1 for p in pieces if not seen[p])),
            "predicted": {"votes": cast, "rep": round(rep / cast, 3)}, "actual": {"votes": actual[2], "rep": round(actual[1] / (actual[0] + actual[1]), 3)}}
 OUT.parent.mkdir(parents=True, exist_ok=True)
 pops.sort(key=lambda p: p["id"])

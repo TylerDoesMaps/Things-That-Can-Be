@@ -34,7 +34,7 @@ const MOOD_COL = { Angry: "#b2182b", Dissatisfied: "#ef8a62", Neutral: "#bdbdbd"
 const mood = (pid, level) => { const m = (S.moods[pid] || {})[level]; return m ? `<span class="mood"><i style="background:${MOOD_COL[m]}"></i>${m}</span>` : ""; };
 const lean = (v) => (!v ? "None" : `<span style="color:var(--${v > 0 ? "rep" : "dem"})">${v > 0 ? "R" : "D"} +${Math.abs(v).toFixed(1)}</span>`);
 const pie = (p) => `<span class="pie"><i style="width:${p[0] * 100}%;background:var(--rep)"></i><i style="width:${p[1] * 100}%;background:var(--g2)"></i><i style="width:${p[2] * 100}%;background:var(--dem)"></i></span>`;
-const partyLine = (p) => `<span style="color:var(--rep)">R ${pct(p[0])}</span> · <span style="color:var(--dem)">D ${pct(p[2])}</span> · Ind ${pct(p[1])}`;
+const lead = (p) => { const o = [["R", p[0], "var(--rep)"], ["I", p[1], "var(--muted)"], ["D", p[2], "var(--dem)"]].sort((a, b) => b[1] - a[1]); return `<b style="color:${o[0][2]}">${o[0][0]}+${Math.round((o[0][1] - o[1][1]) * 100)}</b>`; };
 const role = (pid) => {
   const seats = S.seats.filter((s) => s.holder === pid), c = S.people[pid];
   if (seats.length) return seats.map((s) => s.title + (s.label ? ", " + s.label : "")).join("; ");
@@ -100,7 +100,7 @@ function placeTab(q, tab, wide) {
   const ps = popsIn(q);
   if (tab === "overview") {
     const inside = q.kind === "hood" ? `<tr><th>Commission district</th><td>${placeLink(q.code + "-D" + q.district, "District " + q.district)}</td></tr><tr><th>State House</th><td>District ${q.house}</td></tr><tr><th>State Senate</th><td>District ${q.senate}</td></tr><tr><th>Congress</th><td>District ${q.congress}</td></tr><tr><th>Local lean</th><td>${lean(q.local)}</td></tr>` : "";
-    let h = `<table><tr><th>People</th><td>${num(q.pops * 100)} <span class="pt">(${q.pops} pops)</span></td></tr><tr><th>Party ID</th><td>${partyLine(q.party)}</td></tr>
+    let h = `<table><tr><th>People</th><td>${num(q.pops * 100)} <span class="pt">(${q.pops} pops)</span></td></tr><tr><th>Party ID</th><td>${lead(q.party)}</td></tr>
       <tr><th>President, 2024</th><td>${q.rep2024 === null ? "" : `<span style="color:var(--rep)">R ${pct(q.rep2024)}</span> · <span style="color:var(--dem)">D ${pct(1 - q.rep2024)}</span>`}</td></tr>
       <tr><th>Area type</th><td>${Object.entries(q.area).map(([k, v]) => `${k} (${v})`).join(", ")}</td></tr>${inside}</table>
       <div class="ib-h">People by race</div>${Object.keys(RACE_COL).filter((r) => q.race[r]).map((r) => mbar(r, share(q.race, r), RACE_COL[r])).join("")}`;
@@ -109,7 +109,7 @@ function placeTab(q, tab, wide) {
       for (const kind of kids) {
         const rows = Object.values(G.places).filter((x) => x.kind === kind && x.members.every((m) => q.members.includes(m)));
         h += `<h2>${{ district: "Commission districts", muni: "City and unincorporated area", hood: "Neighbourhoods" }[kind]}</h2><table class="wt"><tr><th>Place</th><th>Pops</th><th>Party ID</th><th>President, 2024</th></tr>${rows.map((x) =>
-          `<tr><td>${placeLink(x.id)}</td><td class="n">${x.pops}</td><td>${pie(x.party)}${pct(x.party[0])} R</td><td class="n">${pct(x.rep2024)} R</td></tr>`).join("")}</table>`;
+          `<tr><td>${placeLink(x.id)}</td><td class="n">${x.pops}</td><td>${pie(x.party)}${lead(x.party)}</td><td class="n">${pct(x.rep2024)} R</td></tr>`).join("")}</table>`;
       }
     }
     return h;
@@ -123,7 +123,7 @@ function placeTab(q, tab, wide) {
   if (tab === "party") {
     const lead = { rep: 0, ind: 0, dem: 0 };
     ps.forEach((p) => lead[S.people[S.leaders[p.id]].party]++);
-    return `<table><tr><th>Party ID</th><td>${partyLine(q.party)}</td></tr><tr><th>President, 2024</th><td>${pct(q.rep2024)} Republican of ${num(q.votes2024)} votes</td></tr><tr><th>Expected turnout</th><td>${pct(q.turnout)}</td></tr></table>
+    return `<table><tr><th>Party ID</th><td>${lead(q.party)}</td></tr><tr><th>President, 2024</th><td>${pct(q.rep2024)} Republican of ${num(q.votes2024)} votes</td></tr><tr><th>Expected turnout</th><td>${pct(q.turnout)}</td></tr></table>
       <div class="ib-h">Party ID</div>${mbar("Republican", q.party[0], "var(--rep)")}${mbar("Independent", q.party[1], "var(--g3)")}${mbar("Democrat", q.party[2], "var(--dem)")}
       <div class="ib-h">Mood</div><table class="mini">${["federal", "state", "local"].map((l) => { const c = {}; ps.forEach((p) => { const m = S.moods[p.id][l]; c[m] = (c[m] || 0) + 1; });
         return `<tr><td>${l[0].toUpperCase() + l.slice(1)}</td><td><span class="pie wide">${Object.keys(MOOD_COL).map((m) => `<i style="width:${(c[m] || 0) / ps.length * 100}%;background:${MOOD_COL[m]}"></i>`).join("")}</span></td><td class="pt">${Object.keys(MOOD_COL).filter((m) => c[m]).map((m) => `${m} ${c[m]}`).join(", ")}</td></tr>`; }).join("")}</table>
@@ -144,7 +144,7 @@ function seatTable(seats, wide) {
 function popTable(all) {
   const ps = all.slice(0, 300), more = all.length > ps.length ? `<p class="pt">First ${ps.length} of ${num(all.length)} pops</p>` : "";
   return `<table class="wt"><tr><th>Pop</th><th>Neighbourhood</th><th>Leader</th><th>Work</th><th>Party ID</th><th>Turnout</th><th>Mood, local</th></tr>${ps.map((p) =>
-    `<tr><td>${esc(p.race)}, ${esc(p.age)}, ${esc(p.education.toLowerCase())}<span class="pt">${esc(p.words.join(", "))}</span></td><td>${placeLink(p.hood)}</td><td>${who(S.leaders[p.id])}</td><td>${esc(p.work)}</td><td>${pie(p.pie)}${pct(p.pie[0])} R</td><td class="n">${pct(p.turnout)}</td><td>${mood(p.id, "local")}</td></tr>`).join("")}</table>${more}`;
+    `<tr><td>${esc(p.race)}, ${esc(p.age)}, ${esc(p.education.toLowerCase())}<span class="pt">${esc(p.words.join(", "))}</span></td><td>${placeLink(p.hood)}</td><td>${who(S.leaders[p.id])}</td><td>${esc(p.work)}</td><td>${pie(p.pie)}${lead(p.pie)}</td><td class="n">${pct(p.turnout)}</td><td>${mood(p.id, "local")}</td></tr>`).join("")}</table>${more}`;
 }
 
 /* ---------- pages ---------- */
@@ -264,7 +264,7 @@ get("data/game/counties.json").then((counties) => Promise.all([
     }
     map.addLayer({ id: "picked", type: "line", source: "places", layout: round, filter: ["==", ["get", "id"], ""], paint: { "line-color": "#202122", "line-width": grow(2.4, 3.6) } });
     map.on("click", "fill", (e) => { state.selected = e.features[0].properties.id; paint(); infobox(); });
-    map.on("mousemove", "fill", (e) => { const q = place(e.features[0].properties.id); tip(`<b>${esc(q.name)}</b><br>${q.pops} pops · ${pct(q.party[0])} R · ${pct(q.party[2])} D`, e.originalEvent); map.getCanvas().style.cursor = "pointer"; });
+    map.on("mousemove", "fill", (e) => { const q = place(e.features[0].properties.id); tip(`<b>${esc(q.name)}</b><br>${q.pops} pops · ${lead(q.party)}`, e.originalEvent); map.getCanvas().style.cursor = "pointer"; });
     map.on("mouseleave", "fill", () => { $("tip").hidden = true; map.getCanvas().style.cursor = ""; });
     paint();
   });

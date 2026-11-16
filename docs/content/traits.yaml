@@ -1,0 +1,745 @@
+note: The trait list used for the test 2024 election. Taken from the old build as it stood; expected to be replaced. 'likes' are points of vote share near an even race, for the named kind of pop.
+stats:
+  cha: Charisma
+  sta: Statecraft
+  gri: Grit
+  dip: Diplomacy
+  cun: Cunning
+audiences:
+  everyone: Every pop
+  no_college: No college
+  college: Bachelor's or more
+  low_income: Income under $35,000
+  high_income: Income over $150,000
+  rural: Rural
+  small_town: Small town
+  urban: Urban
+  suburban: Suburban
+  young: Age 18 to 29
+  old: Age 65 and over
+  farm: Farm and ranch work
+  blue_collar: Factory, building, transport, oil and mining work
+  service: Shops and service work
+  government: Government and military work
+  base: The candidate's own party in the pop
+  independents: Independents in the pop
+  same_race: Pops of the candidate's own race
+  against_incumbent: Every pop, when running against a sitting official
+families:
+  upbringing:
+  - id: wealthy_family
+    name: Wealthy Family
+    stats:
+      dip: 1
+    likes:
+      no_college: -2
+      low_income: -2
+  - id: middle_family
+    name: Middle-Class Family
+    stats: {}
+  - id: working_family
+    name: Working Family
+    stats:
+      gri: 1
+    likes:
+      no_college: 2
+      blue_collar: 2
+  - id: poor_family
+    name: Poor Family
+    stats:
+      gri: 1
+      cun: 1
+    likes:
+      low_income: 2
+      no_college: 1
+  - id: farm_family
+    name: Farm Family
+    stats: {}
+    likes:
+      rural: 3
+      small_town: 2
+      farm: 3
+  - id: military_family
+    name: Military Family
+    stats:
+      gri: 1
+    likes:
+      government: 2
+      old: 1
+  - id: immigrant_family
+    name: Immigrant Family
+    stats: {}
+    likes:
+      same_race: 3
+  - id: clergy_family
+    name: Clergy Family
+    stats: {}
+    likes:
+      rural: 1
+      small_town: 1
+      old: 1
+  - id: political_family
+    name: Political Family
+    stats: {}
+    likes:
+      everyone: 1
+      independents: -1
+  childhood:
+  - id: class_clown
+    name: Class Clown
+    stats:
+      cha: 1
+      sta: -1
+    track: cha
+    level: 1
+  - id: debate_kid
+    name: Debate Kid
+    stats:
+      cha: 2
+      cun: -1
+    track: cha
+    level: 2
+  - id: debate_champion
+    name: Debate Champion
+    stats:
+      cha: 3
+    track: cha
+    level: 3
+  - id: silver_tongue
+    name: Silver Tongue
+    stats:
+      cha: 4
+      dip: 1
+    track: cha
+    level: 4
+  - id: bookworm
+    name: Bookworm
+    stats:
+      sta: 1
+      cha: -1
+    track: sta
+    level: 1
+  - id: honor_student
+    name: Honor Student
+    stats:
+      sta: 2
+      gri: -1
+    track: sta
+    level: 2
+  - id: valedictorian
+    name: Valedictorian
+    stats:
+      sta: 3
+    track: sta
+    level: 3
+  - id: prodigy
+    name: Prodigy
+    stats:
+      sta: 4
+      cun: 1
+    track: sta
+    level: 4
+  - id: benchwarmer
+    name: Benchwarmer
+    stats:
+      gri: 1
+      sta: -1
+    track: gri
+    level: 1
+  - id: varsity_athlete
+    name: Varsity Athlete
+    stats:
+      gri: 2
+      dip: -1
+    track: gri
+    level: 2
+  - id: team_captain
+    name: Team Captain
+    stats:
+      gri: 3
+    track: gri
+    level: 3
+  - id: state_champion
+    name: State Champion
+    stats:
+      gri: 4
+      cha: 1
+    track: gri
+    level: 4
+  - id: people_pleaser
+    name: People Pleaser
+    stats:
+      dip: 1
+      cun: -1
+    track: dip
+    level: 1
+  - id: class_officer
+    name: Class Officer
+    stats:
+      dip: 2
+      sta: -1
+    track: dip
+    level: 2
+  - id: student_body_president
+    name: Student Body President
+    stats:
+      dip: 3
+    track: dip
+    level: 3
+  - id: natural_dealmaker
+    name: Natural Dealmaker
+    stats:
+      dip: 4
+      cha: 1
+    track: dip
+    level: 4
+  - id: troublemaker
+    name: Troublemaker
+    stats:
+      cun: 1
+      dip: -1
+    track: cun
+    level: 1
+  - id: gossip
+    name: Gossip
+    stats:
+      cun: 2
+      cha: -1
+    track: cun
+    level: 2
+  - id: schemer
+    name: Schemer
+    stats:
+      cun: 3
+    track: cun
+    level: 3
+  - id: mastermind
+    name: Mastermind
+    stats:
+      cun: 4
+      sta: 1
+    track: cun
+    level: 4
+  personality:
+  - id: attractive
+    name: Attractive
+    stats:
+      cha: 2
+    opposite: homely
+    likes:
+      everyone: 1
+  - id: homely
+    name: Homely
+    stats:
+      cha: -1
+    opposite: attractive
+    likes:
+      no_college: 0.5
+  - id: tall
+    name: Tall
+    stats: {}
+    opposite: short
+  - id: short
+    name: Short
+    stats: {}
+    opposite: tall
+  - id: commanding_voice
+    name: Commanding Voice
+    stats:
+      cha: 1
+    opposite: stammer
+    likes:
+      everyone: 0.5
+  - id: stammer
+    name: Stammer
+    stats: {}
+    opposite: commanding_voice
+  - id: honest
+    name: Honest
+    stats:
+      cun: -1
+    opposite: deceitful
+    likes:
+      independents: 2
+  - id: deceitful
+    name: Deceitful
+    stats:
+      cun: 2
+    opposite: honest
+    likes:
+      independents: -1
+  - id: ambitious
+    name: Ambitious
+    stats: {}
+    opposite: content
+  - id: content
+    name: Content
+    stats: {}
+    opposite: ambitious
+  - id: charming
+    name: Charming
+    stats:
+      cha: 1
+      dip: 1
+    opposite: awkward
+  - id: awkward
+    name: Awkward
+    stats:
+      cha: -2
+    opposite: charming
+  - id: hot_headed
+    name: Hot-Headed
+    stats: {}
+    opposite: even_tempered
+    likes:
+      base: 2
+      independents: -2
+  - id: even_tempered
+    name: Even-Tempered
+    stats: {}
+    opposite: hot_headed
+    likes:
+      independents: 1
+  - id: arrogant
+    name: Arrogant
+    stats: {}
+    opposite: humble
+    likes:
+      base: 1
+      independents: -2
+  - id: humble
+    name: Humble
+    stats: {}
+    opposite: arrogant
+    likes:
+      independents: 2
+  - id: zealous
+    name: Zealous
+    stats: {}
+    opposite: pragmatic
+    likes:
+      base: 2
+      independents: -2
+  - id: pragmatic
+    name: Pragmatic
+    stats:
+      dip: 1
+    opposite: zealous
+    likes:
+      independents: 2
+      base: -1
+  - id: diligent
+    name: Diligent
+    stats:
+      sta: 1
+    opposite: lazy
+  - id: lazy
+    name: Lazy
+    stats:
+      gri: -2
+    opposite: diligent
+  - id: gregarious
+    name: Gregarious
+    stats: {}
+    opposite: shy
+    likes:
+      everyone: 1
+  - id: shy
+    name: Shy
+    stats:
+      cha: -1
+      sta: 1
+    opposite: gregarious
+    likes:
+      everyone: -0.5
+  - id: loyal
+    name: Loyal
+    stats: {}
+    opposite: opportunist
+  - id: opportunist
+    name: Opportunist
+    stats:
+      cun: 1
+    opposite: loyal
+  - id: brave
+    name: Brave
+    stats: {}
+    opposite: cautious
+    likes:
+      against_incumbent: 1
+  - id: cautious
+    name: Cautious
+    stats: {}
+    opposite: brave
+  - id: faithful
+    name: Faithful
+    stats: {}
+    opposite: philanderer
+    likes:
+      old: 1
+      rural: 1
+  - id: philanderer
+    name: Philanderer
+    stats: {}
+    opposite: faithful
+    likes:
+      old: -1
+  - id: teetotaler
+    name: Teetotaler
+    stats: {}
+    opposite: heavy_drinker
+  - id: heavy_drinker
+    name: Heavy Drinker
+    stats:
+      gri: -1
+    opposite: teetotaler
+  - id: thrifty
+    name: Thrifty
+    stats: {}
+    opposite: gambler
+  - id: gambler
+    name: Gambler
+    stats: {}
+    opposite: thrifty
+  - id: fitness_buff
+    name: Fitness Buff
+    stats:
+      gri: 1
+    opposite: couch_potato
+  - id: couch_potato
+    name: Couch Potato
+    stats:
+      gri: -1
+    opposite: fitness_buff
+  - id: churchgoer
+    name: Churchgoer
+    stats: {}
+    opposite: secular
+    likes:
+      rural: 2
+      small_town: 1
+      old: 1
+      urban: -1
+  - id: secular
+    name: Secular
+    stats: {}
+    opposite: churchgoer
+    likes:
+      urban: 2
+      young: 2
+      rural: -2
+  - id: outdoorsman
+    name: Outdoorsman
+    stats: {}
+    opposite: homebody
+    likes:
+      rural: 3
+      small_town: 1
+  - id: homebody
+    name: Homebody
+    stats:
+      sta: 1
+    opposite: outdoorsman
+    likes:
+      rural: -1
+  - id: very_online
+    name: Very Online
+    stats: {}
+    opposite: offline
+    likes:
+      young: 3
+      old: -1
+  - id: offline
+    name: Offline
+    stats: {}
+    opposite: very_online
+    likes:
+      old: 1
+  - id: regular_joe
+    name: Regular Joe
+    stats: {}
+    opposite: country_club
+    likes:
+      no_college: 2
+      blue_collar: 2
+  - id: country_club
+    name: Country Club
+    stats:
+      dip: 1
+    opposite: regular_joe
+    likes:
+      no_college: -2
+      high_income: 1
+  job:
+  - id: attorney
+    name: Attorney
+    stats:
+      sta: 1
+    likes:
+      college: 1
+      no_college: -1
+    education: graduate
+  - id: physician
+    name: Physician
+    stats:
+      sta: 1
+    likes:
+      old: 1
+      college: 1
+    education: graduate
+  - id: professor
+    name: Professor
+    stats:
+      sta: 1
+    likes:
+      college: 2
+      no_college: -2
+      urban: 1
+    education: graduate
+  - id: engineer
+    name: Engineer
+    stats:
+      sta: 1
+    education: bachelors
+  - id: accountant
+    name: Accountant
+    stats:
+      sta: 1
+    education: bachelors
+  - id: teacher
+    name: Teacher
+    stats:
+      cha: 1
+    likes:
+      college: 1
+      government: 1
+    education: bachelors
+  - id: social_worker
+    name: Social Worker
+    stats:
+      dip: 1
+    education: bachelors
+  - id: business_executive
+    name: Business Executive
+    stats:
+      dip: 1
+    likes:
+      high_income: 2
+      low_income: -1
+    education: bachelors
+  - id: banker
+    name: Banker
+    stats:
+      dip: 1
+    likes:
+      high_income: 2
+      low_income: -1
+    education: bachelors
+  - id: nonprofit_director
+    name: Nonprofit Director
+    stats:
+      dip: 1
+    education: bachelors
+  - id: lobbyist
+    name: Lobbyist
+    stats:
+      cun: 1
+    likes:
+      everyone: -1
+    education: bachelors
+  - id: journalist
+    name: Journalist
+    stats:
+      cun: 1
+    likes:
+      college: 1
+      rural: -1
+    education: bachelors
+  - id: nurse
+    name: Nurse
+    stats:
+      gri: 1
+    likes:
+      everyone: 1
+    education: some_college
+  - id: software_developer
+    name: Software Developer
+    stats:
+      sta: 1
+    education: some_college
+  - id: pastor
+    name: Pastor
+    stats:
+      cha: 1
+    likes:
+      rural: 1
+      old: 1
+    education: hs
+  - id: realtor
+    name: Realtor
+    stats:
+      dip: 1
+    education: hs
+  - id: office_worker
+    name: Office Worker
+    stats:
+      sta: 1
+    education: hs
+  - id: government_employee
+    name: Government Employee
+    stats:
+      sta: 1
+    education: hs
+  - id: police_officer
+    name: Police Officer
+    stats:
+      gri: 1
+    likes:
+      old: 1
+      no_college: 1
+      rural: 1
+    education: hs
+  - id: firefighter
+    name: Firefighter
+    stats:
+      gri: 1
+    likes:
+      old: 1
+      no_college: 1
+    education: hs
+  - id: corrections_officer
+    name: Corrections Officer
+    stats:
+      gri: 1
+    education: hs
+  - id: veteran
+    name: Veteran
+    stats:
+      gri: 1
+    likes:
+      old: 1
+      no_college: 1
+      rural: 1
+      government: 1
+    education: hs
+  - id: tradesman
+    name: Tradesman
+    stats:
+      gri: 1
+    likes:
+      blue_collar: 3
+      no_college: 1
+    education: hs
+  - id: lineman
+    name: Lineman
+    stats:
+      gri: 1
+    likes:
+      blue_collar: 3
+      no_college: 1
+    education: hs
+  - id: small_business_owner
+    name: Small Business Owner
+    stats:
+      dip: 1
+    likes:
+      small_town: 1
+      suburban: 1
+    education: dropout
+  - id: salesperson
+    name: Salesperson
+    stats:
+      cha: 1
+    education: dropout
+  - id: restaurant_worker
+    name: Restaurant Worker
+    stats:
+      cha: 1
+    likes:
+      service: 2
+    education: dropout
+  - id: hospitality_worker
+    name: Hospitality Worker
+    stats:
+      cha: 1
+    likes:
+      service: 2
+    education: dropout
+  - id: barber
+    name: Barber
+    stats:
+      cha: 1
+    education: dropout
+  - id: healthcare_aide
+    name: Healthcare Aide
+    stats:
+      gri: 1
+    education: dropout
+  - id: mechanic
+    name: Mechanic
+    stats:
+      gri: 1
+    likes:
+      blue_collar: 3
+      no_college: 1
+    education: dropout
+  - id: construction_worker
+    name: Construction Worker
+    stats:
+      gri: 1
+    likes:
+      blue_collar: 3
+      no_college: 1
+    education: dropout
+  - id: factory_worker
+    name: Factory Worker
+    stats:
+      gri: 1
+    likes:
+      blue_collar: 3
+      no_college: 1
+    education: dropout
+  - id: truck_driver
+    name: Truck Driver
+    stats:
+      gri: 1
+    likes:
+      blue_collar: 3
+      no_college: 1
+    education: dropout
+  - id: warehouse_worker
+    name: Warehouse Worker
+    stats:
+      gri: 1
+    education: dropout
+  - id: custodian
+    name: Custodian
+    stats:
+      gri: 1
+    education: dropout
+  - id: farmer
+    name: Farmer
+    stats:
+      gri: 1
+    likes:
+      farm: 4
+      rural: 2
+    education: dropout
+  - id: rancher
+    name: Rancher
+    stats:
+      gri: 1
+    likes:
+      farm: 4
+      rural: 2
+    education: dropout
+  - id: farmworker
+    name: Farmworker
+    stats:
+      gri: 1
+    education: dropout
+  - id: fisherman
+    name: Fisherman
+    stats:
+      gri: 1
+    education: dropout

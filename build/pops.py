@@ -287,7 +287,7 @@ for unit in sorted(set(j.unit)):
 cast = sum(c["predicted_votes"] for c in check)
 rep = sum(SIZE * p["turnout"] * p["lean"] for p in pops)
 actual = [sum(votes[k][i] for k in votes if k.startswith(PREFIX)) for i in range(3)]
-summary = {"name": f"{gpd.read_file(f'zip://{RAW}/geo/cb_county.zip', engine='pyogrio', read_geometry=False).query('STATEFP == @SF and COUNTYFP == @CF').NAMELSAD.iloc[0]}, {gpd.read_file(f'zip://{RAW}/geo/cb_state.zip', engine='pyogrio', read_geometry=False).query('STATEFP == @SF').NAME.iloc[0]}", "adults": round(float(M.sum())), "pops": len(pops), "pieces": int((np.array([seen[p] for p in pieces]) > 0).sum()), "pieces_without_a_pop": int(sum(1 for p in pieces if not seen[p])),
+summary = {"name": f"{gpd.read_file(f'zip://{RAW}/geo/cb_county.zip', engine='pyogrio', read_geometry=False).query('STATEFP == @SF and COUNTYFP == @CF').NAMELSAD.iloc[0]}, {gpd.read_file(f'zip://{RAW}/geo/cb_state.zip', engine='pyogrio', read_geometry=False).query('STATEFP == @SF').NAME.iloc[0]}", "pops": len(pops), "people": len(pops) * SIZE, "pieces": int((np.array([seen[p] for p in pieces]) > 0).sum()), "pieces_without_a_pop": int(sum(1 for p in pieces if not seen[p])),
            "predicted": {"votes": cast, "rep": round(rep / cast, 3)}, "actual": {"votes": actual[2], "rep": round(actual[1] / (actual[0] + actual[1]), 3)}}
 OUT.parent.mkdir(parents=True, exist_ok=True)
 pops.sort(key=lambda p: p["id"])

@@ -46,6 +46,10 @@ Saving from the builder needs a GitHub token with write access to this repositor
 
 `docs/data/districts/real-lines.csv` lists the counties over 250,000 people and cities over 200,000 that get their real commission or council district lines, with a `lines` column for progress.
 
+`build/districts.py` draws districts from neighbourhoods: contiguous, compact, roughly equal in pops and as competitive as it can manage. It takes any neighbourhood file and a number of districts. `build/workbook.py` writes `docs/data/workbook/fl-counties.csv` and `fl-cities.csv`, which track what each Florida county and city is like and whether it gets its own content.
+
+Sizes are counted in pops of 100. Nobody who cannot vote exists in the game's numbers.
+
 ## National presets
 
 Listed in `docs/presets/presets.json`.

@@ -6,7 +6,7 @@ B: block group pieces. The same, with the census block group in place of the pre
 C: built. Starts from A and merges any piece under SMALL adults into the touching piece it shares the longest
    border with, never across a city or state house line. Pieces over BIG adults are counted, not yet split.
 Commission and council districts are not used: they will be drawn from the neighbourhoods.
-Adults are the 2020 voting-age count less prisoners. Also writes WORK_DIR/neighbourhoods/<county>.csv: each block's C code.
+Sizes are given in pops of 100. The page takes the built set's pop counts from the pops file, which is the authority. Also writes WORK_DIR/neighbourhoods/<county>.csv: each block's C code.
 Usage: neighbourhoods.py RAW_DIR WORK_DIR STATE_ABBR STATE_FIPS COUNTY_FIPS PRECINCT_PREFIX COUNTY_NAME CODE OUT_JSON
 """
 import io
@@ -93,15 +93,16 @@ for option, label in (("A", "Precinct pieces"), ("B", "Block group pieces"), ("C
     numbers = list(range(1, len(g) + 1))
     random.shuffle(numbers)
     g["code"] = [f"{CODE}-{n:02d}" for n in numbers]
-    g["adults"] = g.adults.astype(int)
-    g["pops"] = (g.adults / POP).round().astype(int)
+    want, base = int(round(g.adults.sum() / POP)), (g.adults // POP).astype(int)
+    for k in (g.adults / POP - base).sort_values(ascending=False).index[: want - base.sum()]:
+        base[k] += 1
+    g["pops"] = base
     g["geometry"] = g.geometry.simplify(0.0002)
-    a = g.adults
-    stats = {"neighbourhoods": len(g), "with no adults": int((a == 0).sum()), "too small for one pop (under 50 adults)": int((a < 50).sum()),
-             f"under {SMALL} adults": int((a < SMALL).sum()), f"over {BIG} adults, to split later": int((a > BIG).sum()), "smallest with anyone": int(a[a > 0].min()),
-             "median adults": int(a.median()), "largest": int(a.max()), "pops placed": int(g.pops.sum()), "adults left out by rounding": int(a[g.pops == 0].sum())}
+    n = g.pops
+    stats = {"neighbourhoods": len(g), "with no pops": int((n == 0).sum()), f"under {SMALL // POP} pops": int((n < SMALL // POP).sum()),
+             f"over {BIG // POP} pops, to split later": int((n > BIG // POP).sum()), "median pops": float(n.median()), "largest, in pops": int(n.max()), "pops": int(n.sum())}
     out["options"][option] = {"label": label, "stats": stats,
-                              "shapes": json.loads(g.reset_index(drop=True)[["code", "adults", "pops", "city", "house", "precinct", "geometry"]].to_json(drop_id=True))}
+                              "shapes": json.loads(g.reset_index(drop=True)[["code", "pops", "city", "house", "precinct", "geometry"]].to_json(drop_id=True))}
     if option == "C":
         (WORK / "neighbourhoods").mkdir(exist_ok=True)
         blocks[["block"]].assign(code=blocks.C.map(g.code)).to_csv(WORK / f"neighbourhoods/{SF}{CF}.csv", index=False)

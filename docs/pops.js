@@ -18,7 +18,7 @@ fetch(`data/pops/${ST}.json`).then((r) => r.json()).then((d) => {
   });
   const s = d.summary;
   $("place").textContent = s.name;
-  $("summary").textContent = `${s.adults.toLocaleString("en-US")} adults · ${s.pops} pops of 100 · from demographics alone: ${pct(s.predicted.rep)} Republican of the two-party vote, ${s.predicted.votes.toLocaleString("en-US")} votes · 2024 actual: ${pct(s.actual.rep)}, ${s.actual.votes.toLocaleString("en-US")} votes`;
+  $("summary").textContent = `${s.pops} pops · ${(s.pops * 100).toLocaleString("en-US")} people · from demographics alone: ${pct(s.predicted.rep)} Republican of the two-party vote, ${s.predicted.votes.toLocaleString("en-US")} votes · 2024 actual: ${pct(s.actual.rep)}, ${s.actual.votes.toLocaleString("en-US")} votes`;
   draw();
 });
 

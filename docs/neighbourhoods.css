@@ -3,3 +3,4 @@ body.tiers main { height: 62vh; min-height: 420px; }
 #compare td:not(:first-child) { text-align: right; }
 #compare td.pick { background: #fff8e1; }
 @media (max-width: 760px) { #lines { margin-left: 0; } .controls { flex-wrap: wrap; gap: 8px; } }
+#districts td:nth-child(n+3) { text-align: right; }

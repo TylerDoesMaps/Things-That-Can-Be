@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Things That Can Be</title>
+<link rel="stylesheet" href="vendor/maplibre-gl.css">
+<link rel="stylesheet" href="game-old.css">
+<link rel="stylesheet" href="game.css">
+</head>
+<body>
+<div id="tip" hidden></div>
+<div class="app">
+<header class="top">
+  <div class="brand"><div class="mark" aria-hidden="true">T</div><div><div class="name">Things That Can Be</div><div class="tag" id="seedtag"></div></div></div>
+  <div class="clock"><div class="cdate" id="cdate"></div>
+    <div class="dd"><button class="btn" id="gmenu" data-menu="game" aria-haspopup="true" aria-expanded="false" aria-label="Game menu">☰</button>
+    <div class="ddmenu" id="m-game" hidden role="menu">
+      <button role="menuitem" data-go="#/soon/tools">Test tools</button><button role="menuitem" data-go="#/soon/saves">Saves</button><hr>
+      <button role="menuitem" data-href="index.html">Election night viewer</button><button role="menuitem" data-href="map.html">Tier map</button>
+      <button role="menuitem" data-href="offices.html">Offices</button><button role="menuitem" data-href="pops.html">Pops</button>
+      <button role="menuitem" data-href="neighbourhoods.html">Neighbourhoods</button><button role="menuitem" data-href="builder.html">Event builder</button>
+      <button role="menuitem" data-href="kansas.html">Kansas</button></div></div></div>
+  <nav class="vtabs" aria-label="View">
+    <button data-view="map">Map</button><button data-view="voters">Voters</button><button data-view="elections">Elections</button>
+    <button data-view="officials">Officeholders</button><button data-view="stats">Stats</button>
+  </nav>
+  <div class="gsearch"><input id="gsearch" type="search" placeholder="Search people and places" autocomplete="off" aria-label="Search"><div class="gres" id="gres" hidden role="listbox"></div></div>
+</header>
+
+<main class="stage" id="stage">
+  <aside class="side left" aria-label="Your character"><h2 class="sec">You</h2><div id="youpanel"></div></aside>
+  <section class="center">
+    <div class="toolbar" id="toolbar">
+      <div class="tgroup"><span class="tlabel">Layer</span><div class="btns" role="group" aria-label="Map layer" id="layerbar"></div></div>
+      <div class="tgroup"><span class="tlabel">Show</span><div class="btns" role="group" aria-label="Map shading" id="shadebar"></div></div>
+    </div>
+    <div class="mapwrap"><div id="map"></div><div class="legend" id="legend"></div><div class="infobox" id="infobox" hidden aria-live="polite"></div></div>
+  </section>
+  <aside class="side right" aria-label="Calendar and news"><h2 class="sec">Calendar</h2><div id="calendar"></div><h2 class="sec" style="margin-top:16px">News</h2><div id="news"></div></aside>
+</main>
+<section id="page" class="view" hidden><div class="article wide" id="page-body"></div></section>
+</div>
+<script src="vendor/maplibre-gl.js"></script>
+<script src="vendor/js-yaml.min.js"></script>
+<script src="game.js"></script>
+</body>
+</html>

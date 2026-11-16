@@ -6,6 +6,10 @@ Election night view: https://tylerdoesmaps.github.io/Things-That-Can-Be/
 - `docs/presets/` national presets
 - `docs/content/` every event, the call registry and the shared word list
 - `docs/builder.html` the event builder
+`docs/game.html` is the shell: the old game's interface (its stylesheet is kept whole as `game-old.css`) running on the new data. It has the map with layers and shading, the infobox, place and person pages, voters, elections and officeholders, and a labelled placeholder for each later update. Nothing in it advances time yet.
+
+`build/game.py` packs a county for the shell (`docs/data/game/`) and generates a seed's characters and seat holders (`docs/data/seeds/<seed>/`). In seed 1 a character is a name and a party only: one per pop, drawn from the pop, plus a holder for every seat on the office list.
+
 Florida is the working state. The map, offices and pops pages read Florida; the same pages for Kansas are kept as `map-ks.html`, `offices-ks.html` and `pops-ks.html`, linked from `kansas.html`. Each page reads its state from `data-state` on the body, and `nav.js` writes the shared header.
 
 - `docs/map.html` the tiers of government in Kansas, one click at a time

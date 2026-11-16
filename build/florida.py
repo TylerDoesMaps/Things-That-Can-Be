@@ -2,7 +2,8 @@
 """Runs the county builders over every Florida county in build/fl-counties.csv, several at a time.
 
 Steps: hoods (neighbourhoods then pops for each county), fit (calibrate each TV market), lines (commission districts).
-Counties with real lines under docs/data/districts/real are snapped to them; the rest are drawn by the tool.
+Counties with real lines under docs/data/districts/real are snapped to them; the rest are drawn by the tool,
+with the number of districts the county table gives. Real lines not in use yet are kept under docs/data/districts/real-later.
 Usage: florida.py RAW_DIR WORK_DIR STEP [COUNTY_FIPS ...]
 """
 import csv
@@ -38,7 +39,7 @@ def lines(r):
         code = run([HERE / "districts_from_blocks.py", DATA / f"neighbourhoods/fl-{f}.json", DATA / f"pops/fl-{f}.json", Path(WORK) / f"neighbourhoods/{f}.csv", real,
                     f"{r['name']} County Commission", "Real lines", DATA / f"districts/fl-{f}.json"], log)
     else:
-        code = run([HERE / "districts.py", DATA / f"neighbourhoods/fl-{f}.json", DATA / f"pops/fl-{f}.json", 5, f"{r['name']} County Commission", DATA / f"districts/fl-{f}.json"], log)
+        code = run([HERE / "districts.py", DATA / f"neighbourhoods/fl-{f}.json", DATA / f"pops/fl-{f}.json", r["districts"], f"{r['name']} County Commission", DATA / f"districts/fl-{f}.json"], log)
     print(r["name"], "ok" if not code else "FAILED", flush=True)
 
 

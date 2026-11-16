@@ -26,3 +26,5 @@ table.wt td .pt { display: block; }
 
 #linebar .sw { display: inline-block; width: 12px; height: 3px; margin-right: 5px; vertical-align: middle; }
 #linebar .btn[aria-pressed="false"] .sw { opacity: .45; }
+.who.rep { color: #a95450; } .who.ind { color: #8a8f94; } .who.dem { color: #2f558e; }
+.legend .prow { display: flex; align-items: center; gap: 6px; } .legend .prow span:first-child { width: 10px; font-weight: 600; } .legend .prow .bar { flex: 1; }

@@ -93,14 +93,21 @@ def far(key, office, share):
     return outsiders[key]["id"]
 
 
-def seat_row(office, label, holder, area, county=""):
-    return {"office": office["id"], "title": office["title"], "government": office["government"], "label": label, "holder": holder, "area": area, "kind": office["kind"],
-            "chosen": office["chosen"], "partisan": office.get("partisan", False), "next": office.get("next", []), "county": county}
+def seat_row(office, label, holder, area, county="", **over):
+    row = {"office": office["id"], "title": office["title"], "government": office["government"], "label": label, "holder": holder, "area": area, "kind": office["kind"],
+           "chosen": office["chosen"], "partisan": office.get("partisan", False), "next": office.get("next", []), "county": county}
+    row.update(over)
+    return row
 
 
-def state_seat(office, label, key, area, share):
+def turn(n, first=2024):
+    """Staggered seats: odd numbers vote in presidential years, even numbers in the years between (s. 100.041)."""
+    return [first if n % 2 else first + 2]
+
+
+def state_seat(office, label, key, area, share, next_up):
     if key not in state_seats:
-        state_seats[key] = seat_row(office, label, far(key, office, share), area)
+        state_seats[key] = seat_row(office, label, far(key, office, share), area, next=next_up)
 
 
 # seats above the county, once for the whole state
@@ -111,13 +118,14 @@ for o in offices["offices"]:
     if oid in ("fl.representative", "fl.senator", "us.representative"):
         word = {"fl.representative": "house", "fl.senator": "senate", "us.representative": "cd"}[oid]
         for n in sorted({int(k[0].split("-")[1]) for k in wide if k[0].startswith(word + "-")}):
-            state_seat(o, f"District {n}", f"{word}-{n}", f"{word}-{n}", share_of(f"{word}-{n}"))
+            state_seat(o, f"District {n}", f"{word}-{n}", f"{word}-{n}", share_of(f"{word}-{n}"), turn(n) if oid == "fl.senator" else [2024])
     elif oid in ("fl.state_attorney", "fl.public_defender"):
         for n in sorted({int(r["circuit"]) for r in table}):
-            state_seat(o, f"Circuit {n}", f"{oid}-{n}", f"circuit-{n}", share_of(f"circuit-{n}"))
+            state_seat(o, f"Circuit {n}", f"{oid}-{n}", f"circuit-{n}", share_of(f"circuit-{n}"), [2024])
     else:
         for i in range(o.get("seats", 1)):
-            state_seat(o, "", f"{oid}-{i + 1}", "state" if gov == "state" else "country", 0.5 if oid == "us.president" else share_of("all"))
+            up = [2024] if oid == "us.president" else [[2024], [2028]][i] if oid == "us.senator" else [] if o["chosen"] == "appointed" else [2026]
+            state_seat(o, "", f"{oid}-{i + 1}", "state" if gov == "state" else "country", 0.5 if oid == "us.president" else share_of("all"), up)
 
 index, wider_parts, all_seats, everyone = [], [], [], []
 (WORK / "game").mkdir(parents=True, exist_ok=True)
@@ -181,24 +189,41 @@ for r in table:
         held.add(choice)
         return choice
 
-    def seat(office, label, holder, area):
-        seats.append(seat_row(office, label, holder, area, COUNTY))
+    def seat(office, label, holder, area, **over):
+        seats.append(seat_row(office, label, holder, area, COUNTY, **over))
 
-    for o in offices["offices"]:
-        gov, partisan, oid = o["government"], o.get("partisan", False), o["id"]
-        if oid == "county.commissioner":
-            for d in sorted(set(district_of.values())):
-                seat(o, f"District {d}", local(places[f"{CODE}-D{d}"]["members"], True), county_id if r["countywide"] == "yes" else f"{CODE}-D{d}")
-            for i in range(int(r["at_large"])):
-                seat(o, f"At large, Group {i + 1}", local(hoods, True), county_id)
-        elif gov in ("county", "school", "district") or oid == "fl.county_judge":
-            many = o.get("seats", 1)
-            for i in range(many):
-                seat(o, f"Seat {i + 1}" if many > 1 else "", local(hoods, partisan), county_id)
+    own_cycle = [int(r["city_cycle"])] if r["city_cycle"] else None  # Duval votes with Jacksonville, in the spring of odd years
+    party_board = r["commission_partisan"] == "yes"
+    o = dict(by_id["county.commissioner"], title="City Council Member" if COUNTY == "Duval" else by_id["county.commissioner"]["title"])
+    for d in sorted(set(district_of.values())):
+        seat(o, f"District {d}", local(places[f"{CODE}-D{d}"]["members"], party_board), county_id if r["countywide"] == "yes" else f"{CODE}-D{d}", partisan=party_board, next=own_cycle or turn(d))
+    for i in range(1, int(r["at_large"]) + 1):
+        seat(o, f"At large, Group {i}", local(hoods, party_board), county_id, partisan=party_board, next=own_cycle or turn(i))
+    if r["executive"]:
+        o = by_id["county.chair" if r["executive"] == "County Chair" else "county.mayor"]
+        seat(o, "", local(hoods, party_board), county_id, partisan=party_board, next=[int(r["executive_next"])], title="Mayor of Jacksonville" if COUNTY == "Duval" else o["title"])
+    plain = set(r["officers_nonpartisan"].split(";"))
+    for oid in ("county.clerk", "county.property_appraiser", "county.sheriff", "county.elections", "county.tax_collector"):
+        seat(by_id[oid], "", local(hoods, oid not in plain), county_id, partisan=oid not in plain, next=own_cycle if own_cycle and oid != "county.clerk" else [2024])
+    for i in range(1, int(r["judges"]) + 1):
+        seat(by_id["fl.county_judge"], f"Group {i}" if int(r["judges"]) > 1 else "", local(hoods, False), county_id, next=[[2024], [2026], [2028]][(i - 1) % 3])
+    o, many = by_id["school.board"], int(r["board_districts"])
+    for i in range(1, many + 1):  # boards of five: two seats with the president, three between; larger boards the other way round
+        seat(o, f"District {i}", local(hoods, False), county_id, next=turn(i) if many > 5 else turn(i + 1))
+    for i in range(1, int(r["board_at_large"]) + 1):
+        seat(o, "Chair, at large" if COUNTY == "Orange" else f"At large, Seat {i}", local(hoods, False), county_id, next=turn(i))
+    o = by_id["school.superintendent"]
+    if r["superintendent"] == "elected":
+        seat(o, "", local(hoods, True), county_id, next=[2024])
+    else:
+        seat(o, "", local(hoods, False), county_id, chosen="appointed", partisan=False, next=[])
+    if r["soil"] == "yes":
+        for i in range(1, 6):
+            seat(by_id["district.conservation"], f"Seat {i}", local(hoods, False), county_id, next=turn(i + 1))
     for town in [q for q in places.values() if q["kind"] == "muni" and q["sub"] == "City" and q["pops"] >= DORMANT]:
         if (COUNTY, town["name"]) in ONE_WITH_COUNTY:
-            seat(by_id["city.mayor"], "", local(town["members"], False), town["id"])
-        elif town["name"] == "Monticello":
+            continue
+        if town["name"] == "Monticello":
             council = []
             for i in range(by_id["city.council"]["seats"]):
                 council.append(local(town["members"], False))

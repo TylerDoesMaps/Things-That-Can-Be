@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Runs the county builders over every Florida county in build/fl-counties.csv, several at a time.
 
-Steps: hoods (neighbourhoods then pops for each county), fit (calibrate each TV market), lines (commission districts).
+Steps: hoods (neighbourhoods then pops for each county), shapes (neighbourhoods only, when only the drawing changed), fit (calibrate each TV market), lines (commission districts).
 Counties with real lines under docs/data/districts/real are snapped to them; the rest are drawn by the tool,
 with the number of districts the county table gives. Real lines not in use yet are kept under docs/data/districts/real-later.
 Usage: florida.py RAW_DIR WORK_DIR STEP [COUNTY_FIPS ...]
@@ -28,8 +28,8 @@ def run(args, log):
 def hoods(r):
     f, log = r["fips"], logs / f"{r['fips']}.log"
     a = run([HERE / "neighbourhoods.py", RAW, WORK, "FL", "12", f[2:], r["prefix"] + "-:", r["name"], r["code"], DATA / f"neighbourhoods/fl-{f}.json"], log)
-    b = a or run([HERE / "pops.py", RAW, WORK, "FL", "12", f[2:], r["prefix"] + "-:", DATA / f"pops/fl-{f}.json"], log)
-    print(r["name"], "ok" if not (a or b) else "FAILED", flush=True)
+    b = a or STEP == "shapes" or run([HERE / "pops.py", RAW, WORK, "FL", "12", f[2:], r["prefix"] + "-:", DATA / f"pops/fl-{f}.json"], log)
+    print(r["name"], "ok" if not a and b in (0, True) else "FAILED", flush=True)
 
 
 def lines(r):
@@ -55,4 +55,4 @@ if STEP == "fit":
     (DATA / "game/built.json").write_text(json.dumps(built))
 else:
     with ThreadPoolExecutor(2) as pool:
-        list(pool.map(hoods if STEP == "hoods" else lines, rows))
+        list(pool.map(lines if STEP == "lines" else hoods, rows))

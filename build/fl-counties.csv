@@ -1,68 +1,68 @@
-fips,name,code,prefix,market,districts,at_large,countywide,circuit
-12001,Alachua,ALA,Alachua,Gainesville,5,0,yes,8
-12003,Baker,BAK,Baker,Jacksonville,5,0,yes,8
-12005,Bay,BAY,Bay,Panama City,5,0,yes,14
-12007,Bradford,BRA,Bradford,Jacksonville,5,0,no,8
-12009,Brevard,BRE,Brevard,Orlando,5,0,no,18
-12011,Broward,BRO,Broward,Miami,9,0,no,17
-12013,Calhoun,CAL,Calhoun,Panama City,5,0,no,14
-12015,Charlotte,CHA,Charlotte,Fort Myers,5,0,yes,20
-12017,Citrus,CIT,Citrus,Tampa,5,0,yes,5
-12019,Clay,CLA,Clay,Jacksonville,5,0,yes,4
-12021,Collier,COL,Collier,Fort Myers,5,0,no,20
-12023,Columbia,CLM,Columbia,Jacksonville,5,0,no,3
-12027,DeSoto,DES,Desoto,Fort Myers,5,0,yes,12
-12029,Dixie,DIX,Dixie,Gainesville,5,0,yes,3
-12031,Duval,DUV,Duval,Jacksonville,14,5,no,4
-12033,Escambia,ESC,Escambia,Pensacola,5,0,no,1
-12035,Flagler,FLA,Flagler,Orlando,5,0,yes,7
-12037,Franklin,FRA,Franklin,Panama City,5,0,no,2
-12039,Gadsden,GAD,Gadsden,Tallahassee,5,0,no,2
-12041,Gilchrist,GIL,Gilchrist,Gainesville,5,0,yes,8
-12043,Glades,GLA,Glades,Fort Myers,5,0,yes,20
-12045,Gulf,GUL,Gulf,Panama City,5,0,no,14
-12047,Hamilton,HAM,Hamilton,Tallahassee,5,0,no,3
-12049,Hardee,HAR,Hardee,Tampa,5,0,yes,10
-12051,Hendry,HEN,Hendry,Fort Myers,5,0,no,20
-12053,Hernando,HER,Hernando,Tampa,5,0,yes,5
-12055,Highlands,HIG,Highlands,Tampa,5,0,yes,10
-12057,Hillsborough,HIL,Hillsborough,Tampa,4,3,no,13
-12059,Holmes,HOL,Holmes,Panama City,5,0,yes,14
-12061,Indian River,IND,Indian River,West Palm Beach,5,0,yes,19
-12063,Jackson,JAC,Jackson,Panama City,5,0,no,14
-12065,Jefferson,JEF,Jefferson,Tallahassee,5,0,no,2
-12067,Lafayette,LAF,Lafayette,Tallahassee,5,0,yes,3
-12069,Lake,LAK,Lake,Orlando,5,0,yes,5
-12071,Lee,LEE,Lee,Fort Myers,5,0,yes,20
-12073,Leon,LEO,Leon,Tallahassee,5,2,no,2
-12075,Levy,LEV,Levy,Gainesville,5,0,yes,8
-12077,Liberty,LIB,Liberty,Tallahassee,5,0,yes,2
-12079,Madison,MAD,Madison,Tallahassee,5,0,no,3
-12081,Manatee,MAN,Manatee,Tampa,5,2,no,12
-12083,Marion,MAR,Marion,Orlando,5,0,yes,5
-12085,Martin,MRT,Martin,West Palm Beach,5,0,yes,19
-12086,Miami-Dade,MIA,Miami-Dade,Miami,13,0,no,11
-12087,Monroe,MON,Monroe,Miami,5,0,yes,16
-12089,Nassau,NAS,Nassau,Jacksonville,5,0,yes,4
-12091,Okaloosa,OKA,Okaloosa,Pensacola,5,0,yes,1
-12093,Okeechobee,OKE,Okeechobee,West Palm Beach,5,0,yes,19
-12095,Orange,ORA,Orange,Orlando,6,0,no,9
-12097,Osceola,OSC,Osceola,Orlando,5,0,yes,9
-12099,Palm Beach,PAL,Palm Beach,West Palm Beach,7,0,no,15
-12101,Pasco,PAS,Pasco,Tampa,5,0,yes,6
-12103,Pinellas,PIN,Pinellas,Tampa,4,3,no,6
-12105,Polk,POL,Polk,Tampa,5,0,yes,10
-12107,Putnam,PUT,Putnam,Jacksonville,5,0,yes,7
-12109,St. Johns,STJ,St. Johns,Jacksonville,5,0,yes,7
-12111,St. Lucie,STL,St. Lucie,West Palm Beach,5,0,yes,19
-12113,Santa Rosa,SAN,Santa Rosa,Pensacola,5,0,yes,1
-12115,Sarasota,SAR,Sarasota,Tampa,5,0,no,12
-12117,Seminole,SEM,Seminole,Orlando,5,0,yes,18
-12119,Sumter,SUM,Sumter,Orlando,5,0,yes,5
-12121,Suwannee,SUW,Suwannee,Tallahassee,5,0,yes,3
-12123,Taylor,TAY,Taylor,Tallahassee,5,0,no,3
-12125,Union,UNI,Union,Jacksonville,5,0,no,8
-12127,Volusia,VOL,Volusia,Orlando,5,2,no,7
-12129,Wakulla,WAK,Wakulla,Tallahassee,5,0,yes,2
-12131,Walton,WAL,Walton,Panama City,5,0,yes,1
-12133,Washington,WAS,Washington,Panama City,5,0,yes,14
+fips,name,code,prefix,market,districts,at_large,countywide,circuit,commission_partisan,executive,executive_next,officers_nonpartisan,city_cycle,board_districts,board_at_large,board_vote,superintendent,judges,soil
+12001,Alachua,ALA,Alachua,Gainesville,5,0,yes,8,yes,,,,,5,0,countywide,appointed,5,yes
+12003,Baker,BAK,Baker,Jacksonville,5,0,yes,8,yes,,,,,5,0,countywide,elected,1,no
+12005,Bay,BAY,Bay,Panama City,5,0,yes,14,yes,,,,,5,0,countywide,elected,4,no
+12007,Bradford,BRA,Bradford,Jacksonville,5,0,no,8,yes,,,,,5,0,district,elected,1,yes
+12009,Brevard,BRE,Brevard,Orlando,5,0,no,18,yes,,,,,5,0,district,appointed,11,yes
+12011,Broward,BRO,Broward,Miami,9,0,no,17,yes,,,,,7,2,district,appointed,32,no
+12013,Calhoun,CAL,Calhoun,Panama City,5,0,no,14,yes,,,,,5,0,countywide,elected,1,yes
+12015,Charlotte,CHA,Charlotte,Fort Myers,5,0,yes,20,yes,,,,,5,0,countywide,appointed,3,yes
+12017,Citrus,CIT,Citrus,Tampa,5,0,yes,5,yes,,,,,5,0,countywide,elected,3,no
+12019,Clay,CLA,Clay,Jacksonville,5,0,yes,4,yes,,,,,5,0,countywide,elected,2,yes
+12021,Collier,COL,Collier,Fort Myers,5,0,no,20,yes,,,,,5,0,countywide,appointed,6,yes
+12023,Columbia,CLM,Columbia,Jacksonville,5,0,no,3,no,,,,,5,0,district,elected,2,yes
+12027,DeSoto,DES,Desoto,Fort Myers,5,0,yes,12,yes,,,,,5,0,countywide,elected,1,yes
+12029,Dixie,DIX,Dixie,Gainesville,5,0,yes,3,yes,,,,,5,0,countywide,elected,1,yes
+12031,Duval,DUV,Duval,Jacksonville,14,5,no,4,yes,Mayor,2027,,2027,7,0,district,appointed,17,yes
+12033,Escambia,ESC,Escambia,Pensacola,5,0,no,1,yes,,,,,5,0,district,appointed,5,yes
+12035,Flagler,FLA,Flagler,Orlando,5,0,yes,7,yes,,,,,5,0,countywide,appointed,2,no
+12037,Franklin,FRA,Franklin,Panama City,5,0,no,2,yes,,,,,5,0,district,elected,1,yes
+12039,Gadsden,GAD,Gadsden,Tallahassee,5,0,no,2,yes,,,,,5,0,district,elected,1,yes
+12041,Gilchrist,GIL,Gilchrist,Gainesville,5,0,yes,8,yes,,,,,5,0,countywide,elected,1,yes
+12043,Glades,GLA,Glades,Fort Myers,5,0,yes,20,yes,,,,,5,0,countywide,elected,1,yes
+12045,Gulf,GUL,Gulf,Panama City,5,0,no,14,yes,,,,,5,0,district,elected,1,yes
+12047,Hamilton,HAM,Hamilton,Tallahassee,5,0,no,3,yes,,,,,5,0,district,elected,1,yes
+12049,Hardee,HAR,Hardee,Tampa,5,0,yes,10,yes,,,,,5,0,countywide,elected,1,yes
+12051,Hendry,HEN,Hendry,Fort Myers,5,0,no,20,yes,,,,,5,0,district,elected,1,yes
+12053,Hernando,HER,Hernando,Tampa,5,0,yes,5,yes,,,,,5,0,countywide,appointed,2,no
+12055,Highlands,HIG,Highlands,Tampa,5,0,yes,10,yes,,,,,5,0,countywide,elected,1,yes
+12057,Hillsborough,HIL,Hillsborough,Tampa,4,3,no,13,yes,,,,,5,2,district,appointed,25,yes
+12059,Holmes,HOL,Holmes,Panama City,5,0,yes,14,yes,,,,,5,0,countywide,elected,1,yes
+12061,Indian River,IND,Indian River,West Palm Beach,5,0,yes,19,yes,,,,,5,0,countywide,appointed,2,yes
+12063,Jackson,JAC,Jackson,Panama City,5,0,no,14,yes,,,,,5,0,countywide,elected,1,yes
+12065,Jefferson,JEF,Jefferson,Tallahassee,5,0,no,2,yes,,,,,5,0,district,elected,1,yes
+12067,Lafayette,LAF,Lafayette,Tallahassee,5,0,yes,3,yes,,,,,5,0,countywide,elected,1,yes
+12069,Lake,LAK,Lake,Orlando,5,0,yes,5,yes,,,,,5,0,countywide,appointed,4,yes
+12071,Lee,LEE,Lee,Fort Myers,5,0,yes,20,yes,,,county.elections,,5,2,district,elected,9,no
+12073,Leon,LEO,Leon,Tallahassee,5,2,no,2,no,,,county.elections,,5,0,district,elected,5,yes
+12075,Levy,LEV,Levy,Gainesville,5,0,yes,8,yes,,,,,5,0,countywide,elected,1,yes
+12077,Liberty,LIB,Liberty,Tallahassee,5,0,yes,2,yes,,,,,5,0,countywide,elected,1,no
+12079,Madison,MAD,Madison,Tallahassee,5,0,no,3,yes,,,,,5,0,district,elected,1,yes
+12081,Manatee,MAN,Manatee,Tampa,5,2,no,12,yes,,,,,5,0,district,appointed,4,yes
+12083,Marion,MAR,Marion,Orlando,5,0,yes,5,yes,,,,,5,0,countywide,appointed,4,yes
+12085,Martin,MRT,Martin,West Palm Beach,5,0,yes,19,yes,,,,,5,0,countywide,appointed,3,no
+12086,Miami-Dade,MIA,Miami-Dade,Miami,13,0,no,11,no,Mayor,2024,,,9,0,district,appointed,43,yes
+12087,Monroe,MON,Monroe,Miami,5,0,yes,16,yes,,,,,5,0,countywide,appointed,4,no
+12089,Nassau,NAS,Nassau,Jacksonville,5,0,yes,4,yes,,,,,5,0,countywide,elected,1,yes
+12091,Okaloosa,OKA,Okaloosa,Pensacola,5,0,yes,1,yes,,,,,5,0,countywide,elected,3,yes
+12093,Okeechobee,OKE,Okeechobee,West Palm Beach,5,0,yes,19,yes,,,,,5,0,countywide,appointed,1,yes
+12095,Orange,ORA,Orange,Orlando,6,0,no,9,no,Mayor,2026,,,7,1,district,appointed,22,yes
+12097,Osceola,OSC,Osceola,Orlando,5,0,yes,9,yes,,,,,5,0,district,appointed,4,yes
+12099,Palm Beach,PAL,Palm Beach,West Palm Beach,7,0,no,15,yes,,,county.property_appraiser;county.sheriff;county.elections,,7,0,district,appointed,19,yes
+12101,Pasco,PAS,Pasco,Tampa,5,0,yes,6,yes,,,,,5,0,countywide,elected,7,no
+12103,Pinellas,PIN,Pinellas,Tampa,4,3,no,6,yes,,,,,4,3,district,appointed,17,yes
+12105,Polk,POL,Polk,Tampa,5,0,yes,10,yes,,,county.clerk;county.property_appraiser;county.elections;county.sheriff;county.tax_collector,,7,0,countywide,appointed,10,yes
+12107,Putnam,PUT,Putnam,Jacksonville,5,0,yes,7,yes,,,,,5,0,countywide,elected,2,yes
+12109,St. Johns,STJ,St. Johns,Jacksonville,5,0,yes,7,yes,,,,,5,0,district,appointed,3,yes
+12111,St. Lucie,STL,St. Lucie,West Palm Beach,5,0,yes,19,yes,,,,,5,0,countywide,appointed,4,no
+12113,Santa Rosa,SAN,Santa Rosa,Pensacola,5,0,yes,1,yes,,,,,5,0,countywide,elected,3,yes
+12115,Sarasota,SAR,Sarasota,Tampa,5,0,no,12,yes,,,,,5,0,countywide,appointed,5,no
+12117,Seminole,SEM,Seminole,Orlando,5,0,yes,18,yes,,,,,5,0,countywide,appointed,6,yes
+12119,Sumter,SUM,Sumter,Orlando,5,0,yes,5,yes,,,,,5,0,countywide,elected,1,yes
+12121,Suwannee,SUW,Suwannee,Tallahassee,5,0,yes,3,yes,,,,,5,0,district,elected,1,yes
+12123,Taylor,TAY,Taylor,Tallahassee,5,0,no,3,yes,,,,,5,0,district,elected,1,no
+12125,Union,UNI,Union,Jacksonville,5,0,no,8,yes,,,,,5,0,countywide,elected,1,no
+12127,Volusia,VOL,Volusia,Orlando,5,1,no,7,no,County Chair,2024,,,5,0,district,appointed,10,yes
+12129,Wakulla,WAK,Wakulla,Tallahassee,5,0,yes,2,yes,,,,,5,0,countywide,elected,1,yes
+12131,Walton,WAL,Walton,Panama City,5,0,yes,1,yes,,,,,5,0,countywide,elected,1,yes
+12133,Washington,WAS,Washington,Panama City,5,0,yes,14,yes,,,,,5,0,district,elected,1,yes

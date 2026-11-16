@@ -57,7 +57,7 @@ governments:
 
 offices:
 - {id: us.president, government: federal, title: President, kind: executive, seats: 1, area: the country, chosen: elected, partisan: true, term: 4, next: [2028], every: 4, player: yes, checked: true}
-- {id: us.senator, government: federal, title: United States Senator, kind: legislator, seats: 2, area: the state, chosen: elected, partisan: true, term: 6, next: [2026, 2028], every: 6, player: yes, checked: false, note: One seat has a special election in 2026 to finish a term.}
+- {id: us.senator, government: federal, title: United States Senator, kind: legislator, seats: 2, area: the state, chosen: elected, partisan: true, term: 6, next: [2024, 2028], every: 6, player: yes, checked: false, note: One seat is up in 2024 and the other in 2028. No vacancy and no special election.}
 - {id: us.representative, government: federal, title: United States Representative, kind: legislator, seats: 1, of: 28, area: "Congressional District {cd}", chosen: elected, partisan: true, term: 2, next: [2026], every: 2, player: yes, checked: true, source: Census district lines}
 
 - {id: fl.governor, government: state, title: Governor, kind: executive, seats: 1, area: the state, chosen: elected, partisan: true, term: 4, next: [2026], every: 4, player: yes, checked: false, note: Runs on one ticket with the Lieutenant Governor.}
@@ -75,6 +75,8 @@ offices:
 - {id: fl.county_judge, government: state, title: County Judge, kind: judge, seats: 1, area: the county, chosen: elected, partisan: false, term: 6, next: [2026, 2028], every: 6, player: later, checked: false}
 
 - {id: county.commissioner, government: county, title: County Commissioner, kind: legislator, seats: 1, of: 5, area: a commission district, chosen: elected, partisan: true, term: 4, next: [2026, 2028], every: 4, player: yes, checked: false, note: Two districts vote in 2026 and three in 2028. Whether the whole county votes on each district was not looked up.}
+- {id: county.mayor, government: county, title: County Mayor, kind: executive, seats: 1, area: the county, chosen: elected, partisan: false, term: 4, every: 4, player: yes, checked: true, source: Florida Association of Counties charter comparison 2022, note: Only Duval (as Mayor of Jacksonville) Miami-Dade and Orange elect one.}
+- {id: county.chair, government: county, title: County Chair, kind: executive, seats: 1, area: the county, chosen: elected, partisan: false, term: 4, every: 4, player: yes, checked: true, source: Florida Association of Counties charter comparison 2022, note: Only Volusia elects its chair countywide.}
 - {id: county.clerk, government: county, title: Clerk of the Circuit Court, kind: row officer, seats: 1, area: the county, chosen: elected, partisan: true, term: 4, next: [2028], every: 4, player: yes, checked: true, source: Jefferson County}
 - {id: county.property_appraiser, government: county, title: Property Appraiser, kind: row officer, seats: 1, area: the county, chosen: elected, partisan: true, term: 4, next: [2028], every: 4, player: yes, checked: true, source: Jefferson County}
 - {id: county.sheriff, government: county, title: Sheriff, kind: row officer, seats: 1, area: the county, chosen: elected, partisan: true, term: 4, next: [2028], every: 4, player: yes, checked: true, source: Jefferson County}

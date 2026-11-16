@@ -172,7 +172,11 @@ for (a, b), length in border.items():
         borders[code_of[b]][code_of[a]] += length
 measures = {c: {"sq_m": round(true[k].area), "edge_m": round(true[k].length), "borders": {o: round(v) for o, v in borders[c].items()}} for k, c in g.code.items()}
 # simplify all the shapes together, so a border two neighbourhoods share stays one line
-g["geometry"] = gpd.GeoSeries(shapely.coverage_simplify(true.values, 25), index=g.index, crs=5070).to_crs(blocks.crs).buffer(0)
+# cut away open water: keep only what lies inside the Census's drawn outline of the county, which stops at the shore
+land = gpd.read_file(f"zip://{RAW}/geo/cb_county.zip", engine="pyogrio").query("STATEFP == @SF and COUNTYFP == @CF").to_crs(5070).geometry.iloc[0]
+dry = true.intersection(land).apply(lambda s: shapely.unary_union([p for p in shapely.get_parts(s) if p.geom_type == "Polygon" and p.area > 100]))
+dry = dry.where(~dry.is_empty, true)  # a neighbourhood wholly offshore keeps its shape rather than vanish
+g["geometry"] = gpd.GeoSeries(shapely.coverage_simplify(dry.buffer(0).values, 25), index=g.index, crs=5070).to_crs(blocks.crs).buffer(0)
 (WORK / "neighbourhoods").mkdir(exist_ok=True)
 blocks[["block", "adults"]].assign(code=blocks.piece.map(g.code), area=blocks.piece.map(g.area_type)).to_csv(WORK / f"neighbourhoods/{SF}{CF}.csv", index=False)
 n = g.pops
@@ -190,7 +194,7 @@ lines = {"Precincts": prec.to_crs(blocks.crs).geometry.buffer(0).boundary.simpli
 for name, field in (("State House districts", "house"), ("State Senate districts", "senate"), ("Congressional districts", "congress")):
     if g[field].nunique() > 1:
         lines[name] = between(field)
-out = {"county": COUNTY, "code": CODE, "fips": SF + CF, "stats": stats, "bounds": [round(v, 4) for v in blocks.total_bounds], "measures": measures,
+out = {"county": COUNTY, "code": CODE, "fips": SF + CF, "stats": stats, "bounds": [round(v, 4) for v in g.total_bounds], "measures": measures,
        "shapes": json.loads(g.reset_index(drop=True)[["code", "pops", "city", "house", "senate", "congress", "precinct", "area_type", "density", "geometry"]].rename(columns={"area_type": "area"}).to_json(drop_id=True)),
        "lines": {name: json.loads(s.to_json()) for name, s in lines.items()}}
 OUT.parent.mkdir(parents=True, exist_ok=True)

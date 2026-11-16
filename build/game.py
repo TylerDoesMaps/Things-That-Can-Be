@@ -196,7 +196,7 @@ for f in FIPS:
         moods[p["id"]] = {}
         for level, party in holds.items():
             with_them = p["rep"] if party == "rep" else 1 - p["rep"]
-            moods[p["id"]][level] = "Content" if with_them >= 0.65 else "Neutral" if with_them >= 0.4 else "Dissatisfied"
+            moods[p["id"]][level] = MOODS[min(4, int(with_them * 5))]  # fifths: under 20% with the side in power is Angry, 80% and over is Happy
 
     (DATA / "game").mkdir(parents=True, exist_ok=True)
     (DATA / f"game/fl-{f}.json").write_text(json.dumps({"county": COUNTY, "state": ST, "code": CODE, "fips": f, "bounds": c["src"]["bounds"], "places": places, "holds": holds,

@@ -3,8 +3,8 @@
 
 Works on any set of neighbourhoods. Each trial grows districts outward from random seeds, then moves border
 neighbourhoods between districts while that lowers the cost. The best of all trials is kept.
-Cost = EQUAL x worst gap from the ideal size + COMPACT x (1 - average roundness) + CLOSE x average distance from 50-50.
-Roundness is 4 pi area / perimeter squared. The 2024 vote by neighbourhood comes from the pops file.
+Cost = EQUAL x gap from the ideal size + COMPACT x length of the borders between districts + CLOSE x average distance from 50-50.
+The border length is the districts' collective perimeter less the county's own outline, set against what a tidy grid would need. The 2024 vote by neighbourhood comes from the pops file.
 Usage: districts.py NEIGHBOURHOODS_JSON POPS_JSON HOW_MANY NAME OUT_JSON [TRIALS]
 """
 import json
@@ -18,7 +18,7 @@ import geopandas as gpd
 
 SRC, POPS, N, NAME, OUT = Path(sys.argv[1]), Path(sys.argv[2]), int(sys.argv[3]), sys.argv[4], Path(sys.argv[5])
 TRIALS = int(sys.argv[6]) if len(sys.argv) > 6 else 4000
-EQUAL, COMPACT, CLOSE = 3.0, 1.0, 2.0
+EQUAL, COMPACT, CLOSE, TOUCH = 3.0, 3.0, 1.0, 200  # TOUCH: metres of shared border before two neighbourhoods count as touching
 
 shapes = gpd.GeoDataFrame.from_features(json.load(open(SRC))["shapes"], crs=4269).set_index("code")
 flat = shapes.to_crs(5070).geometry
@@ -33,8 +33,10 @@ area, edge = {u: measures[u]["sq_m"] for u in units}, {u: measures[u]["edge_m"] 
 shared = defaultdict(dict)
 for u in units:
     for v, length in measures[u]["borders"].items():
-        if length > 50:
+        if length > TOUCH:
             shared[u][v] = length
+outline = sum(edge.values()) - sum(v for u in units for v in measures[u]["borders"].values())
+tidy = 2 * math.sqrt(sum(area.values())) * (math.sqrt(N) - 1)  # border length if the county were a square cut into a grid
 ideal = sum(size[u] for u in units) / N
 
 
@@ -62,7 +64,7 @@ def measure(plan):
         perimeter = sum(edge[u] for u in members) - 2 * inner
         rep, dem = sum(vote[u][0] for u in members), sum(vote[u][1] for u in members)
         rows.append({"district": d + 1, "neighbourhoods": sorted(members), "pops": sum(size[u] for u in members),
-                     "roundness": 4 * math.pi * sum(area[u] for u in members) / perimeter ** 2, "rep": rep / (rep + dem) if rep + dem else 0.5})
+                     "roundness": 4 * math.pi * sum(area[u] for u in members) / perimeter ** 2, "perimeter": perimeter, "rep": rep / (rep + dem) if rep + dem else 0.5})
     return rows
 
 
@@ -72,7 +74,7 @@ def cost(plan):
         return 99
     gaps = [abs(r["pops"] - ideal) / ideal for r in rows]
     gap = (max(gaps) + math.sqrt(sum(g * g for g in gaps) / N)) / 2  # the worst district and the typical one, so every evening-out move counts
-    return EQUAL * gap + COMPACT * (1 - sum(r["roundness"] for r in rows) / N) + CLOSE * sum(abs(r["rep"] - 0.5) for r in rows) / N
+    return EQUAL * gap + COMPACT * ((sum(r["perimeter"] for r in rows) - outline) / 2 / tidy) + CLOSE * sum(abs(r["rep"] - 0.5) for r in rows) / N
 
 
 def grow(rng):
@@ -128,7 +130,7 @@ rows = measure(best_plan)
 drawn = shapes.assign(district=[best_plan[u] + 1 for u in shapes.index]).dissolve("district")
 features = []
 for r in rows:
-    r.update(roundness=round(r["roundness"], 2), rep=round(r["rep"], 3), people=r["pops"] * 100)
+    r.update(perimeter=round(r["perimeter"] / 1609.34, 1), roundness=round(r["roundness"], 2), rep=round(r["rep"], 3), people=r["pops"] * 100)
     features.append({"type": "Feature", "properties": {"code": f"District {r['district']}", "pops": r["pops"], "rep": r["rep"], "precinct": ", ".join(r["neighbourhoods"])},
                      "geometry": json.loads(gpd.GeoSeries([drawn.geometry[r["district"]]]).to_json())["features"][0]["geometry"]})
 out = {"name": NAME, "districts": rows, "ideal": round(ideal, 1), "weights": {"equal": EQUAL, "compact": COMPACT, "close": CLOSE}, "trials": TRIALS,

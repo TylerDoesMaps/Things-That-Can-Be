@@ -12,7 +12,7 @@ const AREA_COL = { urban: "#54278f", suburban: "#9e9ac8", "small town": "#fdae6b
 const SOON = {
   you: ["Character creation", 3], week: ["The week", 4], notebook: ["Notebook", 5], known: ["Who knows you", 5], orgs: ["Organizations", 6], issues: ["Issues and positions", 7],
   running: ["Running for office", 8], campaign: ["The campaign", 9], money: ["Money and fundraising", 11], election: ["Election day", 15], office: ["Holding office", 17],
-  services: ["Government and services", 18], bills: ["Bills and votes", 19], news: ["News and the press", 22], intrigue: ["Intrigue and actions", 23], tools: ["Test tools", 0], saves: ["Saves", 0],
+  services: ["Government and services", 18], bills: ["Bills and votes", 19], news: ["News and the press", 22], intrigue: ["Intrigue and actions", 23], history: ["History and generation", 26], tools: ["Test tools", 0], saves: ["Saves", 0],
 };
 const SHADES = [
   { id: "party", label: "Party" },
@@ -170,7 +170,7 @@ function route() {
       <h2>President, 2024</h2><table class="wt"><tr><th>Neighbourhood</th><th>Pops</th><th>Votes</th><th>Republican</th><th>Democratic</th></tr>${Object.values(G.places).filter((q) => q.kind === "hood").map((q) =>
         `<tr><td>${placeLink(q.id)}</td><td class="n">${q.pops}</td><td class="n">${num(q.votes2024)}</td><td class="n" style="color:var(--rep)">${pct(q.rep2024)}</td><td class="n" style="color:var(--dem)">${pct(1 - q.rep2024)}</td></tr>`).join("")}</table>`);
   } else if (view === "officials") {
-    page(`<h1>Officeholders</h1><div class="from">${S.seats.length} seats over ${G.county} County · seed ${S.seed}</div>${seatTable(S.seats, true)}${soon("office")}`);
+    page(`<h1>Officeholders</h1><div class="from">${S.seats.length} seats over ${G.county} County · seed ${S.seed}</div>${seatTable(S.seats, true)}${soon("office")}${soon("history")}`);
   } else if (view === "stats") {
     page(`<h1>Stats</h1><div class="from">${G.county} County</div>${soon("services")}${soon("bills")}${soon("issues")}`);
   } else if (view === "soon") {
@@ -222,11 +222,12 @@ Promise.all([
     map.addSource("places", { type: "geojson", data: { type: "FeatureCollection", features: [] } });
     map.addSource("county", { type: "geojson", data: { type: "FeatureCollection", features: G.shapes.features.filter((f) => f.properties.kind === "county") } });
     map.addSource("city", { type: "geojson", data: G.lines.City });
-    map.addLayer({ id: "fill", type: "fill", source: "places", paint: { "fill-color": ["get", "c"] } });
-    map.addLayer({ id: "edge", type: "line", source: "places", paint: { "line-color": "#54595d", "line-width": 0.8 } });
-    map.addLayer({ id: "city", type: "line", source: "city", paint: { "line-color": "#202122", "line-width": 1.2, "line-dasharray": [2, 1.5] } });
-    map.addLayer({ id: "county", type: "line", source: "county", paint: { "line-color": "#202122", "line-width": 2 } });
-    map.addLayer({ id: "picked", type: "line", source: "places", filter: ["==", ["get", "id"], ""], paint: { "line-color": "#202122", "line-width": 3 } });
+    const round = { "line-join": "round", "line-cap": "round" }, grow = (a, b) => ["interpolate", ["linear"], ["zoom"], 8, a, 13, b];
+    map.addLayer({ id: "fill", type: "fill", source: "places", paint: { "fill-color": ["get", "c"], "fill-antialias": false } });
+    map.addLayer({ id: "edge", type: "line", source: "places", layout: round, paint: { "line-color": "#72777d", "line-width": grow(0.4, 1) } });
+    map.addLayer({ id: "city", type: "line", source: "city", layout: { "line-join": "round" }, paint: { "line-color": "#202122", "line-width": grow(1, 1.8), "line-dasharray": [3, 2] } });
+    map.addLayer({ id: "county", type: "line", source: "county", layout: round, paint: { "line-color": "#202122", "line-width": grow(1.6, 2.6) } });
+    map.addLayer({ id: "picked", type: "line", source: "places", layout: round, filter: ["==", ["get", "id"], ""], paint: { "line-color": "#202122", "line-width": grow(2.4, 3.4) } });
     map.on("click", "fill", (e) => { state.selected = e.features[0].properties.id; paint(); infobox(); });
     map.on("mousemove", "fill", (e) => { const q = place(e.features[0].properties.id); tip(`<b>${esc(q.name)}</b><br>${q.pops} pops · ${pct(q.party[0])} R · ${pct(q.party[2])} D`, e.originalEvent); map.getCanvas().style.cursor = "pointer"; });
     map.on("mouseleave", "fill", () => { $("tip").hidden = true; map.getCanvas().style.cursor = ""; });

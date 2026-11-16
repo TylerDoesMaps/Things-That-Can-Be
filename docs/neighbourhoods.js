@@ -38,10 +38,10 @@ Promise.all([
   map.fitBounds([[b[0], b[1]], [b[2], b[3]]], { padding: 24, duration: 0 });
   map.addSource("shapes", { type: "geojson", data: d.shapes });
   map.addLayer({ id: "fill", type: "fill", source: "shapes", paint: { "fill-color": "#ffffff" } });
-  map.addLayer({ id: "edge", type: "line", source: "shapes", paint: { "line-color": "#16181d", "line-width": 0.9 } });
+  map.addLayer({ id: "edge", type: "line", source: "shapes", layout: { "line-join": "round" }, paint: { "line-color": "#72777d", "line-width": 0.6 } });
   for (const [name, shape] of Object.entries(d.lines)) {
     map.addSource(name, { type: "geojson", data: shape });
-    map.addLayer({ id: name, type: "line", source: name, paint: { "line-color": LINE[name], "line-width": name === "Precincts" ? 1 : 2.2, "line-dasharray": name === "Precincts" ? [2, 2] : [1, 0] } });
+    map.addLayer({ id: name, type: "line", source: name, paint: { "line-color": LINE[name], "line-width": name === "Precincts" ? 0.8 : 1.8, "line-dasharray": name === "Precincts" ? [2, 2] : [1, 0] } });
   }
   for (const key of Object.keys(VIEWS)) button("options", key, () => { view = key; draw(); });
   for (const name of Object.keys(d.lines)) button("lines", name, () => { shown.has(name) ? shown.delete(name) : shown.add(name); draw(); });

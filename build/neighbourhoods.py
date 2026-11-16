@@ -19,6 +19,7 @@ from collections import defaultdict
 from pathlib import Path
 
 import geopandas as gpd
+import shapely
 import pandas as pd
 
 RAW, WORK, ST, SF, CF, PREFIX, COUNTY, CODE, OUT = (Path(sys.argv[1]), Path(sys.argv[2]), *sys.argv[3:9], Path(sys.argv[9]))
@@ -170,20 +171,28 @@ for (a, b), length in border.items():
         borders[code_of[a]][code_of[b]] += length
         borders[code_of[b]][code_of[a]] += length
 measures = {c: {"sq_m": round(true[k].area), "edge_m": round(true[k].length), "borders": {o: round(v) for o, v in borders[c].items()}} for k, c in g.code.items()}
-g["geometry"] = g.geometry.simplify(0.0002)
+# simplify all the shapes together, so a border two neighbourhoods share stays one line
+g["geometry"] = gpd.GeoSeries(shapely.coverage_simplify(true.values, 25), index=g.index, crs=5070).to_crs(blocks.crs).buffer(0)
 (WORK / "neighbourhoods").mkdir(exist_ok=True)
 blocks[["block"]].assign(code=blocks.piece.map(g.code), area=blocks.piece.map(g.area_type)).to_csv(WORK / f"neighbourhoods/{SF}{CF}.csv", index=False)
 n = g.pops
 stats = {"neighbourhoods": len(g), "pops": int(n.sum()), "median pops": float(n.median()), "largest, in pops": int(n.max()), "under 3 pops": int((n < SMALL).sum()),
          "over 50 pops": int((n > BIG).sum()), "precinct pieces that were split": to_split, "area types": g.area_type.value_counts().to_dict()}
-lines = {"Precincts": prec.geometry.buffer(0).boundary, "City": places[places.NAME.isin(set(blocks.city) - {""})].boundary}
-edge = blocks.union_all()
-for name, layer, field in (("State House districts", house, "SLDLST"), ("State Senate districts", senate, "SLDUST"), ("Congressional districts", congress, cd_field)):
-    if blocks[{"State House districts": "house", "State Senate districts": "senate", "Congressional districts": "congress"}[name]].nunique() > 1:
-        lines[name] = layer.to_crs(blocks.crs).clip(edge).boundary
+outline = g.geometry.union_all().boundary.buffer(0.00002)
+
+
+def between(field):
+    """The borders between neighbourhoods that differ on this field, cut from the neighbourhood shapes so they sit exactly on them."""
+    return gpd.GeoSeries([g.dissolve(field).boundary.union_all().difference(outline)], crs=blocks.crs)
+
+
+lines = {"Precincts": prec.to_crs(blocks.crs).geometry.buffer(0).boundary.simplify(0.0002), "City": between("city")}
+for name, field in (("State House districts", "house"), ("State Senate districts", "senate"), ("Congressional districts", "congress")):
+    if g[field].nunique() > 1:
+        lines[name] = between(field)
 out = {"county": COUNTY, "code": CODE, "fips": SF + CF, "stats": stats, "bounds": [round(v, 4) for v in blocks.total_bounds], "measures": measures,
        "shapes": json.loads(g.reset_index(drop=True)[["code", "pops", "city", "house", "senate", "congress", "precinct", "area_type", "density", "geometry"]].rename(columns={"area_type": "area"}).to_json(drop_id=True)),
-       "lines": {name: json.loads(s.to_crs(blocks.crs).simplify(0.0002).to_json()) for name, s in lines.items()}}
+       "lines": {name: json.loads(s.to_json()) for name, s in lines.items()}}
 OUT.parent.mkdir(parents=True, exist_ok=True)
 OUT.write_text(json.dumps(out, separators=(",", ":")))
 print(COUNTY, stats, OUT.stat().st_size)

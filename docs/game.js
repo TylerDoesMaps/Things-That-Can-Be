@@ -21,7 +21,7 @@ const SHADES = [
   { id: "demo", label: "Demographics", menu: [["pops", "Pops"], ["area", "Area type"], ["ba", "% Bachelor's degree"], ["old", "% Age 65 and over"], ["income", "% Income under $35,000"]] },
   { id: "results", label: "Results", menu: [["r2024", "President, 2024"], ["local", "Local lean"]] },
 ];
-let G, P, S, O, map, state = { layer: "hood", shade: "party", selected: null, tab: "overview", ptab: "overview" };
+let G, P, S, O, map, state = { layer: "hood", shade: "party", selected: null, tab: "overview", ptab: "overview", olevel: "local", ocounty: "jefferson" };
 
 const soon = (key) => `<div class="soon"><b>${esc(SOON[key][0])}</b>${SOON[key][1] ? "Update " + SOON[key][1] : "Later"}</div>`;
 const place = (id) => G.places[id];
@@ -173,7 +173,15 @@ function route() {
       <h2>President, 2024</h2><table class="wt"><tr><th>Neighbourhood</th><th>Pops</th><th>Votes</th><th>Republican</th><th>Democratic</th></tr>${Object.values(G.places).filter((q) => q.kind === "hood").map((q) =>
         `<tr><td>${placeLink(q.id)}</td><td class="n">${q.pops}</td><td class="n">${num(q.votes2024)}</td><td class="n" style="color:var(--rep)">${pct(q.rep2024)}</td><td class="n" style="color:var(--dem)">${pct(1 - q.rep2024)}</td></tr>`).join("")}</table>`);
   } else if (view === "officials") {
-    page(`<h1>Officeholders</h1><div class="from">${S.seats.length} seats over ${G.names} · seed ${S.seed}</div>${seatTable(S.seats, true)}${soon("office")}${soon("history")}`);
+    const counties = Object.values(G.places).filter((q) => q.kind === "county"), level = ["federal", "state", "local"].includes(id) ? id : state.olevel;
+    state.olevel = level;
+    const here = counties.find((q) => q.id === state.ocounty) || counties[0];
+    const seats = S.seats.filter((s) => level === "federal" ? s.government === "federal" : level === "state" ? !s.county && s.government === "state" : s.county && s.county.toLowerCase() === here.id);
+    page(`<h1>Officeholders</h1><div class="from">${level === "federal" ? "United States" : level === "state" ? "State of " + esc(G.state) : esc(here.name)} · ${seats.length} seats · seed ${S.seed}</div>
+      <div class="tabs2" role="tablist">${[["federal", "Federal"], ["state", "State"], ["local", "Local"]].map(([k, l]) => `<button role="tab" aria-selected="${level === k}" data-go="#/officials/${k}">${l}</button>`).join("")}</div>
+      ${level === "local" ? `<p><select id="ocounty" aria-label="County">${counties.map((q) => `<option value="${esc(q.id)}"${q.id === here.id ? " selected" : ""}>${esc(q.name)}</option>`).join("")}</select></p>` : ""}
+      <div class="ib-body">${seatTable(seats, true)}</div>${soon("office")}${soon("history")}`);
+    if ($("ocounty")) $("ocounty").onchange = (e) => { state.ocounty = e.target.value; route(); };
   } else if (view === "stats") {
     page(`<h1>Stats</h1><div class="from">${G.names}</div>${soon("services")}${soon("bills")}${soon("issues")}`);
   } else if (view === "soon") {

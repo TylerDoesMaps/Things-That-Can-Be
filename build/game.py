@@ -97,7 +97,7 @@ for f in FIPS:
         places[pid] = {"id": pid, "kind": kind, "name": name, "sub": sub, "members": sorted(members), "pops": len(mine),
                        "party": [round(sum(p["pie"][k] for p in mine) / n, 3) for k in "RID"], "turnout": round(sum(p["turnout"] for p in mine) / n, 3),
                        "race": count("race"), "age": count("age"), "education": count("education"), "income": count("income"), "work": count("work"), "area": count("area"),
-                       "rep2024": round(rep / (rep + dem), 3) if rep + dem else None, "votes2024": round(cast), **(extra or {})}
+                       "rep2024": round(rep / (rep + dem), 3) if rep + dem else None, "votes2024": round(cast), "county": COUNTY.lower(), "code": CODE, **(extra or {})}
         features.append({"type": "Feature", "properties": {"id": pid, "kind": kind}, "geometry": json.loads(gpd.GeoSeries([geometry]).to_json())["features"][0]["geometry"]})
 
     hoods, district_of = list(shapes.index), drawn["assignment"]
@@ -110,7 +110,7 @@ for f in FIPS:
         add(f"{CODE}-D{d}", "district", f"District {d}", f"{COUNTY} County Commission district", members, shapes.geometry[members].union_all())
     for city in sorted(set(city_of.values())):
         members = [h for h in hoods if city_of[h] == city]
-        add((city or "unincorporated").lower().replace(" ", "-").replace(".", ""), "muni", city or f"Unincorporated {COUNTY} County", "City" if city else "Outside any city", members, shapes.geometry[members].union_all())
+        add((city or f"{CODE}-unincorporated").lower().replace(" ", "-").replace(".", ""), "muni", city or f"Unincorporated {COUNTY} County", "City" if city else "Outside any city", members, shapes.geometry[members].union_all())
     add(COUNTY.lower(), "county", f"{COUNTY} County", ST, hoods, shapes.geometry.union_all())
 
     # ---- a leader for every pop
@@ -137,7 +137,7 @@ for f in FIPS:
 
     def seat(office, label, holder, area, title=None):
         seats.append({"office": office["id"], "title": title or office["title"], "government": office["government"], "label": label, "holder": holder, "area": area,
-                      "kind": office["kind"], "chosen": office["chosen"], "partisan": office.get("partisan", False), "next": office.get("next", [])})
+                      "kind": office["kind"], "chosen": office["chosen"], "partisan": office.get("partisan", False), "next": office.get("next", []), "county": "" if office["government"] in ("state", "federal") and office["id"] != "fl.county_judge" else COUNTY})
 
     def far(key, office, share=None):
         o = outside(key, office.get("partisan", False) or office["chosen"] == "appointed", share)
@@ -204,4 +204,12 @@ for f in FIPS:
     (DATA / f"seeds/{SEED}").mkdir(parents=True, exist_ok=True)
     (DATA / f"seeds/{SEED}/fl-{f}.json").write_text(json.dumps({"seed": SEED, "people": people, "leaders": leader, "seats": seats, "moods": moods}, separators=(",", ":")))
     print(COUNTY, len(places), "places,", len(people), "people,", len(seats), "seats;", dict(Counter(people[s["holder"]]["party"] for s in seats)), holds, [q["name"] for q in cities])
+# the wider districts as shapes over every county built, for lines on the joined map
+import pandas as pd
+everything = pd.concat([c["shapes"] for c in loaded.values()])
+wider = {}
+for field in ("house", "senate", "congress"):
+    parts = everything.dissolve(field)
+    wider[field] = json.loads(gpd.GeoDataFrame({"n": parts.index.astype(int)}, geometry=parts.geometry.buffer(0.00005).buffer(-0.00005).values, crs=4269).to_json(drop_id=True))
+(DATA / "game/fl-lines.json").write_text(json.dumps(wider, separators=(",", ":")))
 (DATA / "game/counties.json").write_text(json.dumps([{"fips": f, "name": COUNTIES[f]["name"], "state": ST} for f in FIPS]))

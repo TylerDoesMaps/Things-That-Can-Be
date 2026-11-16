@@ -23,3 +23,6 @@ table.wt td .pt { display: block; }
 .cdate select.wk { border: 0; background: none; padding: 0; margin-left: -3px; font: inherit; font-size: 11px; color: var(--muted); cursor: pointer; }
 .mood { white-space: nowrap; } .mood i { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 4px; }
 .pie.wide { width: 120px; }
+
+#linebar .sw { display: inline-block; width: 12px; height: 3px; margin-right: 5px; vertical-align: middle; }
+#linebar .btn[aria-pressed="false"] .sw { opacity: .45; }

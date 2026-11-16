@@ -42,8 +42,7 @@ const role = (pid) => {
 };
 
 function covers(seat, q) {
-  if (seat.area === "state" || seat.area === "country" || seat.area === G.county.toLowerCase()) return true;
-  if (q.kind === "county") return true;
+  if (seat.area === "state" || seat.area === "country") return true;
   if (seat.area === q.id) return true;
   const hoods = q.members.map(place);
   for (const [word, field] of [["house", "house"], ["senate", "senate"], ["cd", "congress"]]) if (seat.area.startsWith(word + "-")) return hoods.some((h) => word + "-" + h[field] === seat.area);
@@ -82,6 +81,8 @@ function paint() {
   const data = { type: "FeatureCollection", features: G.shapes.features.filter((f) => f.properties.kind === state.layer).map((f) => ({ ...f, properties: { ...f.properties, c: colour(place(f.properties.id)) } })) };
   map.getSource("places").setData(data);
   map.setFilter("picked", ["==", ["get", "id"], state.selected || ""]);
+  LINES.forEach(([k]) => map.setLayoutProperty("l-" + k, "visibility", lines.has(k) ? "visible" : "none"));
+  document.querySelectorAll("#linebar .btn").forEach((b) => b.setAttribute("aria-pressed", lines.has(b.dataset.line)));
   document.querySelectorAll("#layerbar .btn").forEach((b) => b.setAttribute("aria-pressed", b.dataset.layer === state.layer));
   document.querySelectorAll("#shadebar > .btn, #shadebar .dd > .btn").forEach((b) => b.setAttribute("aria-pressed", b.dataset.group === (SHADES.find((x) => x.id === state.shade || (x.menu || []).some((m) => m && m[0] === state.shade)) || {}).id));
   legend();
@@ -98,7 +99,7 @@ function infobox() {
 function placeTab(q, tab, wide) {
   const ps = popsIn(q);
   if (tab === "overview") {
-    const inside = q.kind === "hood" ? `<tr><th>Commission district</th><td>${placeLink(G.code + "-D" + q.district, "District " + q.district)}</td></tr><tr><th>State House</th><td>District ${q.house}</td></tr><tr><th>State Senate</th><td>District ${q.senate}</td></tr><tr><th>Congress</th><td>District ${q.congress}</td></tr><tr><th>Local lean</th><td>${lean(q.local)}</td></tr>` : "";
+    const inside = q.kind === "hood" ? `<tr><th>Commission district</th><td>${placeLink(q.code + "-D" + q.district, "District " + q.district)}</td></tr><tr><th>State House</th><td>District ${q.house}</td></tr><tr><th>State Senate</th><td>District ${q.senate}</td></tr><tr><th>Congress</th><td>District ${q.congress}</td></tr><tr><th>Local lean</th><td>${lean(q.local)}</td></tr>` : "";
     let h = `<table><tr><th>People</th><td>${num(q.pops * 100)} <span class="pt">(${q.pops} pops)</span></td></tr><tr><th>Party ID</th><td>${partyLine(q.party)}</td></tr>
       <tr><th>President, 2024</th><td>${q.rep2024 === null ? "" : `<span style="color:var(--rep)">R ${pct(q.rep2024)}</span> · <span style="color:var(--dem)">D ${pct(1 - q.rep2024)}</span>`}</td></tr>
       <tr><th>Area type</th><td>${Object.entries(q.area).map(([k, v]) => `${k} (${v})`).join(", ")}</td></tr>${inside}</table>
@@ -133,8 +134,10 @@ function placeTab(q, tab, wide) {
 }
 function seatTable(seats, wide) {
   const groups = {};
-  seats.forEach((s) => (groups[s.government] ||= []).push(s));
-  const names = { federal: "United States", state: "State of " + G.state, county: G.county + " County", city: "City", school: "School district", district: "Other districts" };
+  const head = (s) => s.government === "federal" ? "United States" : !s.county ? "State of " + G.state : s.government === "county" || s.office === "fl.county_judge" ? s.county + " County"
+    : s.government === "city" ? "City of " + place(s.area).name : s.government === "school" ? s.county + " County School District" : s.county + " County, other districts";
+  seats.forEach((s) => (groups[head(s)] ||= []).push(s));
+  const names = new Proxy({}, { get: (_, k) => k });
   return Object.entries(groups).map(([g, list]) => `<div class="ib-h">${names[g]}</div><table class="mini${wide ? " wide" : ""}">${list.map((s) =>
     `<tr><td>${esc(s.title)}${s.label ? ` <span class="pt">${esc(s.label)}</span>` : ""}</td><td>${who(s.holder)}</td>${wide ? `<td class="pt">${s.chosen === "elected" ? (s.partisan ? "Elected by party" : "Elected, no party") : "Appointed"}</td><td class="n">${s.next.join(", ")}</td>` : ""}</tr>`).join("")}</table>`).join("");
 }
@@ -159,25 +162,25 @@ function route() {
   $("gres").hidden = true;
   show(view);
   if (view === "voters") {
-    page(`<h1>Voters</h1><div class="from">${P.pops.length} pops · ${num(P.pops.length * 100)} people</div><p><select id="vfilter"><option value="${G.county.toLowerCase()}">${G.county} County</option>${Object.values(G.places).filter((q) => q.kind !== "county").map((q) => `<option value="${esc(q.id)}">${esc(q.name)}</option>`).join("")}</select></p><div id="vtable"></div>${soon("known")}`);
+    page(`<h1>Voters</h1><div class="from">${P.pops.length} pops · ${num(P.pops.length * 100)} people</div><p><select id="vfilter">${Object.values(G.places).sort((a, b) => (b.kind === "county") - (a.kind === "county")).map((q) => `<option value="${esc(q.id)}">${esc(q.name)}</option>`).join("")}</select></p><div id="vtable"></div>${soon("known")}`);
     const fill = () => { $("vtable").innerHTML = popTable(popsIn(place($("vfilter").value))); };
     $("vfilter").onchange = fill;
     fill();
   } else if (view === "elections") {
     const years = {};
     S.seats.forEach((s) => s.next.forEach((y) => (years[y] ||= []).push(s)));
-    page(`<h1>Elections</h1><div class="from">${G.county} County</div>${soon("running")}${soon("election")}${Object.keys(years).sort().map((y) => `<h2>${y}</h2>${seatTable(years[y], true)}`).join("")}
+    page(`<h1>Elections</h1><div class="from">${G.names}</div>${soon("running")}${soon("election")}${Object.keys(years).sort().map((y) => `<h2>${y}</h2>${seatTable(years[y], true)}`).join("")}
       <h2>President, 2024</h2><table class="wt"><tr><th>Neighbourhood</th><th>Pops</th><th>Votes</th><th>Republican</th><th>Democratic</th></tr>${Object.values(G.places).filter((q) => q.kind === "hood").map((q) =>
         `<tr><td>${placeLink(q.id)}</td><td class="n">${q.pops}</td><td class="n">${num(q.votes2024)}</td><td class="n" style="color:var(--rep)">${pct(q.rep2024)}</td><td class="n" style="color:var(--dem)">${pct(1 - q.rep2024)}</td></tr>`).join("")}</table>`);
   } else if (view === "officials") {
-    page(`<h1>Officeholders</h1><div class="from">${S.seats.length} seats over ${G.county} County · seed ${S.seed}</div>${seatTable(S.seats, true)}${soon("office")}${soon("history")}`);
+    page(`<h1>Officeholders</h1><div class="from">${S.seats.length} seats over ${G.names} · seed ${S.seed}</div>${seatTable(S.seats, true)}${soon("office")}${soon("history")}`);
   } else if (view === "stats") {
-    page(`<h1>Stats</h1><div class="from">${G.county} County</div>${soon("services")}${soon("bills")}${soon("issues")}`);
+    page(`<h1>Stats</h1><div class="from">${G.names}</div>${soon("services")}${soon("bills")}${soon("issues")}`);
   } else if (view === "soon") {
     page(`<h1>${esc(SOON[id][0])}</h1>${soon(id)}`);
   } else if (view === "place" && place(id)) {
-    const q = place(id), up = q.kind === "county" ? [] : [G.county.toLowerCase()];
-    if (q.kind === "hood") up.push(G.code + "-D" + q.district);
+    const q = place(id), up = q.kind === "county" ? [] : [q.county];
+    if (q.kind === "hood") up.push(q.code + "-D" + q.district);
     page(`<div class="crumbs"><button class="back" data-go="#/map">Map</button>${up.map((u) => placeLink(u)).join(" › ")}</div><h1>${esc(q.name)}</h1><div class="from">${esc(q.sub)}</div>
       <div class="tabs2" role="tablist">${TABS.map(([k, l]) => `<button role="tab" aria-selected="${state.ptab === k}" data-ptab="${k}">${l}</button>`).join("")}</div><div class="ib-body">${placeTab(q, state.ptab, true)}</div>`);
     document.querySelectorAll("[data-ptab]").forEach((b) => b.onclick = () => { state.ptab = b.dataset.ptab; route(); });
@@ -193,15 +196,35 @@ function route() {
 }
 
 /* ---------- start ---------- */
-const COUNTY = new URLSearchParams(location.search).get("county") || "12065";
-Promise.all([
-  fetch(`data/game/fl-${COUNTY}.json`).then((r) => r.json()), fetch(`data/pops/fl-${COUNTY}.json`).then((r) => r.json()),
-  fetch(`data/seeds/1/fl-${COUNTY}.json`).then((r) => r.json()), fetch("content/government/offices-fl.yaml").then((r) => r.text()), fetch("data/game/counties.json").then((r) => r.json()),
-]).then(([g, p, s, o, counties]) => {
-  G = g; P = p; S = s; O = jsyaml.load(o);
+const get = (path) => fetch(path).then((r) => r.json());
+const LINES = [["county", "Counties", "#202122"], ["district", "Commission districts", "#202122"], ["city", "Cities", "#202122"], ["hood", "Neighbourhoods", "#72777d"],
+  ["house", "State House", "#7a3fb0"], ["senate", "State Senate", "#0b7a75"], ["congress", "Congress", "#b36b00"]];
+const lines = new Set(["county", "city"]);
+let WIDE;
+get("data/game/counties.json").then((counties) => Promise.all([
+  Promise.all(counties.map((c) => Promise.all([get(`data/game/fl-${c.fips}.json`), get(`data/pops/fl-${c.fips}.json`), get(`data/seeds/1/fl-${c.fips}.json`)]))),
+  fetch("content/government/offices-fl.yaml").then((r) => r.text()), get("data/game/fl-lines.json"),
+])).then(([parts, o, wide]) => {
+  // every county joined into one world
+  G = { state: parts[0][0].state, places: {}, shapes: { type: "FeatureCollection", features: [] }, city: { type: "FeatureCollection", features: [] }, bounds: [180, 90, -180, -90] };
+  P = { pops: [] }; S = { seed: parts[0][2].seed, people: {}, leaders: {}, moods: {}, seats: [] }; O = jsyaml.load(o); WIDE = wide;
+  const seen = new Set();
+  for (const [g, p, s] of parts) {
+    Object.assign(G.places, g.places);
+    G.shapes.features.push(...g.shapes.features);
+    G.city.features.push(...g.lines.City.features);
+    G.bounds = [Math.min(G.bounds[0], g.bounds[0]), Math.min(G.bounds[1], g.bounds[1]), Math.max(G.bounds[2], g.bounds[2]), Math.max(G.bounds[3], g.bounds[3])];
+    P.pops.push(...p.pops);
+    Object.assign(S.people, s.people); Object.assign(S.leaders, s.leaders); Object.assign(S.moods, s.moods);
+    for (const x of s.seats) { const k = x.county + x.office + x.label + x.area + x.holder; if (!seen.has(k)) { seen.add(k); S.seats.push(x); } }
+  }
+  const order = { federal: 0, state: 1, county: 2, city: 3, school: 4, district: 5 };
+  S.seats.sort((a, b) => (a.county ? 1 : 0) - (b.county ? 1 : 0) || a.county.localeCompare(b.county) || order[a.government] - order[b.government]);
+  const cs = Object.values(G.places).filter((q) => q.kind === "county").map((q) => q.name.replace(" County", ""));
+  G.names = cs.slice(0, -1).join(", ") + (cs.length > 1 ? " and " : "") + cs.slice(-1) + (cs.length > 1 ? " counties" : " County");
   P.pops.forEach((x) => { x.pie = [x.pie.R, x.pie.I, x.pie.D]; });
-  $("cdate").innerHTML = `November 2024<select class="wk" id="county" aria-label="County">${counties.map((c) => `<option value="${c.fips}"${c.fips === COUNTY ? " selected" : ""}>${esc(c.name)} County, ${esc(c.state)}</option>`).join("")}</select>`;
-  $("county").onchange = (e) => { location.href = "game.html?county=" + e.target.value; };
+  $("cdate").innerHTML = `November 2024<span class="wk">${esc(G.names)}, ${esc(G.state)}</span>`;
+  $("linebar").innerHTML = LINES.map(([k, l, c]) => `<button class="btn" data-line="${k}"><i class="sw" style="background:${c}"></i>${l}</button>`).join("");
   $("seedtag").textContent = "Seed " + S.seed;
   $("youpanel").innerHTML = soon("you") + soon("week") + soon("campaign") + soon("notebook");
   const years = {};
@@ -219,15 +242,19 @@ Promise.all([
   map.on("load", () => {
     const b = G.bounds;
     map.fitBounds([[b[0], b[1]], [b[2], b[3]]], { padding: 24, duration: 0 });
-    map.addSource("places", { type: "geojson", data: { type: "FeatureCollection", features: [] } });
-    map.addSource("county", { type: "geojson", data: { type: "FeatureCollection", features: G.shapes.features.filter((f) => f.properties.kind === "county") } });
-    map.addSource("city", { type: "geojson", data: G.lines.City });
+    const only = (kind) => ({ type: "FeatureCollection", features: G.shapes.features.filter((f) => f.properties.kind === kind) });
     const round = { "line-join": "round", "line-cap": "round" }, grow = (a, b) => ["interpolate", ["linear"], ["zoom"], 8, a, 13, b];
+    map.addSource("places", { type: "geojson", data: { type: "FeatureCollection", features: [] } });
     map.addLayer({ id: "fill", type: "fill", source: "places", paint: { "fill-color": ["get", "c"], "fill-antialias": false } });
-    map.addLayer({ id: "edge", type: "line", source: "places", layout: round, paint: { "line-color": "#72777d", "line-width": grow(0.4, 1) } });
-    map.addLayer({ id: "city", type: "line", source: "city", layout: { "line-join": "round" }, paint: { "line-color": "#202122", "line-width": grow(1, 1.8), "line-dasharray": [3, 2] } });
-    map.addLayer({ id: "county", type: "line", source: "county", layout: round, paint: { "line-color": "#202122", "line-width": grow(1.6, 2.6) } });
-    map.addLayer({ id: "picked", type: "line", source: "places", layout: round, filter: ["==", ["get", "id"], ""], paint: { "line-color": "#202122", "line-width": grow(2.4, 3.4) } });
+    map.addLayer({ id: "edge", type: "line", source: "places", layout: round, paint: { "line-color": "#72777d", "line-width": grow(0.3, 0.8) } });
+    const style = { hood: [0.4, 1, null], district: [1, 1.8, null], city: [1, 1.8, [3, 2]], house: [1.4, 2.4, null], senate: [1.4, 2.4, [5, 2]], congress: [1.8, 3, [1, 2]], county: [1.8, 2.8, null] };
+    for (const k of ["hood", "district", "city", "house", "senate", "congress", "county"]) {
+      map.addSource("l-" + k, { type: "geojson", data: k === "city" ? G.city : WIDE[k] || only(k) });
+      const paint = { "line-color": LINES.find((x) => x[0] === k)[2], "line-width": grow(style[k][0], style[k][1]) };
+      if (style[k][2]) paint["line-dasharray"] = style[k][2];
+      map.addLayer({ id: "l-" + k, type: "line", source: "l-" + k, layout: { ...(style[k][2] ? { "line-join": "round" } : round), visibility: "none" }, paint });
+    }
+    map.addLayer({ id: "picked", type: "line", source: "places", layout: round, filter: ["==", ["get", "id"], ""], paint: { "line-color": "#202122", "line-width": grow(2.4, 3.6) } });
     map.on("click", "fill", (e) => { state.selected = e.features[0].properties.id; paint(); infobox(); });
     map.on("mousemove", "fill", (e) => { const q = place(e.features[0].properties.id); tip(`<b>${esc(q.name)}</b><br>${q.pops} pops · ${pct(q.party[0])} R · ${pct(q.party[2])} D`, e.originalEvent); map.getCanvas().style.cursor = "pointer"; });
     map.on("mouseleave", "fill", () => { $("tip").hidden = true; map.getCanvas().style.cursor = ""; });
@@ -255,6 +282,7 @@ document.addEventListener("click", (e) => {
   if (t.dataset.place) location.hash = "#/place/" + encodeURIComponent(t.dataset.place);
   if (t.dataset.pid) location.hash = "#/person/" + t.dataset.pid;
   if (t.dataset.layer) { state.layer = t.dataset.layer; state.selected = null; paint(); infobox(); }
+  if (t.dataset.line) { lines.has(t.dataset.line) ? lines.delete(t.dataset.line) : lines.add(t.dataset.line); paint(); }
   if (t.dataset.shade) { state.shade = t.dataset.shade; paint(); }
 });
 document.addEventListener("mouseover", (e) => {

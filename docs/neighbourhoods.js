@@ -1,6 +1,6 @@
 const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
-const LINE = { "Precincts": "#bf2c2c", "City": "#16181d", "State House districts": "#7a3fb0", "Commission districts": "#1d7a46" };
+const LINE = { "Precincts": "#bf2c2c", "City": "#16181d", "State House districts": "#7a3fb0" };
 let data, option = "C", shown = new Set(["City"]);
 
 const map = new maplibregl.Map({
@@ -26,7 +26,7 @@ Promise.all([fetch("data/neighbourhoods/jefferson-fl.json").then((r) => r.json()
   for (const name of Object.keys(d.lines)) button("lines", name, () => { shown.has(name) ? shown.delete(name) : shown.add(name); draw(); });
   map.on("mousemove", "fill", (e) => {
     const p = e.features[0].properties, tip = $("tip");
-    const rows = [["Adults", Number(p.adults).toLocaleString("en-US")], ["Pops", p.pops], ["Place", p.city || "Outside any city"], ["State House", p.house], ["Commission district", p.commission], ["Precincts", p.precinct]];
+    const rows = [["Adults", Number(p.adults).toLocaleString("en-US")], ["Pops", p.pops], ["Place", p.city || "Outside any city"], ["State House", p.house], ["Precincts", p.precinct]];
     tip.innerHTML = `<h3>${esc(p.code)}</h3><dl>${rows.map(([a, v]) => `<dt>${a}</dt><dd>${esc(v)}</dd>`).join("")}</dl>`;
     tip.hidden = false;
     const box = $("map").getBoundingClientRect();

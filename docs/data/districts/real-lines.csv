@@ -1,0 +1,372 @@
+kind,name,state,people,lines
+County,Los Angeles,CA,9829544,not started
+County,Cook,IL,5173146,not started
+County,Harris,TX,4728030,not started
+County,Maricopa,AZ,4496588,not started
+County,San Diego,CA,3286069,not started
+County,Orange,CA,3167809,not started
+County,Miami-Dade,FL,2662777,not started
+County,Dallas,TX,2586050,not started
+County,Riverside,CA,2458395,not started
+County,Clark,NV,2292476,not started
+County,King,WA,2252305,not started
+County,San Bernardino,CA,2194710,not started
+County,Tarrant,TX,2126477,not started
+County,Bexar,TX,2028236,not started
+County,Broward,FL,1930983,not started
+County,Santa Clara,CA,1885508,not started
+County,Wayne,MI,1774816,not started
+County,Alameda,CA,1648556,not started
+County,Sacramento,CA,1588921,not started
+County,Suffolk,NY,1526344,not started
+County,Palm Beach,FL,1497987,not started
+County,Hillsborough,FL,1478194,not started
+County,Orange,FL,1422746,not started
+County,Nassau,NY,1390907,not started
+County,Franklin,OH,1321414,not started
+County,Travis,TX,1305154,not started
+County,Oakland,MI,1270017,not started
+County,Hennepin,MN,1267416,not started
+County,Cuyahoga,OH,1249387,not started
+County,Allegheny,PA,1238090,not started
+County,Salt Lake,UT,1186421,not started
+County,Contra Costa,CA,1161413,not started
+County,Wake,NC,1150204,not started
+County,Fairfax,VA,1139720,not started
+County,Mecklenburg,NC,1122276,not started
+County,Collin,TX,1109462,not started
+County,Fulton,GA,1065334,not started
+County,Montgomery,MD,1054827,not started
+County,Pima,AZ,1052030,not started
+County,Fresno,CA,1013581,not started
+County,Westchester,NY,997895,not started
+County,St Louis,MO,997187,not started
+County,Gwinnett,GA,964546,not started
+County,Pinellas,FL,956615,not started
+County,Prince Georges,MD,955306,not started
+County,Bergen,NJ,953819,not started
+County,Erie,NY,950683,not started
+County,Denton,TX,941647,not started
+County,Milwaukee,WI,928059,not started
+County,Pierce,WA,925708,not started
+County,Dupage,IL,924885,not started
+County,Shelby,TN,924454,not started
+County,Kern,CA,917673,not started
+County,Hidalgo,TX,880356,not started
+County,Macomb,MI,876792,not started
+County,El Paso,TX,867947,not started
+County,Middlesex,NJ,860807,not started
+County,Montgomery,PA,860578,not started
+County,Fort Bend,TX,858527,not started
+County,Essex,NJ,854917,not started
+County,Baltimore,MD,849316,not started
+County,Ventura,CA,839784,not started
+County,Snohomish,WA,833540,not started
+County,Hamilton,OH,826139,not started
+County,Multnomah,OR,803377,not started
+County,Oklahoma,OK,798575,not started
+County,San Joaquin,CA,789410,not started
+County,Lee,FL,787976,not started
+County,Cobb,GA,766802,not started
+County,Dekalb,GA,757718,not started
+County,Monroe,NY,755160,not started
+County,Polk,FL,753520,not started
+County,San Mateo,CA,737888,not started
+County,El Paso,CO,737867,not started
+County,Norfolk,MA,724505,not started
+County,Jackson,MO,716862,not started
+County,Lake,IL,711239,not started
+County,Hudson,NJ,702463,not started
+County,Will,IL,697252,not started
+County,Utah,UT,684986,not started
+County,Bernalillo,NM,674393,not started
+County,Tulsa,OK,672858,not started
+County,Jefferson,AL,667820,not started
+County,Kent,MI,658046,not started
+County,Arapahoe,CO,654900,not started
+County,Ocean,NJ,648998,not started
+County,Montgomery,TX,648886,not started
+County,Bucks,PA,646098,not started
+County,Monmouth,NJ,645354,not started
+County,Williamson,TX,643026,not started
+County,Brevard,FL,616628,not started
+County,Johnson,KS,613219,not started
+County,Washington,OR,600811,not started
+County,Anne Arundel,MD,590336,not started
+County,Douglas,NE,585008,not started
+County,Pasco,FL,584067,not started
+County,Bristol,MA,580164,not started
+County,Jefferson,CO,579581,not started
+County,Delaware,PA,573849,not started
+County,Union,NJ,572114,not started
+County,New Castle,DE,571708,not started
+County,Volusia,FL,564412,not started
+County,Dane,WI,563951,not started
+County,Lancaster,PA,553652,not started
+County,Stanislaus,CA,552999,not started
+County,Spokane,WA,546040,not started
+County,Ramsey,MN,543257,not started
+County,Guilford,NC,542410,not started
+County,Chester,PA,538649,not started
+County,Summit,OH,537633,not started
+County,Montgomery,OH,535840,not started
+County,Greenville,SC,533834,not started
+County,Plymouth,MA,533003,not started
+County,Sedgwick,KS,523828,not started
+County,Camden,NJ,523771,not started
+County,Adams,CO,522140,not started
+County,Passaic,NJ,518117,not started
+County,Kane,IL,515588,not started
+County,Ada,ID,511931,not started
+County,Clark,WA,511404,not started
+County,Morris,NJ,510981,not started
+County,Lake,IN,498558,not started
+County,Polk,IA,496844,not started
+County,Washoe,NV,493392,not started
+County,Knox,TN,486677,not started
+County,Sonoma,CA,485887,not started
+County,Prince William,VA,484472,not started
+County,Tulare,CA,477054,not started
+County,Onondaga,NY,473236,not started
+County,Seminole,FL,470093,not started
+County,Burlington,NJ,464269,not started
+County,York,PA,458696,not started
+County,Solano,CA,451716,not started
+County,Pinal,AZ,449557,not started
+County,Sarasota,FL,447057,not started
+County,Santa Barbara,CA,446475,not started
+County,Dakota,MN,442038,not started
+County,Monterey,CA,437325,not started
+County,Jefferson,LA,433688,not started
+County,Berks,PA,429342,not started
+County,Lucas,OH,429191,not started
+County,Loudoun,VA,427592,not started
+County,Hillsborough,NH,424079,not started
+County,Cameron,TX,423029,not started
+County,Clackamas,OR,422537,not started
+County,Richland,SC,418307,not started
+County,Mobile,AL,413073,not started
+County,Charleston,SC,413024,not started
+County,Manatee,FL,412703,not started
+County,Placer,CA,412300,not started
+County,St Charles,MO,409981,not started
+County,Waukesha,WI,408756,not started
+County,Orange,NY,404525,not started
+County,Genesee,MI,404208,not started
+County,Osceola,FL,403282,not started
+County,Pulaski,AR,397821,not started
+County,Lake,FL,395804,not started
+County,Madison,AL,395211,not started
+County,Butler,OH,390234,not started
+County,Allen,IN,388608,not started
+County,Collier,FL,385980,not started
+County,Marion,FL,385915,not started
+County,Mercer,NJ,385898,not started
+County,Forsyth,NC,385523,not started
+County,Lane,OR,383189,not started
+County,Brazoria,TX,379689,not started
+County,Bell,TX,379617,not started
+County,Lehigh,PA,375539,not started
+County,Stark,OH,373834,not started
+County,Chesterfield,VA,370688,not started
+County,Washtenaw,MI,369390,not started
+County,Hamilton,TN,369135,not started
+County,Douglas,CO,368990,not started
+County,Davis,UT,367285,not started
+County,Anoka,MN,367018,not started
+County,Horry,SC,365579,not started
+County,Larimer,CO,362533,not started
+County,Hamilton,IN,356650,not started
+County,Galveston,TX,355062,not started
+County,Nueces,TX,353079,not started
+County,Westmoreland,PA,353057,not started
+County,Rutherford,TN,352182,not started
+County,Marion,OR,347119,not started
+County,Somerset,NJ,345647,not started
+County,St Lucie,FL,343579,not started
+County,Weld,CO,340036,not started
+County,Rockland,NY,339227,not started
+County,Spartanburg,SC,335864,not started
+County,Cumberland,NC,335508,not started
+County,Howard,MD,334529,not started
+County,Henrico,VA,333554,not started
+County,Boulder,CO,329543,not started
+County,Durham,NC,326126,not started
+County,Luzerne,PA,326053,not started
+County,Lancaster,NE,324514,not started
+County,Escambia,FL,322390,not started
+County,Rockingham,NH,316947,not started
+County,Lorain,OH,315595,not started
+County,Lubbock,TX,314451,not started
+County,Albany,NY,313743,not started
+County,Northampton,PA,313628,not started
+County,Mchenry,IL,311122,not started
+County,Cumberland,ME,305231,not started
+County,Gloucester,NJ,304477,not started
+County,Greene,MO,300865,not started
+County,Lexington,SC,300137,not started
+County,Ottawa,MI,299157,not started
+County,Thurston,WA,297977,not started
+County,Cleveland,OK,297597,not started
+County,Dutchess,NY,297112,not started
+County,Clayton,GA,297100,not started
+County,Chatham,GA,296329,not started
+County,Benton,AR,293692,not started
+County,Leon,FL,292817,not started
+County,St Johns,FL,292466,not started
+County,York,SC,288595,not started
+County,Dauphin,PA,287400,not started
+County,Merced,CA,286461,not started
+County,Ingham,MI,284034,not started
+County,San Luis Obispo,CA,283159,not started
+County,Winnebago,IL,283119,not started
+County,Frederick,MD,279835,not started
+County,Alachua,FL,279238,not started
+County,Atlantic,NJ,274966,not started
+County,Cherokee,GA,274615,not started
+County,Kitsap,WA,274314,not started
+County,Washington,MN,272256,not started
+County,St Joseph,IN,272212,not started
+County,Buncombe,NC,271534,not started
+County,Brown,WI,269591,not started
+County,St Tammany,LA,269388,not started
+County,Erie,PA,269011,not started
+County,Webb,TX,267945,not started
+County,Santa Cruz,CA,267792,not started
+County,Weber,UT,267066,not started
+County,Madison,IL,264490,not started
+County,Mclennan,TX,263115,not started
+County,Harford,MD,262977,not started
+County,Cumberland,PA,262919,not started
+County,Kalamazoo,MI,261108,not started
+County,Marin,CA,260206,not started
+County,Forsyth,GA,260206,not started
+County,Yakima,WA,256035,not started
+County,Williamson,TN,255735,not started
+County,Clay,MO,255518,not started
+County,Hays,TX,255397,not started
+County,St Clair,IL,254796,not started
+County,Jefferson,TX,253704,not started
+County,Washington,AR,250057,not started
+City,New York,NY,8467513,not started
+City,Los Angeles,CA,3849297,not started
+City,Chicago,IL,2696555,not started
+City,Houston,TX,2288250,not started
+City,Phoenix,AZ,1624569,not started
+City,Philadelphia,PA,1576251,not started
+City,San Antonio,TX,1451853,not started
+City,San Diego,CA,1381611,not started
+City,Dallas,TX,1288457,not started
+City,San Jose,CA,983489,not started
+City,Austin,TX,964177,not started
+City,City And Honolulu,HI,963826,not started
+City,Jacksonville,FL,954614,not started
+City,Fort Worth,TX,935508,not started
+City,Columbus,OH,906528,not started
+City,Indianapolis,IN,882039,not started
+City,Charlotte,NC,879709,not started
+City,City And San Francisco,CA,815201,not started
+City,Metro Government Of Louisville-Jefferson County,KY,777874,not started
+City,Seattle,WA,733919,not started
+City,City And Denver,CO,711463,not started
+City,Metropolitan Government Of Nashville-Davidson County,TN,703953,not started
+City,Oklahoma City,OK,687725,not started
+City,El Paso,TX,678415,not started
+City,Washington Dc,DC,670050,not started
+City,Boston,MA,654776,not started
+City,Las Vegas,NV,646790,not started
+City,Portland,OR,641162,not started
+City,Detroit,MI,632464,not started
+City,Memphis,TN,628127,not started
+City,Baltimore,MD,576498,not started
+City,Milwaukee,WI,569330,not started
+City,Albuquerque,NM,562599,not started
+City,Fresno,CA,544510,not started
+City,Tucson,AZ,543242,not started
+City,Sacramento,CA,525041,not started
+City,Mesa,AZ,509475,not started
+City,Kansas City,MO,508394,not started
+City,Atlanta,GA,496461,not started
+City,Omaha,NE,487300,not started
+City,Colorado Springs,CO,483956,not started
+City,Raleigh,NC,469124,not started
+City,Virginia Beach,VA,457672,not started
+City,Long Beach,CA,456062,not started
+City,Miami,FL,439890,not started
+City,Oakland,CA,433823,not started
+City,Minneapolis,MN,425336,not started
+City,Tulsa,OK,411401,not started
+City,Bakersfield,CA,407615,not started
+City,Wichita,KS,395699,not started
+City,Arlington,TX,392786,not started
+City,Aurora,CO,389347,not started
+City,Tampa,FL,387050,not started
+City,New Orleans,LA,376971,not started
+City,Cleveland,OH,367991,not started
+City,Anaheim,CA,345940,not started
+City,Henderson,NV,322178,not started
+City,Stockton,CA,322120,not started
+City,Urban County Government Of Lexington-Fayette,KY,321793,not started
+City,Corpus Christi,TX,317773,not started
+City,Riverside,CA,317261,not started
+City,Santa Ana,CA,309441,not started
+City,Orlando,FL,309154,not started
+City,Irvine,CA,309031,not started
+City,Cincinnati,OH,308935,not started
+City,Newark,NJ,307220,not started
+City,St Paul,MN,307193,not started
+City,Pittsburgh,PA,300431,not started
+City,Greensboro,NC,298263,not started
+City,St Louis,MO,293310,not started
+City,Lincoln,NE,292657,not started
+City,Plano,TX,288253,not started
+City,Anchorage,AK,288121,not started
+City,Durham,NC,285527,not started
+City,Jersey City,NJ,283927,not started
+City,Chandler,AZ,279458,not started
+City,Chula Vista,CA,277220,not started
+City,Buffalo,NY,276807,not started
+City,North Las Vegas,NV,274133,not started
+City,Gilbert,AZ,273136,not started
+City,Madison,WI,269196,not started
+City,Reno,NV,268851,not started
+City,Toledo,OH,268508,not started
+City,Fort Wayne,IN,265974,not started
+City,Lubbock,TX,260993,not started
+City,St Petersburg,FL,258201,not started
+City,Laredo,TX,256153,not started
+City,Irving,TX,254198,not started
+City,Chesapeake,VA,251269,not started
+City,Winston-Salem,NC,250320,not started
+City,Glendale,AZ,249630,not started
+City,Scottsdale,AZ,242753,not started
+City,Garland,TX,242035,not started
+City,Boise,ID,237446,not started
+City,Norfolk,VA,235089,not started
+City,Spokane,WA,229071,not started
+City,Fremont,CA,227514,not started
+City,Richmond,VA,226604,not started
+City,Santa Clarita,CA,224593,not started
+City,San Bernardino,CA,222203,not started
+City,City-Baton Rouge-East Baton Rouge,LA,222185,not started
+City,Hialeah,FL,220490,not started
+City,Tacoma,WA,219205,not started
+City,Modesto,CA,218771,not started
+City,Port St Lucie,FL,217523,not started
+City,Huntsville,AL,216963,not started
+City,Des Moines,IA,212031,not started
+City,Moreno Valley,CA,211600,not started
+City,Fontana,CA,210761,not started
+City,Frisco,TX,210719,not started
+City,Rochester,NY,210606,not started
+City,Yonkers,NY,209530,not started
+City,Fayetteville,NC,208778,not started
+City,Worcester,MA,205918,not started
+City,Consolidated Government Of Columbus,GA,205617,not started
+City,Cape Coral,FL,204510,not started
+City,Mckinney,TX,202690,not started
+City,Little Rock,AR,201998,not started
+City,Oxnard,CA,201879,not started
+City,Amarillo,TX,201234,not started
+City,Consolidated Government Of Augusta-Richmond County,GA,201196,not started
+City,Salt Lake City,UT,200478,not started

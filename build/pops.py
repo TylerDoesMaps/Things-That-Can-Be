@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""Builds the pops for one county: groups of 100 adults who share race, age and education and live in one precinct piece.
+"""Builds the pops for one county: groups of 100 adults who share race, age and education and live in one neighbourhood.
+If WORK_DIR/neighbourhoods/<county>.csv exists (from neighbourhoods.py) pops are placed in those; otherwise in precinct pieces.
 
 Inputs: 2020 Census blocks (adults by race, group quarters), American Community Survey tract tables (age, education,
 income, industry, tenure, citizenship), 2024 precincts. The outputs here come from demographics alone:
@@ -96,6 +97,10 @@ if ST not in TOWNSHIP_STATES:
 j = j[~j.index.duplicated()]
 j["city"] = j.city.fillna("")
 j["piece"] = j.p + "|" + j.city
+hood = WORK / f"neighbourhoods/{SF}{CF}.csv"
+if hood.exists():
+    j["piece"] = j.block.map(pd.read_csv(hood, dtype=str).set_index("block").code)
+j["unit"] = j.piece if hood.exists() else j.p
 city_people = j.groupby("city").adults.sum()
 
 # ---- non-citizens out, by tract, taken from the groups other than White and Black
@@ -159,7 +164,7 @@ for piece, g in j.groupby("piece"):
             for a in range(4):
                 expected[piece][ri * 12 + a * 3: ri * 12 + a * 3 + 3] += n * share[t][r][a]
     top = g.groupby("tract").adults.sum().idxmax()
-    meta[piece] = {"precinct": g.p.iloc[0], "city": g.city.iloc[0], "township": g.groupby("township").adults.sum().idxmax() if g.township.notna().any() else "",
+    meta[piece] = {"precinct": g.unit.iloc[0], "city": g.city.iloc[0], "township": g.groupby("township").adults.sum().idxmax() if g.township.notna().any() else "",
                    "tract": top, "college": float(g.college.sum()), "adults": float(sum(expected[piece]))}
 pieces = sorted(expected)
 M = np.array([expected[p] for p in pieces])
@@ -262,18 +267,23 @@ for n, p in enumerate(pops):
 seen = defaultdict(int)
 for p in sorted(pops, key=lambda p: (p["piece"], RACES.index(p["race"]), p["age"], p["education"])):
     seen[p["piece"]] += 1
-    p["id"] = f"{ST.lower()}.{SF}{CF}.{p['precinct'].split('-')[-1].lower()}.{(p['city'] or 'rural').lower().replace(' ', '_')}.{seen[p['piece']]}"
+    p["id"] = f"{p['piece'].lower()}.{seen[p['piece']]}" if hood.exists() else f"{ST.lower()}.{SF}{CF}.{p['precinct'].split('-')[-1].lower()}.{(p['city'] or 'rural').lower().replace(' ', '_')}.{seen[p['piece']]}"
 
 # ---- comparison with 2024, not used above
 votes = json.load(open(RAW / f"nyt/results/{ST}.json"))
+share = (j.adults / j.groupby("p").adults.transform("sum")).fillna(0)
+real = {}
+for i, name in enumerate(["dem", "rep", "all"]):
+    j[name] = share * j.p.map(lambda k: votes.get(k, [0, 0, 0])[i])
+    real[name] = j.groupby("unit")[name].sum()
 check = []
-for pr in sorted({p["precinct"] for p in pops} | {k for k in votes if k.startswith(PREFIX)}):
-    mine = [p for p in pops if p["precinct"] == pr]
+for unit in sorted(set(j.unit)):
+    mine = [p for p in pops if p["precinct"] == unit]
     cast = sum(SIZE * p["turnout"] for p in mine)
     rep = sum(SIZE * p["turnout"] * p["lean"] for p in mine)
-    d, r, t = votes.get(pr, [0, 0, 0])
-    check.append({"precinct": pr, "pops": len(mine), "places": sorted({p["city"] or "outside any city" for p in mine}), "predicted_votes": round(cast),
-                  "predicted_rep": round(rep / cast, 3) if cast else None, "actual_votes": t, "actual_rep": round(r / (d + r), 3) if d + r else None})
+    d, r, t = real["dem"][unit], real["rep"][unit], real["all"][unit]
+    check.append({"precinct": unit, "pops": len(mine), "places": sorted({p["city"] or "outside any city" for p in mine}), "predicted_votes": round(cast),
+                  "predicted_rep": round(rep / cast, 3) if cast else None, "actual_votes": round(t), "actual_rep": round(r / (d + r), 3) if d + r else None})
 cast = sum(c["predicted_votes"] for c in check)
 rep = sum(SIZE * p["turnout"] * p["lean"] for p in pops)
 actual = [sum(votes[k][i] for k in votes if k.startswith(PREFIX)) for i in range(3)]

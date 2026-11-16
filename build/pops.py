@@ -2,7 +2,7 @@
 """Builds the pops for one county: groups of 100 adults who share race, age and education and live in one precinct piece.
 
 Inputs: 2020 Census blocks (adults by race, group quarters), American Community Survey tract tables (age, education,
-income, industry, tenure, children, citizenship), 2024 precincts. The outputs here come from demographics alone:
+income, industry, tenure, citizenship), 2024 precincts. The outputs here come from demographics alone:
 nothing is fitted to the 2024 result, which is kept only for comparison.
 Leader names are stand-ins drawn from short lists; the party is drawn from the pop's own split.
 Usage: pops.py RAW_DIR WORK_DIR STATE_ABBR STATE_FIPS COUNTY_FIPS OUT_JSON [PRECINCT_PREFIX]
@@ -208,11 +208,8 @@ for t, group in by_tract.items():
         p["income"] = INCOMES[int(np.searchsorted(cut, (n + 0.5) / len(order)))]
     g = acs("b25003", geo_id)
     own = g(2) / g(1)
-    g = acs("b11005", geo_id)
-    kids = g(2) / g(1)
     for p in group:
         p["owners"] = round(min(0.97, own * [0.5, 0.9, 1.1, 1.15][p["_a"]]), 2)
-        p["children"] = round(min(0.9, kids * [1.0, 2.2, 0.7, 0.1][p["_a"]]), 2)
     g = acs("b23025", geo_id)
     working = round(len(group) * (g(4) + g(6)) / g(1))
     idle = len(group) - working

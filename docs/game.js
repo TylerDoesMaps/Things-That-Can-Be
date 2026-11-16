@@ -121,13 +121,13 @@ function placeTab(q, tab, wide) {
     return h;
   }
   if (tab === "party") {
-    const lead = { rep: 0, ind: 0, dem: 0 };
-    ps.forEach((p) => lead[S.people[S.leaders[p.id]].party]++);
+    const heads = { rep: 0, ind: 0, dem: 0 };
+    ps.forEach((p) => heads[S.people[S.leaders[p.id]].party]++);
     return `<table><tr><th>Party ID</th><td>${lead(q.party)}</td></tr><tr><th>President, 2024</th><td>${pct(q.rep2024)} Republican of ${num(q.votes2024)} votes</td></tr><tr><th>Expected turnout</th><td>${pct(q.turnout)}</td></tr></table>
       <div class="ib-h">Party ID</div>${mbar("Republican", q.party[0], "var(--rep)")}${mbar("Independent", q.party[1], "var(--g3)")}${mbar("Democrat", q.party[2], "var(--dem)")}
       <div class="ib-h">Mood</div><table class="mini">${["federal", "state", "local"].map((l) => { const c = {}; ps.forEach((p) => { const m = S.moods[p.id][l]; c[m] = (c[m] || 0) + 1; });
         return `<tr><td>${l[0].toUpperCase() + l.slice(1)}</td><td><span class="pie wide">${Object.keys(MOOD_COL).map((m) => `<i style="width:${(c[m] || 0) / ps.length * 100}%;background:${MOOD_COL[m]}"></i>`).join("")}</span></td><td class="pt">${Object.keys(MOOD_COL).filter((m) => c[m]).map((m) => `${m} ${c[m]}`).join(", ")}</td></tr>`; }).join("")}</table>
-      <div class="ib-h">Pop leaders</div>${mbar("Republican", lead.rep / ps.length, "var(--rep)")}${mbar("Independent", lead.ind / ps.length, "var(--g3)")}${mbar("Democrat", lead.dem / ps.length, "var(--dem)")}${soon("orgs")}`;
+      <div class="ib-h">Pop leaders</div>${mbar("Republican", heads.rep / ps.length, "var(--rep)")}${mbar("Independent", heads.ind / ps.length, "var(--g3)")}${mbar("Democrat", heads.dem / ps.length, "var(--dem)")}${soon("orgs")}`;
   }
   const seats = S.seats.filter((s) => covers(s, q));
   return seatTable(seats, wide);

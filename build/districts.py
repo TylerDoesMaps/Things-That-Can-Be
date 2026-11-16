@@ -21,7 +21,8 @@ TRIALS = int(sys.argv[6]) if len(sys.argv) > 6 else 0
 EQUAL, COMPACT, CLOSE, TOUCH = 3.0, 3.0, 1.0, 200  # TOUCH: metres of shared border before two neighbourhoods count as touching
 
 shapes = gpd.GeoDataFrame.from_features(json.load(open(SRC))["shapes"], crs=4269).set_index("code")
-flat = shapes.to_crs(5070).geometry
+shapes["geometry"] = shapes.geometry.buffer(0)
+flat = shapes.to_crs(5070).geometry.buffer(0)
 pops_file = json.load(open(POPS))
 size = defaultdict(int)
 for p in pops_file["pops"]:
@@ -35,9 +36,25 @@ for u in units:
     for v, length in measures[u]["borders"].items():
         if length > TOUCH:
             shared[u][v] = length
+# islands and anything else cut off: tie each stray group to its nearest neighbourhood, so every district can be reached
+centre = {u: (flat[u].centroid.x, flat[u].centroid.y) for u in units}
+while True:
+    seen, todo = set(), [units[0]]
+    while todo:
+        u = todo.pop()
+        if u not in seen:
+            seen.add(u)
+            todo += [v for v in shared[u] if v not in seen]
+    if len(seen) == len(units):
+        break
+    rest = [u for u in units if u not in seen]
+    _, a, b = min((math.dist(centre[u], centre[v]), u, v) for u in rest for v in seen)
+    shared[a][b] = shared[b][a] = 1.0
 outline = sum(edge.values()) - sum(v for u in units for v in measures[u]["borders"].values())
 tidy = 2 * math.sqrt(sum(area.values())) * (math.sqrt(N) - 1)  # border length if the county were a square cut into a grid
 ideal = sum(size[u] for u in units) / N
+sizes = sorted(size[u] for u in units)
+slack = max(0.05, 1.5 * sizes[len(sizes) // 2] / ideal)  # how uneven districts may be: 5 percent, or more where neighbourhoods are big next to a district
 TRIALS = TRIALS or max(12, min(3000, 40000 // len(units)))  # fewer tries for counties with many neighbourhoods
 
 
@@ -95,6 +112,7 @@ def score(t):
         return 99
     gaps = [abs(x["pops"] - ideal) / ideal for x in t]
     gap = (max(gaps) + math.sqrt(sum(g * g for g in gaps) / N)) / 2  # the worst district and the typical one, so every evening-out move counts
+    gap += 10 * max(0, max(gaps) - slack)  # past the slack, evening out comes before everything else
     between = (sum(x["edge"] - 2 * x["inner"] for x in t) - outline) / 2
     close = sum(abs(x["rep"] / (x["rep"] + x["dem"]) - 0.5) if x["rep"] + x["dem"] else 0 for x in t) / N
     return EQUAL * gap + COMPACT * between / tidy + CLOSE * close

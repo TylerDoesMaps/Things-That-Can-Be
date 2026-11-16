@@ -42,6 +42,8 @@ Saving from the builder needs a GitHub token with write access to this repositor
 
 `build/pops.py` builds the pops for one county: groups of 100 adults who share race, age and education and live in one precinct piece. It reads Census blocks and American Community Survey tract tables kept outside the repo. The lean, turnout and wealth numbers come from placeholder national rates at the top of the script and are not yet fitted to any result.
 
+`build/neighbourhoods.py` builds three candidate sets of neighbourhoods for one county (precinct pieces, block group pieces, and built ones that merge small pieces and split large ones) and `docs/neighbourhoods.html` compares them. The commission district lines come from the old game's data file, which is passed in and not kept in the repo.
+
 ## National presets
 
 Listed in `docs/presets/presets.json`.

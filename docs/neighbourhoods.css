@@ -1,0 +1,5 @@
+body.tiers main { height: 62vh; min-height: 420px; }
+#lines { margin-left: auto; }
+#compare td:not(:first-child) { text-align: right; }
+#compare td.pick { background: #fff8e1; }
+@media (max-width: 760px) { #lines { margin-left: 0; } .controls { flex-wrap: wrap; gap: 8px; } }

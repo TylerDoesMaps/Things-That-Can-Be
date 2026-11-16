@@ -71,7 +71,10 @@ for f, d in data.items():
         hoods.append(h)
 
 turn = fit(pops, hoods, "inherent_turnout", lambda p: SIZE, lambda h: h["votes2024"], "turnout")
-lean = fit(pops, hoods, "inherent", lambda p: SIZE * p["turnout"], lambda h: h["votes2024"] and h["rep2024"] / max(1, h["rep2024"] + h["dem2024"]) * sum(SIZE * p["turnout"] for p in pops if p["hood"] == h["hood"]), "rep")
+voters = defaultdict(float)
+for p in pops:
+    voters[p["hood"]] += SIZE * p["turnout"]
+lean = fit(pops, hoods, "inherent", lambda p: SIZE * p["turnout"], lambda h: h["votes2024"] and h["rep2024"] / max(1, h["rep2024"] + h["dem2024"]) * voters[h["hood"]], "rep")
 
 
 def points(base, move):
@@ -87,8 +90,11 @@ for f, d in data.items():
     for p in mine:
         ind = p["independent"]
         p["pie"] = {"R": round((1 - ind) * p["rep"], 3), "I": ind, "D": round((1 - ind) * (1 - p["rep"]), 3)}
+    in_hood = defaultdict(list)
+    for p in mine:
+        in_hood[p["hood"]].append(p)
     for h in d["neighbourhoods"]:
-        here = [p for p in mine if p["hood"] == h["hood"]]
+        here = in_hood[h["hood"]]
         v = sum(SIZE * p["turnout"] for p in here)
         h["votes"] = round(v)
         h["rep"] = round(sum(SIZE * p["turnout"] * p["rep"] for p in here) / v, 3) if v else None

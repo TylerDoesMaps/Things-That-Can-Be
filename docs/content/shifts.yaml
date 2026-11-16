@@ -1,0 +1,25 @@
+note: >
+  Shifts move pops before any vote is counted. Each one names who it applies to, and moves their lean (points of
+  vote share toward the Republican; negative is toward the Democrat) or their turnout (points), or both.
+  "active" is applied when a seed's election is run and so becomes part of its history. "presets" are named
+  sets that the test panel, a difficulty setting, a command or an event can switch on.
+who:
+  - everyone
+  - "race:White | Black | Hispanic | Asian | Other"
+  - "age:18 to 29 | 30 to 44 | 45 to 64 | 65 and over"
+  - "education:No college | Some college | Bachelor's or more"
+  - "area:urban | suburban | small town | rural"
+  - "income:Under $35,000 | $35,000 to $75,000 | $75,000 to $150,000 | Over $150,000"
+  - "work:Farm and ranch | Factory and plant | Building and transport | Shops and service | Office and professional | Schools and health | Government and military | Retired | Student"
+  - "party:republicans | independents | democrats"
+active: []
+presets:
+  Red wave: [{who: everyone, lean: 4}]
+  Blue wave: [{who: everyone, lean: -4}]
+  Hispanic realignment: [{who: "race:Hispanic", lean: 8}]
+  Youth surge: [{who: "age:18 to 29", turnout: 10, lean: -3}]
+  Seniors stay home: [{who: "age:65 and over", turnout: -8}]
+  Town and country: [{who: "area:rural", lean: 6}, {who: "area:small town", lean: 3}, {who: "area:urban", lean: -6}]
+  Independents break left: [{who: "party:independents", lean: -10}]
+  Fired-up base, Democrats: [{who: "party:democrats", turnout: 6}]
+  Fired-up base, Republicans: [{who: "party:republicans", turnout: 6}]

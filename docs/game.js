@@ -360,3 +360,80 @@ $("gsearch").oninput = async (e) => {
   box.innerHTML = places.concat(people).join("") || `<button disabled>Nothing found</button>`;
   box.hidden = false;
 };
+
+/* ---------- the world panel: shifts that move pops before the vote, recounted here for the presidential race ---------- */
+const WORLD = { data: null, shifts: {}, groups: [
+  ["Lean", "lean", [["everyone", "Everyone"]]],
+  ["Lean by race", "lean", [["race:White", "White"], ["race:Black", "Black"], ["race:Hispanic", "Hispanic"], ["race:Asian", "Asian"], ["race:Other", "Other"]]],
+  ["Lean by area", "lean", [["area:urban", "Urban"], ["area:suburban", "Suburban"], ["area:small town", "Small town"], ["area:rural", "Rural"]]],
+  ["Lean by age", "lean", [["age:18 to 29", "18 to 29"], ["age:30 to 44", "30 to 44"], ["age:45 to 64", "45 to 64"], ["age:65 and over", "65 and over"]]],
+  ["Lean by education", "lean", [["education:No college", "No college"], ["education:Some college", "Some college"], ["education:Bachelor's or more", "Degree"]]],
+  ["Lean by party", "lean", [["party:republicans", "Republicans"], ["party:independents", "Independents"], ["party:democrats", "Democrats"]]],
+  ["Turnout", "turnout", [["everyone", "Everyone"], ["age:18 to 29", "18 to 29"], ["age:65 and over", "65 and over"], ["race:Black", "Black"], ["race:Hispanic", "Hispanic"], ["party:republicans", "Republicans"], ["party:independents", "Independents"], ["party:democrats", "Democrats"]]],
+] };
+const WORDS = { everyone: "everyone", white: "race:White", black: "race:Black", hispanic: "race:Hispanic", asian: "race:Asian", other: "race:Other", urban: "area:urban", suburban: "area:suburban", town: "area:small town", rural: "area:rural",
+  young: "age:18 to 29", old: "age:65 and over", college: "education:Bachelor's or more", nocollege: "education:No college", republicans: "party:republicans", independents: "party:independents", democrats: "party:democrats" };
+async function worldData() {
+  if (WORLD.data) return WORLD.data;
+  const [meta, buf] = await Promise.all([get(`data/seeds/${SEED}/election-2024/pops.json`), fetch(`data/seeds/${SEED}/election-2024/pops.bin`).then((r) => r.arrayBuffer())]);
+  const types = { uint16: Uint16Array, int16: Int16Array, uint8: Uint8Array, int8: Int8Array };
+  let at = 0;
+  for (const [name, type] of meta.columns) { meta[name] = new types[type](buf, at, meta.n); at += meta.n * types[type].BYTES_PER_ELEMENT; }
+  return (WORLD.data = meta);
+}
+async function recount() {
+  const d = await worldData(), n = d.n, H = d.hoods.length, R = new Float64Array(H), D = new Float64Array(H);
+  const list = Object.entries(WORLD.shifts).map(([key, v]) => { const [kind, who] = key.split("|"), [field, value] = who.split(":"); return { kind, field, code: field === "party" || field === "everyone" ? value : d.lists[field].indexOf(value), v }; }).filter((x) => x.v);
+  const fired = { republicans: 0, independents: 0, democrats: 0 };
+  list.filter((x) => x.kind === "turnout" && x.field === "party").forEach((x) => { fired[x.code] += x.v; });
+  const width = { race: 7, age: 3, education: 3, area: 3, income: 3, work: 15 };
+  for (let i = 0; i < n; i++) {
+    const r = d.r[i] / 255, ind = d.i[i] / 255, dem = Math.max(0, 1 - r - ind);
+    let move = 0, more = 0;
+    for (const x of list) {
+      if (x.field === "party") { if (x.kind === "lean") move += x.v * (x.code === "republicans" ? r : x.code === "independents" ? ind : dem); continue; }
+      if (x.field !== "everyone" && ((d.kind[i] >> d.bits[x.field]) & width[x.field]) !== x.code) continue;
+      if (x.kind === "lean") move += x.v; else more += x.v;
+    }
+    const share = 1 / (1 + Math.exp(-(d.lean[i] / 100 + d.point * (d.gap[i] / 10 + move))));
+    const cast = d.size * Math.min(0.98, Math.max(0.02, d.turnout[i] / 200 + more / 100)), h = d.hood[i];
+    R[h] += cast * share + d.size * (fired.republicans * r + fired.independents * ind * share) / 100;
+    D[h] += cast * (1 - share) + d.size * (fired.democrats * dem + fired.independents * ind * (1 - share)) / 100;
+  }
+  const sums = {};
+  let allR = 0, allD = 0;
+  for (let h = 0; h < H; h++) {
+    allR += R[h]; allD += D[h];
+    for (const id of [d.hoods[h], ...d.parents[h]]) { const s = (sums[id] ||= [0, 0]); s[0] += R[h]; s[1] += D[h]; }
+  }
+  for (const [id, [r, dd]] of Object.entries(sums)) {
+    const share = r + dd ? r / (r + dd) : null;
+    VOTE.places[id] = [share === null ? null : Math.round(share * 1000) / 1000, Math.round(r + dd)];
+    if (map && share !== null) map.setFeatureState({ source: "fl", sourceLayer: IDX.byId[id] ? "county" : G.kinds[id] || (/-D\d+$/.test(id) ? "district" : "hood"), id }, { s24: share });
+  }
+  const fl = allR / (allR + allD), nation = (2 * fl - 1) * 100 - d.nation_gap;
+  VOTE.places.__state = [fl, Math.round(allR + allD)];
+  $("wread").innerHTML = `Florida <span style="color:${PARTIES[fl >= 0.5 ? "rep" : "dem"].colour}">${fl >= 0.5 ? "R" : "D"} ${(Math.max(fl, 1 - fl) * 100).toFixed(1)}%</span><br>Country <span style="color:${PARTIES[nation > 0 ? "rep" : "dem"].colour}">${nation > 0 ? "R" : "D"} +${Math.abs(nation).toFixed(1)}</span>`;
+  if (state.shade !== "r2024") { state.shade = "r2024"; }
+  paint();
+}
+function worldPanel() {
+  const slider = (kind, who, label) => `<label class="sl"><span>${esc(label)}</span><input type="range" min="-15" max="15" step="1" value="${WORLD.shifts[kind + "|" + who] || 0}" data-shift="${esc(kind + "|" + who)}"><output>${WORLD.shifts[kind + "|" + who] || 0}</output></label>`;
+  $("worldpanel").innerHTML = `<div class="read" id="wread"></div><select id="wpreset" aria-label="Preset"><option value="">Preset</option>${Object.keys((WORLD.data || {}).presets || {}).map((k) => `<option>${esc(k)}</option>`).join("")}</select>
+    <input type="text" id="wcmd" placeholder="lean hispanic 8" aria-label="Command" autocomplete="off">
+    ${WORLD.groups.map(([title, kind, rows], i) => `<details${i === 0 ? " open" : ""}><summary>${title}</summary>${rows.map(([who, label]) => slider(kind, who, label)).join("")}</details>`).join("")}
+    <button class="btn" id="wreset">Reset</button>`;
+  $("worldpanel").querySelectorAll("[data-shift]").forEach((el) => { el.oninput = () => { WORLD.shifts[el.dataset.shift] = +el.value; el.nextElementSibling.textContent = el.value; }; el.onchange = recount; });
+  $("wpreset").onchange = (e) => { if (!e.target.value) return; WORLD.shifts = {}; for (const s of WORLD.data.presets[e.target.value]) for (const kind of ["lean", "turnout"]) if (s[kind]) WORLD.shifts[kind + "|" + s.who] = s[kind]; worldPanel(); recount(); };
+  $("wreset").onclick = () => { WORLD.shifts = {}; worldPanel(); recount(); };
+  $("wcmd").onkeydown = (e) => {
+    if (e.key !== "Enter") return;
+    const [verb, ...rest] = e.target.value.trim().toLowerCase().split(/\s+/);
+    if (verb === "reset") WORLD.shifts = {};
+    else if (verb === "preset") { const name = Object.keys(WORLD.data.presets).find((k) => k.toLowerCase().startsWith(rest.join(" "))); if (name) { WORLD.shifts = {}; for (const s of WORLD.data.presets[name]) for (const kind of ["lean", "turnout"]) if (s[kind]) WORLD.shifts[kind + "|" + s.who] = s[kind]; } }
+    else if ((verb === "lean" || verb === "turnout") && WORDS[rest[0]] && !isNaN(+rest[rest.length - 1])) WORLD.shifts[verb + "|" + WORDS[rest[0]]] = (rest[1] === "d" ? -1 : 1) * +rest[rest.length - 1];
+    else return;
+    worldPanel(); recount();
+  };
+}
+worldData().then(() => { worldPanel(); const s = VOTE.summary; if (s) $("wread").innerHTML = `Florida <span style="color:${PARTIES.rep.colour}">R ${s.florida_rep}%</span><br>Country <span style="color:${PARTIES[s.nation_margin > 0 ? "rep" : "dem"].colour}">${s.nation_margin > 0 ? "R" : "D"} +${Math.abs(s.nation_margin).toFixed(1)}</span>`; });

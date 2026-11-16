@@ -32,3 +32,9 @@ table.wt td .pt { display: block; }
 .races td { vertical-align: top; } .races .cand { display: flex; gap: 8px; align-items: baseline; } .races .cand .n { margin-left: auto; font-variant-numeric: tabular-nums; color: var(--muted); }
 .races .cand.won { font-weight: 600; } .races .cand.won .n { color: var(--text); }
 .trait { display: inline-block; border: 1px solid var(--border-soft); padding: 0 6px; margin: 1px 2px 1px 0; background: var(--subtle); }
+
+#worldpanel { font-size: 12.5px; } #worldpanel .read { font-weight: 600; margin: 2px 0 6px; line-height: 1.5; }
+#worldpanel select, #worldpanel input[type=text] { width: 100%; box-sizing: border-box; margin: 3px 0; padding: 3px 5px; border: 1px solid var(--border); font: inherit; }
+#worldpanel details { border-top: 1px solid var(--border-soft); padding: 3px 0; } #worldpanel summary { cursor: pointer; font-weight: 600; }
+#worldpanel .sl { display: grid; grid-template-columns: 6.2em 1fr 2.4em; gap: 4px; align-items: center; } #worldpanel .sl input { width: 100%; margin: 0; } #worldpanel .sl output { text-align: right; font-variant-numeric: tabular-nums; }
+#worldpanel .btn { margin: 4px 0 0; }

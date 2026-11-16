@@ -28,9 +28,9 @@ function draw() {
     const places = {};
     data.pops.forEach((p) => (places[p.city || "Outside any city"] ||= []).push(p));
     const order = Object.keys(places).sort((a, b) => places[b].length - places[a].length);
-    $("out").innerHTML = `<table class="seats pops"><thead><tr><td>Pop</td><td>Leader</td><td>Work</td><td>Household income</td><td class="r">Owners</td><td class="r">Children</td><td>Republican · Independent · Democrat</td><td class="r">Turnout</td><td class="r">Wealth</td></tr></thead><tbody>`
-      + order.map((name) => `<tr class="place"><td colspan="9">${esc(name)} · ${places[name].length} pops</td></tr>` + places[name].map((p) =>
-        `<tr><td><span class="t">${esc(p.race)}, ${esc(p.age)}, ${esc(p.education.toLowerCase())}</span><span class="n">${esc(p.id)}${p.township && !p.city ? " · " + esc(p.township) + " Township" : ""}</span></td><td>${p.leader ? `<span class="person ${p.leader.party}">${esc(p.leader.name)}</span>` : ""}</td><td>${esc(p.work)}</td><td>${esc(p.income)}</td><td class="r">${pct(p.owners)}</td><td class="r">${pct(p.children)}</td><td>${pie(p.pie)}</td><td class="r">${pct(p.turnout)}</td><td class="r">${p.wealth}</td></tr>`).join("")).join("")
+    $("out").innerHTML = `<table class="seats pops"><thead><tr><td>Pop</td><td>Leader</td><td>Work</td><td>Household income</td><td class="r">Owners</td><td>Republican · Independent · Democrat</td><td class="r">Turnout</td><td class="r">Wealth</td></tr></thead><tbody>`
+      + order.map((name) => `<tr class="place"><td colspan="8">${esc(name)} · ${places[name].length} pops</td></tr>` + places[name].map((p) =>
+        `<tr><td><span class="t">${esc(p.race)}, ${esc(p.age)}, ${esc(p.education.toLowerCase())}</span><span class="n">${esc(p.id)}${p.township && !p.city ? " · " + esc(p.township) + " Township" : ""}</span></td><td>${p.leader ? `<span class="person ${p.leader.party}">${esc(p.leader.name)}</span>` : ""}</td><td>${esc(p.work)}</td><td>${esc(p.income)}</td><td class="r">${pct(p.owners)}</td><td>${pie(p.pie)}</td><td class="r">${pct(p.turnout)}</td><td class="r">${p.wealth}</td></tr>`).join("")).join("")
       + `</tbody></table>`;
   } else if (view === 1) {
     const kinds = {};

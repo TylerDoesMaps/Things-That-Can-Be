@@ -19,17 +19,20 @@ const SHADES = [
   { id: "race", label: "Race", menu: [["race", "Largest group"], null, ["race_White", "% White"], ["race_Black", "% Black"], ["race_Hispanic", "% Hispanic"]] },
   { id: "issues", label: "Issues", menu: [["", "Issues and positions · update 7"]] },
   { id: "demo", label: "Demographics", menu: [["pops", "Pops"], ["area", "Area type"], ["ba", "% Bachelor's degree"], ["old", "% Age 65 and over"], ["income", "% Income under $35,000"]] },
-  { id: "results", label: "Results", menu: [["r2024", "President, 2024"]] },
+  { id: "results", label: "Results", menu: [["r2024", "President, 2024"], ["local", "Local lean"]] },
 ];
 let G, P, S, O, map, state = { layer: "hood", shade: "party", selected: null, tab: "overview", ptab: "overview" };
 
 const soon = (key) => `<div class="soon"><b>${esc(SOON[key][0])}</b>${SOON[key][1] ? "Update " + SOON[key][1] : "Later"}</div>`;
 const place = (id) => G.places[id];
-const popsIn = (q) => P.pops.filter((p) => q.members.includes(p.precinct));
+const popsIn = (q) => P.pops.filter((p) => q.members.includes(p.hood));
 const who = (pid) => { const c = S.people[pid]; return c ? `<button class="who ${c.party}" data-pid="${pid}">${esc(c.name)}</button>` : ""; };
 const placeLink = (id, label) => `<button class="lk" data-place="${esc(id)}">${esc(label || place(id).name)}</button>`;
 const share = (counts, key) => (counts[key] || 0) / (Object.values(counts).reduce((a, b) => a + b, 0) || 1);
 const mbar = (label, v, color) => `<div class="mbar"><span>${esc(label)}</span><span class="tr"><span class="fl" style="display:block;width:${Math.round(v * 100)}%;background:${color || "var(--g4)"}"></span></span><span class="v">${pct(v)}</span></div>`;
+const MOOD_COL = { Angry: "#b2182b", Dissatisfied: "#ef8a62", Neutral: "#bdbdbd", Content: "#7fbf7b", Happy: "#1b7837" };
+const mood = (pid, level) => { const m = (S.moods[pid] || {})[level]; return m ? `<span class="mood"><i style="background:${MOOD_COL[m]}"></i>${m}</span>` : ""; };
+const lean = (v) => (!v ? "None" : `<span style="color:var(--${v > 0 ? "rep" : "dem"})">${v > 0 ? "R" : "D"} +${Math.abs(v).toFixed(1)}</span>`);
 const pie = (p) => `<span class="pie"><i style="width:${p[0] * 100}%;background:var(--rep)"></i><i style="width:${p[1] * 100}%;background:var(--g2)"></i><i style="width:${p[2] * 100}%;background:var(--dem)"></i></span>`;
 const partyLine = (p) => `<span style="color:var(--rep)">R ${pct(p[0])}</span> · <span style="color:var(--dem)">D ${pct(p[2])}</span> · Ind ${pct(p[1])}`;
 const role = (pid) => {
@@ -43,7 +46,7 @@ function covers(seat, q) {
   if (q.kind === "county") return true;
   if (seat.area === q.id) return true;
   const hoods = q.members.map(place);
-  if (seat.area.startsWith("house-")) return hoods.some((h) => "house-" + h.house === seat.area);
+  for (const [word, field] of [["house", "house"], ["senate", "senate"], ["cd", "congress"]]) if (seat.area.startsWith(word + "-")) return hoods.some((h) => word + "-" + h[field] === seat.area);
   if (place(seat.area)) return place(seat.area).members.some((m) => q.members.includes(m));
   return false;
 }
@@ -59,8 +62,9 @@ function colour(q) {
   if (s === "r2024") return diverge(q.rep2024 - 0.5, 0.3);
   if (s === "race") return RACE_COL[Object.keys(q.race)[0]];
   if (s.startsWith("race_")) return grey(share(q.race, s.slice(5)));
+  if (s === "local") return diverge(q.local || 0, 15);
   if (s === "area") return AREA_COL[Object.keys(q.area)[0]];
-  if (s === "pops") return grey(Math.min(1, q.pops / (state.layer === "hood" ? 18 : state.layer === "district" ? 30 : 111)));
+  if (s === "pops") return grey(Math.min(1, q.pops / Math.max(...Object.values(G.places).filter((x) => x.kind === state.layer).map((x) => x.pops))));
   if (s === "ba") return grey(share(q.education, "Bachelor's or more") / 0.5);
   if (s === "old") return grey(share(q.age, "65 and over") / 0.6);
   if (s === "income") return grey(share(q.income, "Under $35,000") / 0.7);
@@ -70,8 +74,8 @@ function legend() {
   const s = state.shade, bar = (cols, a, b) => `<div class="bar">${cols.map((c) => `<span style="background:${c}"></span>`).join("")}</div><div class="ends"><span>${a}</span><span>${b}</span></div>`;
   const dv = [7, 5, 3, 1].map((i) => css("--d" + i)).concat([1, 3, 5, 7].map((i) => css("--r" + i))), gr = [0, 1, 2, 3, 4, 5, 6].map((i) => css("--g" + i));
   const cat = (table) => `<div class="cat">${Object.entries(table).map(([k, c]) => `<span><i style="background:${c}"></i>${esc(k[0].toUpperCase() + k.slice(1))}</span>`).join("")}</div>`;
-  const title = { party: "Party ID", r2024: "President, 2024", race: "Largest group", area: "Area type", pops: "Pops", ba: "Bachelor's degree", old: "Age 65 and over", income: "Income under $35,000" }[s] || "Share " + s.slice(5);
-  const body = s === "party" ? bar(dv, "More Democratic", "More Republican") : s === "r2024" ? bar(dv, "Democratic", "Republican") : s === "race" ? cat(RACE_COL) : s === "area" ? cat(AREA_COL) : bar(gr, "Fewer", "More");
+  const title = { party: "Party ID", r2024: "President, 2024", local: "Local lean", race: "Largest group", area: "Area type", pops: "Pops", ba: "Bachelor's degree", old: "Age 65 and over", income: "Income under $35,000" }[s] || "Share " + s.slice(5);
+  const body = s === "party" ? bar(dv, "More Democratic", "More Republican") : s === "r2024" || s === "local" ? bar(dv, "Democratic", "Republican") : s === "race" ? cat(RACE_COL) : s === "area" ? cat(AREA_COL) : bar(gr, "Fewer", "More");
   $("legend").innerHTML = `<div class="t">${title}</div>${body}`;
 }
 function paint() {
@@ -94,7 +98,7 @@ function infobox() {
 function placeTab(q, tab, wide) {
   const ps = popsIn(q);
   if (tab === "overview") {
-    const inside = q.kind === "hood" ? `<tr><th>Commission district</th><td>${placeLink(G.code + "-D" + q.district, "District " + q.district)}</td></tr><tr><th>State House</th><td>District ${q.house}</td></tr>` : "";
+    const inside = q.kind === "hood" ? `<tr><th>Commission district</th><td>${placeLink(G.code + "-D" + q.district, "District " + q.district)}</td></tr><tr><th>State House</th><td>District ${q.house}</td></tr><tr><th>State Senate</th><td>District ${q.senate}</td></tr><tr><th>Congress</th><td>District ${q.congress}</td></tr><tr><th>Local lean</th><td>${lean(q.local)}</td></tr>` : "";
     let h = `<table><tr><th>People</th><td>${num(q.pops * 100)} <span class="pt">(${q.pops} pops)</span></td></tr><tr><th>Party ID</th><td>${partyLine(q.party)}</td></tr>
       <tr><th>President, 2024</th><td>${q.rep2024 === null ? "" : `<span style="color:var(--rep)">R ${pct(q.rep2024)}</span> · <span style="color:var(--dem)">D ${pct(1 - q.rep2024)}</span>`}</td></tr>
       <tr><th>Area type</th><td>${Object.entries(q.area).map(([k, v]) => `${k} (${v})`).join(", ")}</td></tr>${inside}</table>
@@ -120,6 +124,8 @@ function placeTab(q, tab, wide) {
     ps.forEach((p) => lead[S.people[S.leaders[p.id]].party]++);
     return `<table><tr><th>Party ID</th><td>${partyLine(q.party)}</td></tr><tr><th>President, 2024</th><td>${pct(q.rep2024)} Republican of ${num(q.votes2024)} votes</td></tr><tr><th>Expected turnout</th><td>${pct(q.turnout)}</td></tr></table>
       <div class="ib-h">Party ID</div>${mbar("Republican", q.party[0], "var(--rep)")}${mbar("Independent", q.party[1], "var(--g3)")}${mbar("Democrat", q.party[2], "var(--dem)")}
+      <div class="ib-h">Mood</div><table class="mini">${["federal", "state", "local"].map((l) => { const c = {}; ps.forEach((p) => { const m = S.moods[p.id][l]; c[m] = (c[m] || 0) + 1; });
+        return `<tr><td>${l[0].toUpperCase() + l.slice(1)}</td><td><span class="pie wide">${Object.keys(MOOD_COL).map((m) => `<i style="width:${(c[m] || 0) / ps.length * 100}%;background:${MOOD_COL[m]}"></i>`).join("")}</span></td><td class="pt">${Object.keys(MOOD_COL).filter((m) => c[m]).map((m) => `${m} ${c[m]}`).join(", ")}</td></tr>`; }).join("")}</table>
       <div class="ib-h">Pop leaders</div>${mbar("Republican", lead.rep / ps.length, "var(--rep)")}${mbar("Independent", lead.ind / ps.length, "var(--g3)")}${mbar("Democrat", lead.dem / ps.length, "var(--dem)")}${soon("orgs")}`;
   }
   const seats = S.seats.filter((s) => covers(s, q));
@@ -132,9 +138,10 @@ function seatTable(seats, wide) {
   return Object.entries(groups).map(([g, list]) => `<div class="ib-h">${names[g]}</div><table class="mini${wide ? " wide" : ""}">${list.map((s) =>
     `<tr><td>${esc(s.title)}${s.label ? ` <span class="pt">${esc(s.label)}</span>` : ""}</td><td>${who(s.holder)}</td>${wide ? `<td class="pt">${s.chosen === "elected" ? (s.partisan ? "Elected by party" : "Elected, no party") : "Appointed"}</td><td class="n">${s.next.join(", ")}</td>` : ""}</tr>`).join("")}</table>`).join("");
 }
-function popTable(ps) {
-  return `<table class="wt"><tr><th>Pop</th><th>Neighbourhood</th><th>Leader</th><th>Work</th><th>Party ID</th><th>Turnout</th></tr>${ps.map((p) =>
-    `<tr><td>${esc(p.race)}, ${esc(p.age)}, ${esc(p.education.toLowerCase())}<span class="pt">${esc(p.id)}</span></td><td>${placeLink(p.precinct)}</td><td>${who(S.leaders[p.id])}</td><td>${esc(p.work)}</td><td>${pie(p.pie)}${pct(p.pie[0])} R</td><td class="n">${pct(p.turnout)}</td></tr>`).join("")}</table>`;
+function popTable(all) {
+  const ps = all.slice(0, 300), more = all.length > ps.length ? `<p class="pt">First ${ps.length} of ${num(all.length)} pops</p>` : "";
+  return `<table class="wt"><tr><th>Pop</th><th>Neighbourhood</th><th>Leader</th><th>Work</th><th>Party ID</th><th>Turnout</th><th>Mood, local</th></tr>${ps.map((p) =>
+    `<tr><td>${esc(p.race)}, ${esc(p.age)}, ${esc(p.education.toLowerCase())}<span class="pt">${esc(p.words.join(", "))}</span></td><td>${placeLink(p.hood)}</td><td>${who(S.leaders[p.id])}</td><td>${esc(p.work)}</td><td>${pie(p.pie)}${pct(p.pie[0])} R</td><td class="n">${pct(p.turnout)}</td><td>${mood(p.id, "local")}</td></tr>`).join("")}</table>${more}`;
 }
 
 /* ---------- pages ---------- */
@@ -178,19 +185,23 @@ function route() {
     const c = S.people[id], seats = S.seats.filter((s) => s.holder === id), pop = c.pop && P.pops.find((p) => p.id === c.pop);
     page(`<div class="crumbs"><button class="back" data-go="#/map">Map</button></div><h1 class="who ${c.party}" style="text-decoration:none;cursor:default;display:block">${esc(c.name)}</h1><div class="from">${esc(role(id))}</div>
       <table class="facts"><tr><th>Party</th><td>${PARTY[c.party]}</td></tr><tr><th>Home</th><td>${place(c.home) ? placeLink(c.home) : esc(c.home)}</td></tr>
-      ${pop ? `<tr><th>Speaks for</th><td>${esc(pop.race)}, ${esc(pop.age)}, ${esc(pop.education.toLowerCase())} <span class="pt">${esc(pop.id)}</span></td></tr>` : ""}
+      ${pop ? `<tr><th>Speaks for</th><td>${esc(pop.race)}, ${esc(pop.age)}, ${esc(pop.education.toLowerCase())} <span class="pt">${esc(pop.words.join(", "))}</span></td></tr><tr><th>Work</th><td>${esc(pop.work)}</td></tr>
+      <tr><th>Mood</th><td>${["federal", "state", "local"].map((l) => `${l[0].toUpperCase() + l.slice(1)} ${mood(pop.id, l)}`).join(" · ")}</td></tr>` : ""}
       ${seats.map((s) => `<tr><th>Office</th><td>${esc(s.title)}${s.label ? ", " + esc(s.label) : ""}${s.next.length ? ` <span class="pt">next election ${s.next.join(", ")}</span>` : ""}</td></tr>`).join("")}
       <tr><th>Seed</th><td>${S.seed}</td></tr></table><h2>Character</h2>${soon("you")}${soon("known")}${soon("intrigue")}`);
   }
 }
 
 /* ---------- start ---------- */
+const COUNTY = new URLSearchParams(location.search).get("county") || "12065";
 Promise.all([
-  fetch("data/game/fl-12065.json").then((r) => r.json()), fetch("data/pops/fl.json").then((r) => r.json()),
-  fetch("data/seeds/1/fl-12065.json").then((r) => r.json()), fetch("content/government/offices-fl.yaml").then((r) => r.text()),
-]).then(([g, p, s, o]) => {
+  fetch(`data/game/fl-${COUNTY}.json`).then((r) => r.json()), fetch(`data/pops/fl-${COUNTY}.json`).then((r) => r.json()),
+  fetch(`data/seeds/1/fl-${COUNTY}.json`).then((r) => r.json()), fetch("content/government/offices-fl.yaml").then((r) => r.text()), fetch("data/game/counties.json").then((r) => r.json()),
+]).then(([g, p, s, o, counties]) => {
   G = g; P = p; S = s; O = jsyaml.load(o);
-  $("cdate").innerHTML = `November 2024<span class="wk">${G.county} County, ${G.state}</span>`;
+  P.pops.forEach((x) => { x.pie = [x.pie.R, x.pie.I, x.pie.D]; });
+  $("cdate").innerHTML = `November 2024<select class="wk" id="county" aria-label="County">${counties.map((c) => `<option value="${c.fips}"${c.fips === COUNTY ? " selected" : ""}>${esc(c.name)} County, ${esc(c.state)}</option>`).join("")}</select>`;
+  $("county").onchange = (e) => { location.href = "game.html?county=" + e.target.value; };
   $("seedtag").textContent = "Seed " + S.seed;
   $("youpanel").innerHTML = soon("you") + soon("week") + soon("campaign") + soon("notebook");
   const years = {};

@@ -20,22 +20,21 @@ SRC, POPS, N, NAME, OUT = Path(sys.argv[1]), Path(sys.argv[2]), int(sys.argv[3])
 TRIALS = int(sys.argv[6]) if len(sys.argv) > 6 else 4000
 EQUAL, COMPACT, CLOSE = 3.0, 1.0, 2.0
 
-shapes = gpd.GeoDataFrame.from_features(json.load(open(SRC))["options"]["C"]["shapes"], crs=4269).set_index("code")
+shapes = gpd.GeoDataFrame.from_features(json.load(open(SRC))["shapes"], crs=4269).set_index("code")
 flat = shapes.to_crs(5070).geometry
 pops_file = json.load(open(POPS))
 size = defaultdict(int)
 for p in pops_file["pops"]:
-    size[p["precinct"]] += 1
-vote = {c["precinct"]: (c["actual_votes"] * (c["actual_rep"] or 0.5), c["actual_votes"] * (1 - (c["actual_rep"] or 0.5))) for c in pops_file["precincts"]}
+    size[p["hood"]] += 1
+vote = {c["hood"]: (c["rep2024"], c["dem2024"]) for c in pops_file["neighbourhoods"]}
 units = list(shapes.index)
-area, edge = flat.area.to_dict(), flat.length.to_dict()
+measures = json.load(open(SRC))["measures"]  # true sizes and shared borders, from before the shapes were simplified
+area, edge = {u: measures[u]["sq_m"] for u in units}, {u: measures[u]["edge_m"] for u in units}
 shared = defaultdict(dict)
-for i, a in enumerate(units):
-    for b in units[i + 1:]:
-        if flat[a].intersects(flat[b]):
-            length = flat[a].boundary.intersection(flat[b].boundary).length
-            if length > 50:
-                shared[a][b] = shared[b][a] = length
+for u in units:
+    for v, length in measures[u]["borders"].items():
+        if length > 50:
+            shared[u][v] = length
 ideal = sum(size[u] for u in units) / N
 
 
@@ -71,7 +70,8 @@ def cost(plan):
     rows = measure(plan)
     if len(rows) < N:
         return 99
-    gap = max(abs(r["pops"] - ideal) / ideal for r in rows)
+    gaps = [abs(r["pops"] - ideal) / ideal for r in rows]
+    gap = (max(gaps) + math.sqrt(sum(g * g for g in gaps) / N)) / 2  # the worst district and the typical one, so every evening-out move counts
     return EQUAL * gap + COMPACT * (1 - sum(r["roundness"] for r in rows) / N) + CLOSE * sum(abs(r["rep"] - 0.5) for r in rows) / N
 
 

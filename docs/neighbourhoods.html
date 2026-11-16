@@ -14,14 +14,14 @@
 <body class="gov tiers">
 <header></header>
 <script src="nav.js"></script>
-<h1>Neighbourhoods, Jefferson County</h1>
+<h1 id="title">Neighbourhoods</h1>
 <p class="sub" id="summary"></p>
-<section class="controls"><div class="tabs" id="options"></div><div class="tabs" id="lines"></div></section>
+<section class="controls"><select id="county" aria-label="County"></select><div class="tabs" id="options"></div><div class="tabs" id="lines"></div></section>
 <main><div id="map"></div><div id="tip" hidden></div></main>
 <h2>Drawn commission districts</h2>
 <div id="districts"></div>
-<h2>The three options side by side</h2>
-<div id="compare"></div>
+<h2>Counts</h2>
+<div id="stats"></div>
 <script src="vendor/maplibre-gl.js"></script>
 <script src="neighbourhoods.js"></script>
 </body>

@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
-"""Builds three candidate sets of neighbourhoods for one county so they can be compared.
+"""Builds the neighbourhoods of one county.
 
-A: precinct pieces. Blocks sharing a precinct, a city (or none) and a state house district.
-B: block group pieces. The same, with the census block group in place of the precinct.
-C: built. Starts from A and merges any piece under SMALL adults into the touching piece it shares the longest
-   border with, never across a city or state house line. Pieces over BIG adults are counted, not yet split.
-Commission and council districts are not used: they will be drawn from the neighbourhoods.
-Sizes are given in pops of 100. The page takes the built set's pop counts from the pops file, which is the authority. Also writes WORK_DIR/neighbourhoods/<county>.csv: each block's C code.
+Blocks are grouped by precinct, city (or none), State House, State Senate and congressional district. A piece over
+BIG pops is split along census block groups into parts of about PART pops. A piece under SMALL pops is merged into
+the touching piece it shares the longest border with, never across a city or district line. Commission and council
+districts are not boundaries: they are drawn from neighbourhoods afterwards.
+Each neighbourhood gets an area type from its density and the size of its city.
+Sizes here use the 2020 voting-age count less prisoners; the pops file is the authority on pop counts.
+Writes OUT_JSON for the site and WORK_DIR/neighbourhoods/<county>.csv with each block's neighbourhood.
 Usage: neighbourhoods.py RAW_DIR WORK_DIR STATE_ABBR STATE_FIPS COUNTY_FIPS PRECINCT_PREFIX COUNTY_NAME CODE OUT_JSON
 """
 import io
@@ -14,24 +15,27 @@ import json
 import random
 import sys
 import zipfile
+from collections import defaultdict
 from pathlib import Path
 
 import geopandas as gpd
 import pandas as pd
 
 RAW, WORK, ST, SF, CF, PREFIX, COUNTY, CODE, OUT = (Path(sys.argv[1]), Path(sys.argv[2]), *sys.argv[3:9], Path(sys.argv[9]))
-SMALL, BIG, POP = 300, 2000, 100
+POP, SMALL, BIG, PART = 100, 3, 50, 20
+URBAN_CITY, URBAN_DENSITY, SUBURBAN_DENSITY, TOWN = 50000, 2000, 400, 750  # people in the city; adults per square mile; adults in the city
 
-blocks = gpd.read_file(f"zip://{RAW}/blocks/{SF}{CF}.zip", engine="pyogrio")[["GEOID20", "geometry"]].rename(columns={"GEOID20": "block"})
+blocks = gpd.read_file(f"zip://{RAW}/blocks/{SF}{CF}.zip", engine="pyogrio")[["GEOID20", "ALAND20", "geometry"]].rename(columns={"GEOID20": "block", "ALAND20": "land"})
 with zipfile.ZipFile(RAW / f"pl/{ST.lower()}.zip") as z:
-    geo = pd.read_csv(io.BytesIO(z.read(f"{ST.lower()}geo2020.pl")), sep="|", header=None, dtype=str, usecols=[2, 7, 9], encoding="latin-1", keep_default_na=False)
-    geo.columns = ["sumlev", "rec", "block"]
+    geo = pd.read_csv(io.BytesIO(z.read(f"{ST.lower()}geo2020.pl")), sep="|", header=None, dtype=str, usecols=[2, 7, 9, 87, 90], encoding="latin-1", keep_default_na=False)
+    geo.columns = ["sumlev", "rec", "block", "name", "people"]
+    city_people = geo[geo.sumlev == "160"].assign(name=lambda d: d.name.str.replace(r" (city|town|village)$", "", regex=True)).set_index("name").people.astype(int).to_dict()
     geo = geo[(geo.sumlev == "750") & geo.block.str.startswith(SF + CF)]
     s2 = pd.read_csv(io.BytesIO(z.read(f"{ST.lower()}000022020.pl")), sep="|", header=None, dtype=str, usecols=[4, 76]).set_axis(["rec", "adults"], axis=1)
     s3 = pd.read_csv(io.BytesIO(z.read(f"{ST.lower()}000032020.pl")), sep="|", header=None, dtype=str, usecols=[4, 7]).set_axis(["rec", "prison"], axis=1)
 counts = geo.merge(s2, on="rec").merge(s3, on="rec")
 counts["adults"] = (counts.adults.astype(int) - counts.prison.astype(int)).clip(lower=0)
-blocks = blocks.merge(counts[["block", "adults"]], on="block", how="left").fillna({"adults": 0})
+blocks = blocks.merge(counts[["block", "adults"]], on="block", how="left").fillna({"adults": 0}).reset_index(drop=True)
 pts = gpd.GeoDataFrame(blocks[["block"]], geometry=blocks.geometry.representative_point(), crs=blocks.crs)
 
 
@@ -46,70 +50,140 @@ def inside(layer, field, name, nearest=False):
     return j[name]
 
 
+def tiger(layer):
+    return gpd.read_file(f"zip://{RAW}/tiger/{SF}_{layer}.zip", engine="pyogrio")
+
+
 prec = gpd.read_file(WORK / f"pgeo/{ST}.geojson", engine="pyogrio")
 prec = prec[prec.p.str.startswith(PREFIX)]
-places = gpd.read_file(f"zip://{RAW}/tiger/{SF}_place.zip", engine="pyogrio")
+places = tiger("place")
 places = places[places.CLASSFP.str.startswith("C")]
-house = gpd.read_file(f"zip://{RAW}/tiger/{SF}_sldl.zip", engine="pyogrio")
+house, senate, congress = tiger("sldl"), tiger("sldu"), tiger("cd")
+cd_field = [c for c in congress.columns if c.startswith("CD") and c.endswith("FP")][0]
 blocks["precinct"] = inside(prec, "p", "precinct", nearest=True).str.replace(PREFIX, "", regex=False).str.lstrip("-")
 blocks["city"] = inside(places, "NAME", "city").fillna("")
-blocks["house"] = inside(house, "SLDLST", "house").astype(int)
+blocks["house"] = inside(house, "SLDLST", "house", nearest=True).astype(int)
+blocks["senate"] = inside(senate, "SLDUST", "senate", nearest=True).astype(int)
+blocks["congress"] = inside(congress, cd_field, "congress", nearest=True).astype(int)
 blocks["bg"] = blocks.block.str[5:12]
-hard = ["city", "house"]
-blocks["hard"] = blocks[hard].astype(str).agg("|".join, axis=1)
-blocks["A"] = blocks.precinct + "/" + blocks.hard
-blocks["B"] = blocks.bg + "/" + blocks.hard
+blocks["hard"] = blocks[["city", "house", "senate", "congress"]].astype(str).agg("|".join, axis=1)
+
+# ---- which blocks touch, and along how much border
+flat = blocks.to_crs(5070).geometry
+pairs = gpd.sjoin(gpd.GeoDataFrame(geometry=flat), gpd.GeoDataFrame(geometry=flat), predicate="intersects")
+pairs = pairs[pairs.index < pairs.index_right]
+border = {}
+for a, b in zip(pairs.index, pairs.index_right):
+    length = flat[a].boundary.intersection(flat[b].boundary).length
+    if length > 1:
+        border[(a, b)] = length
+
+# ---- pieces, as a graph
+piece = (blocks.precinct + "/" + blocks.hard).tolist()
 
 
-def built():
-    key = blocks.A.copy()
-    flat = blocks.to_crs(5070)
+def graph(labels):
+    size, near = defaultdict(float), defaultdict(lambda: defaultdict(float))
+    for label, adults in zip(labels, blocks.adults):
+        size[label] += adults
+    for (a, b), length in border.items():
+        if labels[a] != labels[b]:
+            near[labels[a]][labels[b]] += length
+            near[labels[b]][labels[a]] += length
+    return size, near
+
+
+def merge_small(labels, limit, same):
+    """Merges every piece under 'limit' adults into its longest-bordered neighbour that 'same' allows."""
+    size, near = graph(labels)
+    into = {}
+    stuck = set()
     while True:
-        size = blocks.groupby(key).adults.sum().sort_values()
-        shapes = flat.assign(k=key).dissolve("k").geometry
-        merged = False
-        for k in size[size < SMALL].index:
-            me, mine = shapes[k], k.split("/")[1].split("#")[0]
-            best, score = None, 0
-            for other, shape in shapes.items():
-                if other == k or other.split("/")[1].split("#")[0] != mine or not me.intersects(shape):
-                    continue
-                border = me.boundary.intersection(shape.boundary).length
-                if border > score:
-                    best, score = other, border
-            if best:
-                key[key == k] = best
-                merged = True
-                break
-        if not merged:
-            return key
+        small = [k for k in size if size[k] < limit and k not in stuck]
+        if not small:
+            break
+        k = min(small, key=lambda x: size[x])
+        options = {o: length for o, length in near[k].items() if same(k, o)}
+        if not options:
+            stuck.add(k)
+            continue
+        best = max(options, key=options.get)
+        into[k] = best
+        size[best] += size.pop(k)
+        for o, length in near.pop(k).items():
+            del near[o][k]
+            if o != best:
+                near[best][o] += length
+                near[o][best] += length
+
+    def root(k):
+        while k in into:
+            k = into[k]
+        return k
+    return [root(k) for k in labels]
 
 
-blocks["C"] = built()
-random.seed(12065)
-out = {"county": COUNTY, "small": SMALL, "big": BIG, "options": {}}
-for option, label in (("A", "Precinct pieces"), ("B", "Block group pieces"), ("C", "Built neighbourhoods")):
-    g = blocks.dissolve(option, aggfunc={"adults": "sum", "city": "first", "house": "first", "precinct": lambda s: ", ".join(sorted(set(s), key=lambda x: (len(x), x)))})
-    numbers = list(range(1, len(g) + 1))
-    random.shuffle(numbers)
-    g["code"] = [f"{CODE}-{n:02d}" for n in numbers]
-    want, base = int(round(g.adults.sum() / POP)), (g.adults // POP).astype(int)
-    for k in (g.adults / POP - base).sort_values(ascending=False).index[: want - base.sum()]:
-        base[k] += 1
-    g["pops"] = base
-    g["geometry"] = g.geometry.simplify(0.0002)
-    n = g.pops
-    stats = {"neighbourhoods": len(g), "with no pops": int((n == 0).sum()), f"under {SMALL // POP} pops": int((n < SMALL // POP).sum()),
-             f"over {BIG // POP} pops, to split later": int((n > BIG // POP).sum()), "median pops": float(n.median()), "largest, in pops": int(n.max()), "pops": int(n.sum())}
-    out["options"][option] = {"label": label, "stats": stats,
-                              "shapes": json.loads(g.reset_index(drop=True)[["code", "pops", "city", "house", "precinct", "geometry"]].to_json(drop_id=True))}
-    if option == "C":
-        (WORK / "neighbourhoods").mkdir(exist_ok=True)
-        blocks[["block"]].assign(code=blocks.C.map(g.code)).to_csv(WORK / f"neighbourhoods/{SF}{CF}.csv", index=False)
-    print(option, stats)
-lines = {"Precincts": prec.dissolve("p").boundary, "City": places[places.NAME.isin(set(blocks.city) - {""})].boundary, "State House districts": house[house.SLDLST.astype(int).isin(set(blocks.house))].clip(blocks.union_all()).boundary}
-out["lines"] = {name: json.loads(s.to_crs(blocks.crs).simplify(0.0002).to_json()) for name, s in lines.items()}
-out["bounds"] = [round(v, 4) for v in blocks.total_bounds]
+hard_of = lambda k: k.split("/")[1].split("#")[0]
+size, _ = graph(piece)
+big = {k for k, n in size.items() if n > BIG * POP}
+to_split = len(big)
+if big:
+    piece = [f"{k}#{bg}" if k in big else k for k, bg in zip(piece, blocks.bg)]
+    piece = merge_small(piece, PART * POP * 0.6, lambda a, b: "#" in a and "#" in b and a.split("#")[0] == b.split("#")[0])
+piece = merge_small(piece, SMALL * POP, lambda a, b: hard_of(a) == hard_of(b))
+blocks["piece"] = piece
+
+# ---- neighbourhoods
+g = blocks.dissolve("piece", aggfunc={"adults": "sum", "land": "sum", "city": "first", "house": "first", "senate": "first", "congress": "first",
+                                      "precinct": lambda s: ", ".join(sorted(set(s), key=lambda x: (len(x), x)))})
+random.seed(int(SF + CF))
+numbers = list(range(1, len(g) + 1))
+random.shuffle(numbers)
+width = max(2, len(str(len(g))))
+g["code"] = [f"{CODE}-{n:0{width}d}" for n in numbers]
+want, base = int(round(g.adults.sum() / POP)), (g.adults // POP).astype(int)
+for k in (g.adults / POP - base).sort_values(ascending=False).index[: want - base.sum()]:
+    base[k] += 1
+g["pops"] = base
+g["density"] = (g.adults / (g.land / 2589988.11).clip(lower=0.01)).round().astype(int)
+city_adults = blocks.groupby("city").adults.sum()
+metro = any(city_people.get(c, 0) >= URBAN_CITY for c in set(blocks.city) - {""})
+
+
+def area(row):
+    if row.city and city_people.get(row.city, 0) >= URBAN_CITY and row.density >= URBAN_DENSITY:
+        return "urban"
+    if (metro and row.density >= SUBURBAN_DENSITY) or (row.city and city_people.get(row.city, 0) >= URBAN_CITY):
+        return "suburban"
+    if (row.city and city_adults.get(row.city, 0) >= TOWN) or row.density >= SUBURBAN_DENSITY:
+        return "small town"
+    return "rural"
+
+
+g["area_type"] = g.apply(area, axis=1)
+# true sizes and shared borders, taken before the shapes are simplified for drawing
+true = g.to_crs(5070).geometry
+code_of = blocks.piece.map(g.code).tolist()
+borders = defaultdict(lambda: defaultdict(float))
+for (a, b), length in border.items():
+    if code_of[a] != code_of[b]:
+        borders[code_of[a]][code_of[b]] += length
+        borders[code_of[b]][code_of[a]] += length
+measures = {c: {"sq_m": round(true[k].area), "edge_m": round(true[k].length), "borders": {o: round(v) for o, v in borders[c].items()}} for k, c in g.code.items()}
+g["geometry"] = g.geometry.simplify(0.0002)
+(WORK / "neighbourhoods").mkdir(exist_ok=True)
+blocks[["block"]].assign(code=blocks.piece.map(g.code), area=blocks.piece.map(g.area_type)).to_csv(WORK / f"neighbourhoods/{SF}{CF}.csv", index=False)
+n = g.pops
+stats = {"neighbourhoods": len(g), "pops": int(n.sum()), "median pops": float(n.median()), "largest, in pops": int(n.max()), "under 3 pops": int((n < SMALL).sum()),
+         "over 50 pops": int((n > BIG).sum()), "precinct pieces that were split": to_split, "area types": g.area_type.value_counts().to_dict()}
+lines = {"Precincts": prec.geometry.buffer(0).boundary, "City": places[places.NAME.isin(set(blocks.city) - {""})].boundary}
+edge = blocks.union_all()
+for name, layer, field in (("State House districts", house, "SLDLST"), ("State Senate districts", senate, "SLDUST"), ("Congressional districts", congress, cd_field)):
+    if blocks[{"State House districts": "house", "State Senate districts": "senate", "Congressional districts": "congress"}[name]].nunique() > 1:
+        lines[name] = layer.to_crs(blocks.crs).clip(edge).boundary
+out = {"county": COUNTY, "code": CODE, "fips": SF + CF, "stats": stats, "bounds": [round(v, 4) for v in blocks.total_bounds], "measures": measures,
+       "shapes": json.loads(g.reset_index(drop=True)[["code", "pops", "city", "house", "senate", "congress", "precinct", "area_type", "density", "geometry"]].rename(columns={"area_type": "area"}).to_json(drop_id=True)),
+       "lines": {name: json.loads(s.to_crs(blocks.crs).simplify(0.0002).to_json()) for name, s in lines.items()}}
 OUT.parent.mkdir(parents=True, exist_ok=True)
 OUT.write_text(json.dumps(out, separators=(",", ":")))
-print(OUT.stat().st_size)
+print(COUNTY, stats, OUT.stat().st_size)

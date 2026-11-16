@@ -9,7 +9,7 @@ let data, view = 0;
 const pie = (p) => `<span class="pie"><i class="rep" style="width:${p.R * 100}%"></i><i class="ind" style="width:${p.I * 100}%"></i><i class="dem" style="width:${p.D * 100}%"></i></span>${pct(p.R)} · ${pct(p.I)} · ${pct(p.D)}`;
 const signed = (v) => (v > 0 ? "+" : "") + v.toFixed(1);
 
-Promise.all([fetch(`data/pops/fl-${COUNTY}.json`).then((r) => r.json()), fetch("data/game/counties.json").then((r) => r.json())]).then(([d, counties]) => {
+Promise.all([fetch(`data/pops/fl-${COUNTY}.json`).then((r) => r.json()), fetch("data/game/built.json").then((r) => r.json())]).then(([d, counties]) => {
   data = d;
   $("county").innerHTML = counties.map((c) => `<option value="${c.fips}"${c.fips === COUNTY ? " selected" : ""}>${esc(c.name)} County</option>`).join("");
   $("county").onchange = (e) => { location.href = "pops.html?county=" + e.target.value; };

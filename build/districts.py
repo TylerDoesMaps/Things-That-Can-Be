@@ -17,7 +17,7 @@ from pathlib import Path
 import geopandas as gpd
 
 SRC, POPS, N, NAME, OUT = Path(sys.argv[1]), Path(sys.argv[2]), int(sys.argv[3]), sys.argv[4], Path(sys.argv[5])
-TRIALS = int(sys.argv[6]) if len(sys.argv) > 6 else 4000
+TRIALS = int(sys.argv[6]) if len(sys.argv) > 6 else 0
 EQUAL, COMPACT, CLOSE, TOUCH = 3.0, 3.0, 1.0, 200  # TOUCH: metres of shared border before two neighbourhoods count as touching
 
 shapes = gpd.GeoDataFrame.from_features(json.load(open(SRC))["shapes"], crs=4269).set_index("code")
@@ -38,6 +38,7 @@ for u in units:
 outline = sum(edge.values()) - sum(v for u in units for v in measures[u]["borders"].values())
 tidy = 2 * math.sqrt(sum(area.values())) * (math.sqrt(N) - 1)  # border length if the county were a square cut into a grid
 ideal = sum(size[u] for u in units) / N
+TRIALS = TRIALS or max(12, min(3000, 40000 // len(units)))  # fewer tries for counties with many neighbourhoods
 
 
 def connected(members):
@@ -68,25 +69,53 @@ def measure(plan):
     return rows
 
 
-def cost(plan):
-    rows = measure(plan)
-    if len(rows) < N:
+def tally(plan):
+    """Running totals for each district, so a single move can be scored without measuring everything again."""
+    t = [{"pops": 0, "edge": 0.0, "inner": 0.0, "rep": 0.0, "dem": 0.0, "n": 0} for _ in range(N)]
+    for u, d in plan.items():
+        shift(t, plan, u, d, 1, placed=False)
+    for u, d in plan.items():
+        t[d]["inner"] += sum(length for v, length in shared[u].items() if plan.get(v) == d) / 2
+    return t
+
+
+def shift(t, plan, u, d, sign, placed=True):
+    x = t[d]
+    x["pops"] += sign * size[u]
+    x["edge"] += sign * edge[u]
+    x["rep"] += sign * vote[u][0]
+    x["dem"] += sign * vote[u][1]
+    x["n"] += sign
+    if placed:
+        x["inner"] += sign * sum(length for v, length in shared[u].items() if v != u and plan.get(v) == d)
+
+
+def score(t):
+    if any(x["n"] == 0 for x in t):
         return 99
-    gaps = [abs(r["pops"] - ideal) / ideal for r in rows]
+    gaps = [abs(x["pops"] - ideal) / ideal for x in t]
     gap = (max(gaps) + math.sqrt(sum(g * g for g in gaps) / N)) / 2  # the worst district and the typical one, so every evening-out move counts
-    return EQUAL * gap + COMPACT * ((sum(r["perimeter"] for r in rows) - outline) / 2 / tidy) + CLOSE * sum(abs(r["rep"] - 0.5) for r in rows) / N
+    between = (sum(x["edge"] - 2 * x["inner"] for x in t) - outline) / 2
+    close = sum(abs(x["rep"] / (x["rep"] + x["dem"]) - 0.5) if x["rep"] + x["dem"] else 0 for x in t) / N
+    return EQUAL * gap + COMPACT * between / tidy + CLOSE * close
+
+
+def cost(plan):
+    return score(tally(plan))
 
 
 def grow(rng):
     plan = {u: d for d, u in enumerate(rng.sample(units, N))}
+    totals = [size[u] for u in plan]
+    front = [set(v for v in shared[u] if v not in plan) for u in plan]
     while len(plan) < len(units):
-        totals = defaultdict(int)
-        for u, d in plan.items():
-            totals[d] += size[u]
         for d in sorted(range(N), key=lambda d: totals[d]):
-            edge_units = {v for u, x in plan.items() if x == d for v in shared[u] if v not in plan}
-            if edge_units:
-                plan[rng.choice(sorted(edge_units))] = d
+            front[d] -= plan.keys()
+            if front[d]:
+                u = rng.choice(sorted(front[d]))
+                plan[u] = d
+                totals[d] += size[u]
+                front[d] |= {v for v in shared[u] if v not in plan}
                 break
         else:
             return None
@@ -94,21 +123,32 @@ def grow(rng):
 
 
 def improve(plan, rng):
-    best = cost(plan)
+    t = tally(plan)
+    best = score(t)
     changed = True
     while changed:
         changed = False
-        for u in rng.sample(units, len(units)):
+        border = [u for u in units if any(plan[v] != plan[u] for v in shared[u])]
+        for u in rng.sample(border, len(border)):
             here = plan[u]
-            rest = [v for v in units if plan[v] == here and v != u]
-            if not rest or not connected(rest):
+            options = sorted({plan[v] for v in shared[u]} - {here})
+            if not options or t[here]["n"] < 2:
                 continue
-            for there in sorted({plan[v] for v in shared[u]} - {here}):
+            mine = [v for v in shared[u] if plan[v] == here]
+            if len(mine) > 1 and not connected([v for v in units if plan[v] == here and v != u]):
+                continue
+            for there in options:
+                plan[u] = None
+                shift(t, plan, u, here, -1)
+                shift(t, plan, u, there, 1)
                 plan[u] = there
-                now = cost(plan)
+                now = score(t)
                 if now < best - 1e-9:
                     best, changed = now, True
                     break
+                plan[u] = None
+                shift(t, plan, u, there, -1)
+                shift(t, plan, u, here, 1)
                 plan[u] = here
     return best
 

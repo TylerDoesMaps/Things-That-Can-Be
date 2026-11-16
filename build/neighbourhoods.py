@@ -174,7 +174,7 @@ measures = {c: {"sq_m": round(true[k].area), "edge_m": round(true[k].length), "b
 # simplify all the shapes together, so a border two neighbourhoods share stays one line
 g["geometry"] = gpd.GeoSeries(shapely.coverage_simplify(true.values, 25), index=g.index, crs=5070).to_crs(blocks.crs).buffer(0)
 (WORK / "neighbourhoods").mkdir(exist_ok=True)
-blocks[["block"]].assign(code=blocks.piece.map(g.code), area=blocks.piece.map(g.area_type)).to_csv(WORK / f"neighbourhoods/{SF}{CF}.csv", index=False)
+blocks[["block", "adults"]].assign(code=blocks.piece.map(g.code), area=blocks.piece.map(g.area_type)).to_csv(WORK / f"neighbourhoods/{SF}{CF}.csv", index=False)
 n = g.pops
 stats = {"neighbourhoods": len(g), "pops": int(n.sum()), "median pops": float(n.median()), "largest, in pops": int(n.max()), "under 3 pops": int((n < SMALL).sum()),
          "over 50 pops": int((n > BIG).sum()), "precinct pieces that were split": to_split, "area types": g.area_type.value_counts().to_dict()}
@@ -194,5 +194,16 @@ out = {"county": COUNTY, "code": CODE, "fips": SF + CF, "stats": stats, "bounds"
        "shapes": json.loads(g.reset_index(drop=True)[["code", "pops", "city", "house", "senate", "congress", "precinct", "area_type", "density", "geometry"]].rename(columns={"area_type": "area"}).to_json(drop_id=True)),
        "lines": {name: json.loads(s.to_json()) for name, s in lines.items()}}
 OUT.parent.mkdir(parents=True, exist_ok=True)
+def trim(o):
+    if isinstance(o, float):
+        return round(o, 5)
+    if isinstance(o, list):
+        return [trim(v) for v in o]
+    if isinstance(o, dict):
+        return {k: trim(v) for k, v in o.items()}
+    return o
+
+
+out["shapes"], out["lines"] = trim(out["shapes"]), trim(out["lines"])
 OUT.write_text(json.dumps(out, separators=(",", ":")))
 print(COUNTY, stats, OUT.stat().st_size)

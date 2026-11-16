@@ -26,7 +26,7 @@ new ResizeObserver(() => map.resize()).observe($("map"));
 
 Promise.all([
   fetch(`data/neighbourhoods/fl-${COUNTY}.json`).then((r) => r.json()), fetch(`data/pops/fl-${COUNTY}.json`).then((r) => r.json()),
-  fetch(`data/districts/fl-${COUNTY}.json`).then((r) => r.json()), fetch("data/game/counties.json").then((r) => r.json()), new Promise((go) => map.on("load", go)),
+  fetch(`data/districts/fl-${COUNTY}.json`).then((r) => r.json()), fetch("data/game/built.json").then((r) => r.json()), new Promise((go) => map.on("load", go)),
 ]).then(([d, pops, districts, counties]) => {
   hoods = d; drawn = districts;
   const by = Object.fromEntries(pops.neighbourhoods.map((h) => [h.hood, h]));
@@ -80,6 +80,6 @@ function draw() {
   [...$("lines").children].forEach((b) => { b.setAttribute("aria-pressed", shown.has(b.textContent)); map.setLayoutProperty(b.textContent, "visibility", shown.has(b.textContent) ? "visible" : "none"); });
   const s = hoods.stats;
   $("summary").textContent = view === "Drawn districts"
-    ? `${drawn.name}: ${drawn.districts.length} districts drawn from ${Object.keys(drawn.assignment).length} neighbourhoods · ${drawn.districts.map((r) => r.pops).join(", ")} pops · best of ${num(drawn.trials)} tries`
+    ? `${drawn.name}: ${drawn.districts.length} districts drawn from ${Object.keys(drawn.assignment).length} neighbourhoods · ${drawn.districts.map((r) => r.pops).join(", ")} pops · ${drawn.source ? `${drawn.source} · ${(drawn.wrong_side * 100).toFixed(1)}% of people on the wrong side of a real line` : `best of ${num(drawn.trials)} tries`}`
     : `${s.neighbourhoods} neighbourhoods · median ${s["median pops"]} pops · largest ${s["largest, in pops"]} · ${s["under 3 pops"]} under 3 pops`;
 }

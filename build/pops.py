@@ -49,9 +49,13 @@ INDEPENDENT = [0.40, 0.36, 0.30, 0.24]
 TURNOUT = [[0.38, 0.52, 0.68], [0.48, 0.62, 0.76], [0.58, 0.70, 0.82], [0.64, 0.76, 0.85]]
 
 
+TABLES = {}
+
+
 def acs(table, geo):
-    d = pd.read_csv(RAW / f"acs/{ST.lower()}/{table}.dat", sep="|", dtype=str).set_index("GEO_ID")
-    row = d.loc[geo]
+    if table not in TABLES:  # read each statewide table once
+        TABLES[table] = pd.read_csv(RAW / f"acs/{ST.lower()}/{table}.dat", sep="|", dtype=str).set_index("GEO_ID")
+    row = TABLES[table].loc[geo]
     return lambda n: float(row[f"{table.upper()}_E{n:03d}"] or 0)
 
 

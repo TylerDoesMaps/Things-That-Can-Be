@@ -322,12 +322,20 @@ document.addEventListener("mouseover", (e) => {
   if (b) { const c = S.people[b.dataset.pid]; tip(`<b>${esc(c.name)}</b><br>${PARTIES[c.party].name}${role(c.id) ? "<br>" + esc(role(c.id)) : ""}`, e); }
 });
 document.addEventListener("mouseout", (e) => { if (e.target.closest && e.target.closest(".who[data-pid]")) $("tip").hidden = true; });
-$("gsearch").oninput = (e) => {
-  const text = e.target.value.trim().toLowerCase(), box = $("gres");
+const shelves = {};
+const shelf = (letter) => (shelves[letter] ||= get(`data/seeds/${SEED}/search/${letter}.json`).catch(() => []));
+let asked = 0;
+$("gsearch").oninput = async (e) => {
+  const text = e.target.value.trim().toLowerCase(), box = $("gres"), mine = ++asked;
   if (text.length < 2) { box.hidden = true; return; }
-  const people = Object.values(S.people).filter((c) => c.name.toLowerCase().includes(text)).slice(0, 8).map((c) => `<button data-pid="${c.id}"><span class="who ${c.party}" style="text-decoration:none">${esc(c.name)}</span><span class="k">${esc(role(c.id) || PARTIES[c.party].name)}</span></button>`);
-  const places = IDX.counties.flatMap((c) => [[c.id, c.name, "Florida"]].concat(c.places.filter((p) => p[2] === "muni").map((p) => [p[0], p[1], c.name]))).filter((p) => p[1].toLowerCase().includes(text)).slice(0, 8)
-    .map((p) => `<button data-place="${esc(p[0])}">${esc(p[1])}<span class="k">${esc(p[2])}</span></button>`);
+  const words = text.split(/\s+/);
+  const code = text.toUpperCase().match(/^([A-Z]{3})-(D?\d+)$/), county = code && IDX.byCode[code[1]];
+  const places = (county ? [[code[0], code[0], county.name]] : []).concat(IDX.counties.flatMap((c) => [[c.id, c.name, "Florida"]].concat(c.places.filter((p) => p[2] === "muni").map((p) => [p[0], p[1], c.name])))
+    .filter((p) => p[1].toLowerCase().includes(text))).slice(0, 6).map((p) => `<button data-place="${esc(p[0])}">${esc(p[1])}<span class="k">${esc(p[2])}</span></button>`);
+  const rows = /[a-z]/.test(words[0][0]) ? await shelf(words[0][0]) : [];
+  if (mine !== asked) return;
+  const people = rows.filter((r) => { const parts = r[1].toLowerCase().split(" "); return words.every((w) => parts.some((part) => part.startsWith(w))); }).slice(0, 10)
+    .map((r) => `<button data-pid="${r[0]}"><span class="who ${r[2]}" style="text-decoration:none">${esc(r[1])}</span><span class="k">${esc(r[3] || (r[4] ? "Speaks for a pop in " + r[4] : PARTIES[r[2]].name))}</span></button>`);
   box.innerHTML = places.concat(people).join("") || `<button disabled>Nothing found</button>`;
   box.hidden = false;
 };

@@ -119,7 +119,7 @@ for o in offices["offices"]:
         for i in range(o.get("seats", 1)):
             state_seat(o, "", f"{oid}-{i + 1}", "state" if gov == "state" else "country", 0.5 if oid == "us.president" else share_of("all"))
 
-index, wider_parts = [], []
+index, wider_parts, all_seats, everyone = [], [], [], []
 (WORK / "game").mkdir(parents=True, exist_ok=True)
 (DATA / "game").mkdir(parents=True, exist_ok=True)
 (DATA / f"seeds/{SEED}").mkdir(parents=True, exist_ok=True)
@@ -222,6 +222,8 @@ for r in table:
             with_them = p["rep"] if party == "rep" else 1 - p["rep"]
             moods[p["id"]][level] = MOODS[4] if with_them >= 0.8 else MOODS[3] if with_them >= 0.6 else MOODS[2] if with_them >= 0.4 else MOODS[1] if with_them >= 0.2 else MOODS[0]
 
+    all_seats += seats
+    everyone += people.values()
     (DATA / f"game/fl-{f}.json").write_text(json.dumps({"county": COUNTY, "state": ST, "code": CODE, "fips": f, "places": places, "holds": holds,
                                                          "calibration": c["pops"]["summary"]["calibration"]}, separators=(",", ":")))
     (DATA / f"seeds/{SEED}/fl-{f}.json").write_text(json.dumps({"seed": SEED, "people": people, "leaders": leader, "seats": seats, "moods": moods}, separators=(",", ":")))
@@ -246,6 +248,19 @@ for field in ("house", "senate", "congress"):
     parts = everything.dissolve(field)
     gpd.GeoDataFrame({"n": parts.index.astype(int)}, geometry=parts.geometry.buffer(0.00005).buffer(-0.00005).values, crs=4269).to_file(WORK / f"game/{field}.gpkg", driver="GPKG")
 (DATA / f"seeds/{SEED}/fl-state.json").write_text(json.dumps({"seed": SEED, "people": {o["id"]: o for o in outsiders.values()}, "seats": list(state_seats.values())}, separators=(",", ":")))
+# ---- search: everyone in the seed, filed under the first letter of each of their names, officeholders first
+role = {}
+for seat in list(state_seats.values()) + all_seats:
+    role.setdefault(seat["holder"], seat["title"] + (", " + seat["label"] if seat["label"] else "") + (", " + seat["county"] + " County" if seat["county"] else ""))
+shelves = {}
+for person in list(outsiders.values()) + everyone:
+    row = [person["id"], person["name"], person["party"], role.get(person["id"], ""), "" if person["id"] in role else person.get("home", "")]
+    for letter in {word[0].lower() for word in person["name"].split() if word[0].isalpha()}:
+        shelves.setdefault(letter, []).append(row)
+(DATA / f"seeds/{SEED}/search").mkdir(exist_ok=True)
+for letter, rows in shelves.items():
+    rows.sort(key=lambda x: (not x[3], x[1]))
+    (DATA / f"seeds/{SEED}/search/{letter}.json").write_text(json.dumps(rows, separators=(",", ":")))
 (DATA / "game/fl-index.json").write_text(json.dumps({"state": ST, "counties": index}, separators=(",", ":")))
 for old in ("fl-lines.json", "counties.json"):
     (DATA / "game" / old).unlink(missing_ok=True)

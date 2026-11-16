@@ -17,6 +17,9 @@ HOME = {"Jefferson": "Home county", "MONTICELLO": "Home city"}
 # How commissioners are elected: Florida Association of Counties, county districting page, read November 2026.
 SINGLE = "Bradford,Brevard,Broward,Calhoun,Collier,Columbia,Escambia,Franklin,Gadsden,Gulf,Hamilton,Hendry,Jackson,Jefferson,Madison,Miami-Dade,Palm Beach,Sarasota,Taylor,Union".split(",")
 MIXED = "Duval,Hillsborough,Leon,Manatee,Orange,Pinellas,Volusia".split(",")
+# Who leads the county as a whole and how they get the job. Only Broward is confirmed, by Tyler.
+EXECUTIVE = {"Miami-Dade": ("Mayor", "Elected countywide"), "Orange": ("Mayor", "Elected countywide"), "Duval": ("Mayor", "Elected countywide"),
+             "Volusia": ("County Chair", "Elected countywide, not checked"), "Broward": ("Mayor", "By the commission from its members")}
 CROSSES = {"FANNING SPRINGS": "Gilchrist and Levy", "LONGBOAT KEY": "Manatee and Sarasota", "MARINELAND": "Flagler and St. Johns"}
 
 data = json.load(open(OFFICES))
@@ -33,7 +36,7 @@ def seats(c, office, how="ballot"):
 
 with open(OUT / "fl-counties.csv", "w", newline="") as f:
     w = csv.writer(f)
-    w.writerow(["County", "People, 2020", "Content", "Real district lines", "Lines found", "Commissioners elected", "Governing body", "Elected county mayor", "School board",
+    w.writerow(["County", "People, 2020", "Content", "Real district lines", "Lines found", "Commissioners elected", "Governing body", "Countywide executive", "How chosen", "School board",
                 "Superintendent", "Judicial circuit", "Congress", "State Senate", "State House", "Cities", "Other districts", "Notes"])
     for c in data["counties"]:
         name, real = c["name"], c["people"] >= COUNTY_LINE
@@ -42,7 +45,7 @@ with open(OUT / "fl-counties.csv", "w", newline="") as f:
         after = lambda key: facts[key].replace(key + " ", "").split(",")[0] if key == "Judicial circuit" else facts[key].replace(key + " ", "")
         w.writerow([name, c["people"], HOME.get(name) or ("Own content" if real else "Generic"), "Yes" if real else "No",
                     "Not started" if real and method != "Countywide" else "None needed: elected countywide" if real else "Drawn from neighbourhoods",
-                    method, seats(c, "county.commissioner"), "Yes" if seats(c, "county.mayor") else "No", seats(c, "school.board"),
+                    method, seats(c, "county.commissioner"), *EXECUTIVE.get(name, ("Chair", "By the commission from its members, not checked")), seats(c, "school.board"),
                     "Elected" if seats(c, "school.superintendent") else "Appointed", after("Judicial circuit"), after("Congress"), after("State Senate"), after("State House"),
                     c["governments"].get("city", 0), c["governments"].get("district", 0), "; ".join(c["real"] + c["notes"])])
 names = {r.FIPS_COUNTY: r.COUNTY_AREA_NAME.title() for r in gp.itertuples()}

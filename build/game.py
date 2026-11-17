@@ -69,6 +69,8 @@ wide = Counter()
 for r in table:
     c = loaded[r["fips"]]
     for h in c["pops"]["neighbourhoods"]:
+        if h["hood"] not in c["shapes"].index:  # all water, left off the map
+            continue
         row = c["shapes"].loc[h["hood"]]
         for key in ("all", f"house-{int(row.house)}", f"senate-{int(row.senate)}", f"cd-{int(row.congress)}", f"circuit-{r['circuit']}"):
             wide[key, "r"] += h["rep2024"]

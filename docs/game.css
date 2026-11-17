@@ -38,3 +38,5 @@ table.wt td .pt { display: block; }
 #worldpanel details { border-top: 1px solid var(--border-soft); padding: 3px 0; } #worldpanel summary { cursor: pointer; font-weight: 600; }
 #worldpanel .sl { display: grid; grid-template-columns: 6.2em 1fr 2.4em; gap: 4px; align-items: center; } #worldpanel .sl input { width: 100%; margin: 0; } #worldpanel .sl output { text-align: right; font-variant-numeric: tabular-nums; }
 #worldpanel .btn { margin: 4px 0 0; }
+
+.hist{display:flex;gap:4px;align-items:center;margin-left:12px}.hist .btn{min-width:30px;padding:2px 8px;font-size:18px;line-height:1.2}

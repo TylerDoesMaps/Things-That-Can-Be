@@ -225,6 +225,7 @@ function pickCounty(id) { if ($(id)) $(id).onchange = (e) => { state.county = e.
 async function route() {
   const [, view = "map", id] = decodeURIComponent(location.hash || "#/map").split("/");
   $("gres").hidden = true;
+  $("tip").hidden = true;
   show(view);
   const here = IDX.byFips[state.county];
   if (["voters", "elections", "officials", "groups"].includes(view)) await ensure(state.county);
@@ -367,9 +368,12 @@ function tip(html, e) {
   t.style.top = Math.min(e.clientY + 16, innerHeight - t.offsetHeight - 8) + "px";
 }
 addEventListener("hashchange", route);
+$("hback").onclick = () => history.back();
+$("hfwd").onclick = () => history.forward();
 document.addEventListener("click", (e) => {
   const t = e.target.closest("button");
   document.querySelectorAll(".ddmenu").forEach((m) => { if (!t || t.dataset.menu !== m.id.slice(2)) m.hidden = true; });
+  $("tip").hidden = true;
   if (!t) return;
   if (t.dataset.menu) { const m = $("m-" + t.dataset.menu); m.hidden = !m.hidden; }
   if (t.dataset.view) location.hash = "#/" + t.dataset.view;

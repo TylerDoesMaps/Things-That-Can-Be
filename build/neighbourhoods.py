@@ -162,6 +162,7 @@ def area(row):
 
 
 g["area_type"] = g.apply(area, axis=1)
+area_of = g.area_type.to_dict()
 # true sizes and shared borders, taken before the shapes are simplified for drawing
 true = g.to_crs(5070).geometry
 code_of = blocks.piece.map(g.code).tolist()
@@ -172,15 +173,19 @@ for (a, b), length in border.items():
         borders[code_of[b]][code_of[a]] += length
 measures = {c: {"sq_m": round(true[k].area), "edge_m": round(true[k].length), "borders": {o: round(v) for o, v in borders[c].items()}} for k, c in g.code.items()}
 # simplify all the shapes together, so a border two neighbourhoods share stays one line
-# cut away open water: keep only what lies inside the Census's drawn outline of the county, which stops at the shore
-land = gpd.read_file(f"zip://{RAW}/geo/cb_county.zip", engine="pyogrio").query("STATEFP == @SF and COUNTYFP == @CF").to_crs(5070).geometry.iloc[0]
-dry = true.intersection(land).apply(lambda s: shapely.unary_union([p for p in shapely.get_parts(s) if p.geom_type == "Polygon" and p.area > 100]))
-dry = dry.where(~dry.is_empty, true)  # a neighbourhood wholly offshore keeps its shape rather than vanish
-g["geometry"] = gpd.GeoSeries(shapely.coverage_simplify(dry.buffer(0).values, 25), index=g.index, crs=5070).to_crs(blocks.crs).buffer(0)
+# cut away water: the Census's own water areas for the county (every bay, sound, gulf and ocean piece, and any lake or river of a square kilometre or more)
+water = gpd.read_file(f"zip://{RAW}/water/{SF}{CF}.zip", engine="pyogrio").to_crs(5070)
+water = water[water.MTFCC.isin(["H2051", "H2053"]) | (water.area >= 1e6)]
+cut = gpd.overlay(gpd.GeoDataFrame({"piece": true.index}, geometry=true.buffer(0).values, crs=5070), gpd.GeoDataFrame(geometry=water.geometry.buffer(0).values, crs=5070), how="difference").dissolve("piece").geometry
+dry = cut.apply(lambda s: shapely.unary_union([p for p in shapely.get_parts(s) if p.geom_type == "Polygon" and p.area > 400])).reindex(true.index)
+gone = [k for k in true.index if (dry[k] is None or dry[k].is_empty) and g.pops[k] == 0]  # a neighbourhood that is all water and holds nobody is left off the map
+dry = dry.where(~(dry.isna() | dry.is_empty), true)  # one that holds people keeps its shape rather than vanish
+g, dry = g.drop(index=gone), dry.drop(index=gone)
+g["geometry"] = gpd.GeoSeries(shapely.coverage_simplify(dry.buffer(0).values, 15), index=g.index, crs=5070).to_crs(blocks.crs).buffer(0)
 (WORK / "neighbourhoods").mkdir(exist_ok=True)
-blocks[["block", "adults"]].assign(code=blocks.piece.map(g.code), area=blocks.piece.map(g.area_type)).to_csv(WORK / f"neighbourhoods/{SF}{CF}.csv", index=False)
+blocks[["block", "adults"]].assign(code=code_of, area=blocks.piece.map(area_of)).to_csv(WORK / f"neighbourhoods/{SF}{CF}.csv", index=False)
 n = g.pops
-stats = {"neighbourhoods": len(g), "pops": int(n.sum()), "median pops": float(n.median()), "largest, in pops": int(n.max()), "under 3 pops": int((n < SMALL).sum()),
+stats = {"neighbourhoods": len(g), "left off as water": len(gone), "pops": int(n.sum()), "median pops": float(n.median()), "largest, in pops": int(n.max()), "under 3 pops": int((n < SMALL).sum()),
          "over 50 pops": int((n > BIG).sum()), "precinct pieces that were split": to_split, "area types": g.area_type.value_counts().to_dict()}
 outline = g.geometry.union_all().boundary.buffer(0.00002)
 

@@ -118,6 +118,14 @@ function shadeOf(kind) {
     : s === "ba" ? grey(n("ba"), 0.5) : s === "old" ? grey(n("old"), 0.6) : grey(n("inc"), 0.7);
   return ["case", ["==", n("pops"), 0], "#ffffff", colour];
 }
+/* what the map is shading by, for one place: shown when the pointer is over it */
+function shown(p) {
+  const s = state.shade, rd = (x) => `<span style="color:${PARTIES[x >= 0.5 ? "rep" : "dem"].colour}">${x >= 0.5 ? "R" : "D"} ${pct(Math.max(x, 1 - x))}</span>`, v = VOTE.places[p.id];
+  const text = s === "party" ? "Party ID " + lead([p.pr, p.pi, p.pd]) : s === "r2024" ? (v && v[0] !== null ? "President, 2024 " + rd(v[0]) : "") : s === "real" ? "Real 2024 " + rd(p.r24) : s === "local" ? "Local lean " + lean(p.local)
+    : s === "race" ? "Largest group " + esc(p.race) : s === "area" ? "Area type " + esc(p.area) : s === "race_White" ? "White " + pct(p.rw) : s === "race_Black" ? "Black " + pct(p.rb) : s === "race_Hispanic" ? "Hispanic " + pct(p.rh)
+    : s === "ba" ? "Bachelor's degree " + pct(p.ba) : s === "old" ? "Age 65 and over " + pct(p.old) : s === "income" ? "Income under $35,000 " + pct(p.inc) : "";
+  return p.pops && text ? "<br>" + text : "";
+}
 function legend() {
   const s = state.shade, bar = (cols, a, b) => `<div class="bar">${cols.map((c) => `<span style="background:${c}"></span>`).join("")}</div><div class="ends"><span>${a}</span><span>${b}</span></div>`;
   const dv = [7, 5, 3, 1].map((i) => css("--d" + i)).concat([1, 3, 5, 7].map((i) => css("--r" + i))), gr = [0, 1, 2, 3, 4, 5, 6].map((i) => css("--g" + i));
@@ -352,7 +360,7 @@ Promise.all([get("data/game/fl-index.json"), get(`data/seeds/${SEED}/fl-state.js
     for (const [kind] of LAYERS) {
       map.addLayer({ id: "picked-" + kind, type: "line", source: "fl", "source-layer": kind, layout: { ...round, visibility: "none" }, filter: ["==", ["get", "id"], ""], paint: { "line-color": "#202122", "line-width": grow(2, 3.6) } });
       map.on("click", "fill-" + kind, async (e) => { const p = e.features[0].properties; await ensure(p.fips); state.selected = p.id; paint(); infobox(); });
-      map.on("mousemove", "fill-" + kind, (e) => { const p = e.features[0].properties; tip(`<b>${esc(p.name)}</b>${kind === "county" ? "" : "<br>" + esc(IDX.byFips[p.fips].name)}<br>${num(p.pops)} pops · ${lead([p.pr, p.pi, p.pd])}`, e.originalEvent); map.getCanvas().style.cursor = "pointer"; });
+      map.on("mousemove", "fill-" + kind, (e) => { const p = e.features[0].properties; tip(`<b>${esc(p.name)}</b>${kind === "county" ? "" : "<br>" + esc(IDX.byFips[p.fips].name)}<br>${num(p.pops)} pops${shown(p)}`, e.originalEvent); map.getCanvas().style.cursor = "pointer"; });
       map.on("mouseleave", "fill-" + kind, () => { $("tip").hidden = true; map.getCanvas().style.cursor = ""; });
     }
     paint();

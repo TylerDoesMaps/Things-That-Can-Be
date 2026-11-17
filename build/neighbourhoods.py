@@ -173,9 +173,10 @@ for (a, b), length in border.items():
         borders[code_of[b]][code_of[a]] += length
 measures = {c: {"sq_m": round(true[k].area), "edge_m": round(true[k].length), "borders": {o: round(v) for o, v in borders[c].items()}} for k, c in g.code.items()}
 # simplify all the shapes together, so a border two neighbourhoods share stays one line
-# cut away water: the Census's own water areas for the county (every bay, sound, gulf and ocean piece, and any lake or river of a square kilometre or more)
+# cut away the sea: the Census's water areas for the county that are bay, sound, gulf or ocean, and any river of a square kilometre or more.
+# Lakes, ponds and reservoirs stay as land, so the map has no holes in it.
 water = gpd.read_file(f"zip://{RAW}/water/{SF}{CF}.zip", engine="pyogrio").to_crs(5070)
-water = water[water.MTFCC.isin(["H2051", "H2053"]) | (water.area >= 1e6)]
+water = water[water.MTFCC.isin(["H2051", "H2053"]) | ((water.MTFCC == "H3010") & (water.area >= 1e6))]
 cut = gpd.overlay(gpd.GeoDataFrame({"piece": true.index}, geometry=true.buffer(0).values, crs=5070), gpd.GeoDataFrame(geometry=water.geometry.buffer(0).values, crs=5070), how="difference").dissolve("piece").geometry
 dry = cut.apply(lambda s: shapely.unary_union([p for p in shapely.get_parts(s) if p.geom_type == "Polygon" and p.area > 400])).reindex(true.index)
 gone = [k for k in true.index if (dry[k] is None or dry[k].area < 0.1 * true[k].area) and g.pops[k] == 0]  # a neighbourhood that is nine-tenths water or more and holds nobody is left off the map

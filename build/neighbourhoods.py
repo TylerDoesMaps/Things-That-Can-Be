@@ -178,7 +178,7 @@ water = gpd.read_file(f"zip://{RAW}/water/{SF}{CF}.zip", engine="pyogrio").to_cr
 water = water[water.MTFCC.isin(["H2051", "H2053"]) | (water.area >= 1e6)]
 cut = gpd.overlay(gpd.GeoDataFrame({"piece": true.index}, geometry=true.buffer(0).values, crs=5070), gpd.GeoDataFrame(geometry=water.geometry.buffer(0).values, crs=5070), how="difference").dissolve("piece").geometry
 dry = cut.apply(lambda s: shapely.unary_union([p for p in shapely.get_parts(s) if p.geom_type == "Polygon" and p.area > 400])).reindex(true.index)
-gone = [k for k in true.index if (dry[k] is None or dry[k].is_empty) and g.pops[k] == 0]  # a neighbourhood that is all water and holds nobody is left off the map
+gone = [k for k in true.index if (dry[k] is None or dry[k].area < 0.1 * true[k].area) and g.pops[k] == 0]  # a neighbourhood that is nine-tenths water or more and holds nobody is left off the map
 dry = dry.where(~(dry.isna() | dry.is_empty), true)  # one that holds people keeps its shape rather than vanish
 g, dry = g.drop(index=gone), dry.drop(index=gone)
 g["geometry"] = gpd.GeoSeries(shapely.coverage_simplify(dry.buffer(0).values, 15), index=g.index, crs=5070).to_crs(blocks.crs).buffer(0)

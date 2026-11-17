@@ -4,8 +4,10 @@
 Run after game.py. The presidency is an open race between two candidates from outside the state. Every other sitting official up for election runs again; the other party's nominee is drawn from the
 characters who live in the seat's area, and may not file where the seat is lopsided or draws little attention.
 Everyone who runs, and everyone in office, is given traits. Each pop then votes from its own lean and turnout,
-moved by how the two candidates' stats and traits sit with that kind of pop, by where the candidates live, by
-incumbency, and by the top of the ticket. The winners take the offices and pop mood is reset from who won.
+moved by how the two candidates' stats and traits sit with that kind of pop (scaled by how well each is known
+there), by where the candidates live, and by the top of the ticket. The winners take the offices, any winner who led
+a pop hands it to a new leader, and pop mood is reset from who won. Then society.py fills the departments, boards and
+organization chapters.
 The shifts listed as active in content/shifts.yaml are applied to every pop first.
 With a number, runs that many more elections with other candidates and only reports the top lines, changing nothing.
 With "match", pits the best and worst candidates the traits allow against each other for president, changing nothing.
@@ -18,9 +20,12 @@ import random
 import sys
 from collections import Counter, defaultdict
 from pathlib import Path
+from types import SimpleNamespace
 
 import numpy as np
 import yaml
+
+import society
 
 DATA, TABLE, OFFICES, TRAITS, NAMES, SEED = Path(sys.argv[1]), Path(sys.argv[2]), Path(sys.argv[3]), Path(sys.argv[4]), Path(sys.argv[5]), int(sys.argv[6])
 MODE = sys.argv[7] if len(sys.argv) > 7 else ""  # a number of trial elections, or "match" for the best and worst candidates head to head
@@ -29,7 +34,12 @@ SHIFTS = yaml.safe_load(open(Path(sys.argv[3]).parent.parent / "shifts.yaml"))
 YEAR, SIZE = 2024, 100
 # ---- the dials. Points are points of vote share near an even race.
 STAT_POINTS = {"cha": 0.6, "gri": 0.25, "dip": 0.25, "sta": 0.15, "cun": 0.15}  # per point of the stat
-HOME_HOOD, HOME_AREA, INCUMBENT = 4.0, 2.0, 2.0  # in the candidate's own neighbourhood; own district or county; for a sitting official
+HOME_HOOD, HOME_AREA = 4.0, 2.0  # in the candidate's own neighbourhood; own district or county
+# Name ID, 0 to 100: how well a character is known. It scales how much of their stats and traits reach voters; an unknown runs close to the party line.
+UNKNOWN, ELSEWHERE = 0.35, 0.3  # the share of a candidate's appeal that lands with no name ID at all; how much of their name ID carries outside the area that knows them
+KNOWN = {"us.senator": 80, "fl.governor": 85, "us.representative": 60, "fl.senator": 45, "fl.representative": 40, "fl.state_attorney": 35, "fl.public_defender": 30, "county.sheriff": 55, "county.mayor": 55, "county.chair": 55,
+         "county.commissioner": 40, "school.superintendent": 40, "school.board": 28, "fl.county_judge": 20, "district.conservation": 8, "city.mayor": 45, "city.mayor.chosen": 40}  # others: 60 statewide, 35 county, 30 city
+PER_TERM, NOMINEE, NEWCOMER = 6, 95, 0.7  # added for each term already served; a presidential nominee; share of an office's name ID a first-time winner starts with
 CAP = 12.0          # the pull toward the mean: however lopsided the candidates, the swing flattens out toward this many points
 COATTAIL = 0.3      # share of the presidential swing that carries down to other party races
 NO_PARTY = 0.35     # how much of a pop's party lean still counts in a race with no party on the ballot
@@ -40,10 +50,20 @@ ROLLOFF = {"us.president": 1.0, "us.senator": 0.985, "us.representative": 0.97, 
            "fl.county_judge": 0.78, "school.board": 0.8, "district.conservation": 0.65}  # share of voters who fill in the race; county party races 0.93
 NATION_GAP = 11.6   # Florida's 2024 margin less the country's, in points: the country is this much less Republican than Florida
 BLUE = {"Factory and plant", "Building and transport", "Oil, gas and mining"}
-JOBS = {"Farm and ranch": ["farmer", "rancher"], "Oil, gas and mining": ["tradesman", "lineman"], "Factory and plant": ["factory_worker", "mechanic", "tradesman"],
-        "Building and transport": ["construction_worker", "truck_driver", "tradesman", "lineman"], "Shops and service": ["small_business_owner", "salesperson", "restaurant_worker", "realtor", "barber"],
-        "Office and professional": ["attorney", "accountant", "business_executive", "banker", "engineer", "realtor", "journalist"], "Schools and health": ["teacher", "nurse", "physician", "professor", "social_worker"],
-        "Government and military": ["government_employee", "police_officer", "firefighter", "veteran"], "Retired": ["veteran", "teacher", "small_business_owner", "business_executive", "nurse"], "Student": ["office_worker"]}
+# A character's job comes from their pop's line of work, weighted toward jobs that pay about what the pop earns.
+JOBS = {"Farm and ranch": ["farmer", "rancher", "farmworker", "fisherman"], "Oil, gas and mining": ["tradesman", "lineman", "engineer"],
+        "Factory and plant": ["factory_worker", "mechanic", "tradesman", "warehouse_worker", "engineer"],
+        "Building and transport": ["construction_worker", "truck_driver", "tradesman", "lineman", "mechanic", "warehouse_worker", "engineer"],
+        "Shops and service": ["small_business_owner", "salesperson", "restaurant_worker", "hospitality_worker", "realtor", "barber", "custodian", "pastor"],
+        "Office and professional": ["attorney", "accountant", "business_executive", "banker", "engineer", "realtor", "journalist", "software_developer", "office_worker", "lobbyist", "nonprofit_director"],
+        "Schools and health": ["teacher", "nurse", "physician", "professor", "social_worker", "healthcare_aide"],
+        "Government and military": ["government_employee", "police_officer", "firefighter", "corrections_officer", "veteran"],
+        "Retired": ["veteran", "teacher", "small_business_owner", "business_executive", "nurse", "pastor", "farmer", "government_employee"], "Student": ["office_worker", "restaurant_worker"]}
+PAY = {3: ["attorney", "physician", "business_executive", "banker", "lobbyist"], 2: ["professor", "engineer", "accountant", "software_developer", "realtor", "nonprofit_director", "small_business_owner", "rancher"],
+       0: ["restaurant_worker", "hospitality_worker", "barber", "healthcare_aide", "warehouse_worker", "custodian", "farmworker", "fisherman"]}  # every other job pays 1
+PAY = {job: band for band, jobs in PAY.items() for job in jobs}
+INCOMES = ["Under $35,000", "$35,000 to $75,000", "$75,000 to $150,000", "Over $150,000"]
+NEAR = [3, 1.5, 0.6, 0.25]  # weight for a job whose pay is 0, 1, 2, 3 bands from the pop's income
 HIGH_JOBS = ["attorney", "attorney", "business_executive", "banker", "physician", "small_business_owner", "teacher", "veteran", "farmer", "lobbyist"]
 
 offices = {o["id"]: o for o in yaml.safe_load(open(OFFICES))["offices"]}
@@ -71,7 +91,7 @@ def pick(rng, rows):
 class County:
     def __init__(self, r):
         f = r["fips"]
-        self.row, self.fips, self.code = r, f, r["code"]
+        self.row, self.fips, self.code, self.seen = r, f, r["code"], {}
         self.game = json.load(open(DATA / f"game/fl-{f}.json"))
         self.seed = json.load(open(DATA / f"seeds/{SEED}/fl-{f}.json"))
         pops = json.load(open(DATA / f"pops/fl-{f}.json"))["pops"]
@@ -93,7 +113,9 @@ class County:
                     "rural": area == "rural", "small_town": area == "small town", "urban": area == "urban", "suburban": area == "suburban", "young": age == "18 to 29", "old": age == "65 and over",
                     "farm": work == "Farm and ranch", "blue_collar": np.isin(work, list(BLUE)), "service": work == "Shops and service", "government": work == "Government and military"}
         self.pop_of = {p["id"]: p for p in pops}
+        self.at = {p["id"]: i for i, p in enumerate(pops)}
         self.leaders = [(self.seed["leaders"][p["id"]], i) for i, p in enumerate(pops)]  # (person, index of the pop they speak for)
+        self.hood_number = number
 
     def shift(self, shifts):
         """Sets the moves that apply to every race: lean in points toward the Republican, turnout in points, by pop."""
@@ -112,6 +134,11 @@ class County:
 
     def voters(self, area):
         """Which of this county's pops vote for a seat with this area."""
+        if area not in self.seen:
+            self.seen[area] = self.find(area)
+        return self.seen[area]
+
+    def find(self, area):
         if area in ("state", "country", self.game["places"][self.row["name"].lower().replace(" ", "-").replace(".", "")]["id"]) or area.startswith("circuit-"):
             return np.ones(len(self.pops), bool)
         for word, field in (("house-", self.house), ("senate-", self.senate), ("cd-", self.congress)):
@@ -120,6 +147,8 @@ class County:
         place = self.game["places"].get(area)
         if place and place["kind"] == "district":
             return self.district == int(area.split("-D")[1])
+        if place:
+            return np.isin(self.hood, [self.hood_number[m] for m in place["members"]])
         return np.zeros(len(self.pops), bool)
 
 
@@ -128,13 +157,24 @@ state = json.load(open(DATA / f"seeds/{SEED}/fl-state.json"))
 people = dict(state["people"])
 for c in counties.values():
     people.update(c.seed["people"])
-if any(s.get("won") for s in state["seats"]):
+if any(s.get("won") for s in state["seats"]) and MODE != "match":
     sys.exit("This seed's election has already been run. Run game.py first.")
 county_id = {c.fips: c.row["name"].lower().replace(" ", "-").replace(".", "") for c in counties.values()}
-home_of = {}  # person -> (fips, hood number, district, race)
+home_of = {}  # person -> (fips, hood number, district, race, pop number): where they live, whether or not they still lead the pop
+
+
+def settle(c, pid):
+    i = c.at[people[pid]["pop"]]
+    home_of[pid] = (c.fips, int(c.hood[i]), int(c.district[i]), c.pops[i]["race"], i)
+
+
 for c in counties.values():
-    for pid, i in c.leaders:
-        home_of[pid] = (c.fips, int(c.hood[i]), int(c.district[i]), c.pops[i]["race"], i)
+    for pid, person in c.seed["people"].items():
+        if "pop" in person:
+            settle(c, pid)
+seat_of = {}
+for s in state["seats"] + [s for c in counties.values() for s in c.seed["seats"]]:
+    seat_of.setdefault(s["holder"], s)
 
 
 # ---------- traits: the same person always draws the same ones
@@ -151,7 +191,7 @@ def dress(pid):
                     ("immigrant_family", 10 if pop and pop["race"] in ("Hispanic", "Asian") else 1)])
     level = pick(rng, [(1, 50), (2, 30), (3, 15), (4, 5)])
     child = rng.choice([t["id"] for t in book["families"]["childhood"] if t["level"] == level])
-    job = rng.choice(JOBS[work]) if work else rng.choice(HIGH_JOBS)
+    job = pick(rng, [(j, NEAR[abs(PAY.get(j, 1) - INCOMES.index(income))]) for j in JOBS[work]]) if work else rng.choice(HIGH_JOBS)
     mine, shut = [], set()
     pool = [t for t in book["families"]["personality"]]
     rng.shuffle(pool)
@@ -168,7 +208,25 @@ def dress(pid):
             stats[k] += v
     person["traits"], person["stats"] = traits, {k: max(0, min(10, v)) for k, v in stats.items()}
     person.setdefault("race", where[3] if where else "White")
+    if "known" not in person:  # name ID: from the office they hold and the terms they have served, or a little, in their own neighbourhood
+        seat = seat_of.get(pid)
+        if seat:
+            base = KNOWN.get(seat["office"], 60 if seat["government"] in ("state", "federal") else 30 if seat["government"] == "city" else 35)
+            person["known"], person["known_in"] = min(100, base + PER_TERM * rng.choice([0, 0, 1, 1, 2, 3])), seat["area"]
+        else:
+            person["known"], person["known_in"] = rng.randint(3, 15), person.get("home", "")
     return person
+
+
+def reach(person, c, who):
+    """How much of a character's appeal lands with each pop: full where they are well known, little where nobody has heard of them."""
+    area, mask = person["known_in"], None
+    if area in c.hood_number:
+        mask = c.hood[who] == c.hood_number[area]
+    elif area not in ("", "Elsewhere"):
+        mask = c.voters(area)[who]
+    known = person["known"] / 100 * (ELSEWHERE if mask is None else np.where(mask, 1.0, ELSEWHERE))
+    return UNKNOWN + (1 - UNKNOWN) * known
 
 
 def appeal(pid, c, who, against_incumbent, wide):
@@ -187,6 +245,7 @@ def appeal(pid, c, who, against_incumbent, wide):
                 points += worth * against_incumbent
             else:
                 points += worth * c.aud[audience][who]
+    points = points * reach(person, c, who)
     where = home_of.get(pid)
     if where and where[0] == c.fips:
         points += HOME_HOOD * (c.hood[who] == where[1])
@@ -262,7 +321,8 @@ def run(roll, keep):
                     continue
                 if seat["office"] == "us.president":  # from outside the state
                     pid = f"s{SEED}-x-president-{party}-{roll}"
-                    people[pid] = {"id": pid, "name": f"{pick(rng, names['first'][rng.choice('MF') + '|White'])} {pick(rng, names['last']['White'])}", "party": party, "home": "Elsewhere", "race": "White"}
+                    people[pid] = {"id": pid, "name": f"{pick(rng, names['first'][rng.choice('MF') + '|White'])} {pick(rng, names['last']['White'])}", "party": party, "home": "Elsewhere", "race": "White",
+                                   "known": NOMINEE, "known_in": "country"}
                     cands[party] = pid
                 else:
                     pool = [p for p in pool_for(race, party, holders) if p not in drafted]
@@ -284,7 +344,7 @@ def run(roll, keep):
     hoods = {}
     for c in counties.values():
         everyone = np.ones(len(c.pops), bool)
-        coat = appeal(top["a"], c, everyone, top["sitting"] == top["b"], True) - appeal(top["b"], c, everyone, top["sitting"] == top["a"], True) + INCUMBENT * ((top["sitting"] == top["a"]) - (top["sitting"] == top["b"]))
+        coat = appeal(top["a"], c, everyone, top["sitting"] == top["b"], True) - appeal(top["b"], c, everyone, top["sitting"] == top["a"], True)
         for race in ballot:
             if c.fips not in race["where"]:
                 continue
@@ -297,7 +357,7 @@ def run(roll, keep):
             if a is None or b is None:
                 tally[race["key"]][c.fips][0 if a else 1] += cast.sum() * 0.75
                 continue
-            gap = appeal(a, c, who, race["sitting"] == b, race["wide"]) - appeal(b, c, who, race["sitting"] == a, race["wide"]) + INCUMBENT * ((race["sitting"] == a) - (race["sitting"] == b))
+            gap = appeal(a, c, who, race["sitting"] == b, race["wide"]) - appeal(b, c, who, race["sitting"] == a, race["wide"])
             if seat["partisan"]:
                 if race is not top:
                     gap = gap + COATTAIL * coat[who]
@@ -356,7 +416,7 @@ if MODE == "match":
         for t in traits:
             for k, v in trait[t]["stats"].items():
                 stats[k] += v
-        people[pid] = {"id": pid, "name": pid, "party": party, "home": "Elsewhere", "race": "White", "traits": traits, "stats": {k: max(0, min(10, v)) for k, v in stats.items()}}
+        people[pid] = {"id": pid, "name": pid, "party": party, "home": "Elsewhere", "race": "White", "traits": traits, "stats": {k: max(0, min(10, v)) for k, v in stats.items()}, "known": NOMINEE, "known_in": "country"}
         return pid
 
     def worth(t, party):  # what one trait is worth across the whole state, in points
@@ -426,15 +486,39 @@ def card(race):
             "cands": cands, "by_county": race["by_county"] if race["wide"] else None}
 
 
-# the winners take office
+def named(rng, race):
+    return f"{pick(rng, names['first'][rng.choice('MF') + '|' + race])} {pick(rng, names['last'][race])}"
+
+
+# the winners take office. A winner who led a pop hands it on: the pop stays their home and gets a new leader.
+handed = 0
 for race in ballot:
     seat = race["seat"]
+    first_time = race["winner"] != race["sitting"]
     seat["holder"] = race["winner"]
     seat["next"] = [YEAR + int(offices[seat["office"]].get("term", 4))]
     seat["won"] = YEAR
     for pid in (race["a"], race["b"]):
         if pid:
             dress(pid)["ran"] = f"{seat['title']}{', ' + seat['label'] if seat['label'] else ''}, {YEAR}"
+    winner = people[race["winner"]]
+    if first_time:
+        base = KNOWN.get(seat["office"], 60 if seat["government"] in ("state", "federal") else 30 if seat["government"] == "city" else 35)
+        if base * NEWCOMER > winner["known"]:
+            winner["known"], winner["known_in"] = round(base * NEWCOMER), seat["area"]
+        where = home_of.get(winner["id"])
+        c = where and counties[where[0]]
+        if c and c.seed["leaders"].get(winner.get("pop")) == winner["id"]:
+            rng = random.Random(f"{SEED}|heir|{winner['id']}")
+            p, spot = c.pop_of[winner["pop"]], rng.random()
+            pid = f"s{SEED}-{c.code}-{len(c.seed['people']) + 1:05d}"
+            heir = {"id": pid, "name": named(rng, p["race"]), "party": "rep" if spot < p["pie"]["R"] else "ind" if spot < p["pie"]["R"] + p["pie"]["I"] else "dem", "pop": p["id"], "home": p["hood"], "after": winner["id"]}
+            people[pid] = c.seed["people"][pid] = heir
+            c.seed["leaders"][p["id"]], winner["heir"] = pid, pid
+            settle(c, pid)
+            handed += 1
+for c in counties.values():
+    c.leaders = [(c.seed["leaders"][p["id"]], i) for i, p in enumerate(c.pops)]
 for s in state["seats"]:
     dress(s["holder"])
 for c in counties.values():
@@ -457,6 +541,11 @@ for c in counties.values():
         idx = [number[m] for m in q["members"]]
         rr, dd = r[idx].sum(), d[idx].sum()
         place_share[q["id"]] = [round(float(rr / (rr + dd)), 3) if rr + dd else None, round(float(rr + dd))]
+# ---- departments, boards and organization chapters
+ctx = SimpleNamespace(SEED=SEED, DATA=DATA, people=people, dress=dress, appeal=appeal, named=named, book=book)
+filled = [society.fill(c, ctx) for c in counties.values()]
+print(sum(f[0] for f in filled), "departments,", sum(f[2] for f in filled), "of them hired from within;", sum(f[1] for f in filled), "boards;", sum(f[3] for f in filled), "chapters;", handed, "pops handed to a new leader")
+for c in counties.values():
     for pid in c.seed["people"]:
         c.seed["people"][pid] = people[pid]
     (DATA / f"seeds/{SEED}/fl-{c.fips}.json").write_text(json.dumps(c.seed, separators=(",", ":")))
@@ -499,6 +588,12 @@ order = ["hood", "kind", "lean", "turnout", "r", "i", "gap"]
 role = {}
 for seat in state["seats"] + [s for c in counties.values() for s in c.seed["seats"]]:
     role.setdefault(seat["holder"], seat["title"] + (", " + seat["label"] if seat["label"] else "") + (", " + seat["county"] + " County" if seat["county"] else ""))
+for c in counties.values():
+    here = c.row["name"] + " County"
+    for d in c.seed["departments"]:
+        role.setdefault(d["head"], f"Head of {d['name']}, {c.game['places'][d['gov']]['name']}")
+    for ch in c.seed["chapters"]:
+        role.setdefault(ch["leader"], f"Leads the {ch['name']}, {here}")
 shelves = defaultdict(list)
 for person in list(state["people"].values()) + [p for c in counties.values() for p in c.seed["people"].values()]:
     row = [person["id"], person["name"], person["party"], role.get(person["id"], ""), "" if person["id"] in role else person.get("home", "")]

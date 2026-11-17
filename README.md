@@ -21,6 +21,12 @@ Florida is the working state. The map, offices and pops pages read Florida; the 
 - `build/` scripts that rebuild everything (`build/run.sh`)
 - `resources/` source files that cannot be downloaded again
 
+## Society
+
+`build/organizations.py` gives every pop a pie for each kind of organization (church, union, business, civic) and works out which chapters each county has (`docs/data/orgs/`). The list, the members a chapter needs and what folds into what are in `docs/content/organizations/organizations.yaml`; the mix between churches is fitted to county percentages in `religion-fl.csv` (PRRI, 2020 Census of American Religion).
+
+`build/election.py` runs a seed's starting election and then calls `build/society.py`, which fills each county's and city's departments and boards from `docs/content/government/departments.yaml` and has every chapter elect a leader. Run order for a seed: `game.py`, `organizations.py`, `election.py`.
+
 ## Events
 
 Each event is one file in `docs/content/events/`, named by its ID. The game and the builder read the same files.

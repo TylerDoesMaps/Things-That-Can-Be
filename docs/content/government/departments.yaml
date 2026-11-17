@@ -1,0 +1,92 @@
+note: Local appointed government. A government's size in pops sets its tier; each tier lists every department and board at that size. A department holding one function takes that function's name. Thresholds and bindings are a first version.
+functions:
+  police: Police
+  fire: Fire Rescue
+  roads: Streets and Roads
+  water: Utilities
+  waste: Solid Waste
+  parks: Parks and Recreation
+  libraries: Libraries
+  health: Health
+  welfare: Social Services
+  housing: Housing
+  planning: Planning and Zoning
+  environment: Environment
+  airports: Aviation
+  transit: Transit
+  finance: Finance
+  administration: Administration
+elected:  # county functions held by an elected officer, who acts as the department head and cannot be dismissed
+  county.sheriff: [police]
+  county.elections: []
+  county.property_appraiser: []
+  county.tax_collector: []
+  county.clerk: []
+tiers:
+  - {tier: 1, under: 10, seats: 0, departments: [[General Services, [roads, water, waste, finance, administration]]], boards: []}
+  - {tier: 2, under: 25, seats: 0, departments: [[Public Safety, [police, fire]], [General Services, [roads, water, waste, parks, finance, administration]]], boards: []}
+  - {tier: 3, under: 60, seats: 3, departments: [[Public Safety, [police, fire]], [Public Works, [roads, water, waste, parks]], [Administrative Services, [finance, administration, planning]]],
+     boards: [[Planning Board, [planning]]]}
+  - {tier: 4, under: 150, seats: 3, departments: [[Police, [police]], [Fire Rescue, [fire]], [Public Works, [roads, water, waste]], [Community Services, [parks, libraries]], [Administrative Services, [finance, administration, planning]]],
+     boards: [[Planning Board, [planning]], [Community Services Board, [parks, libraries]]]}
+  - {tier: 5, under: 400, seats: 5, departments: [[Police, [police]], [Fire Rescue, [fire]], [Public Works, [roads, waste, airports]], [Utilities, [water]], [Community Services, [parks, libraries, housing]], [Planning and Zoning, [planning]],
+     [Administrative Services, [finance, administration]]], boards: [[Planning Board, [planning]], [Community Services Board, [parks, libraries, housing]], [Utilities Board, [water]]]}
+  - {tier: 6, under: 1000, seats: 5, departments: [[Police, [police]], [Fire Rescue, [fire]], [Public Works, [roads, airports]], [Solid Waste, [waste]], [Utilities, [water]], [Parks and Recreation, [parks]], [Libraries, [libraries]],
+     [Health and Human Services, [health, welfare, housing]], [Planning and Development, [planning, environment]], [Finance, [finance]], [Administration, [administration]]],
+     boards: [[Planning Board, [planning, environment]], [Utilities Board, [water, waste, roads]], [Parks and Libraries Board, [parks, libraries]], [Health and Human Services Board, [health, welfare, housing]]]}
+  - {tier: 7, under: 2500, seats: 5, departments: [[Police, [police]], [Fire Rescue, [fire]], [Streets and Roads, [roads]], [Solid Waste, [waste]], [Utilities, [water]], [Transportation, [airports, transit]], [Parks and Recreation, [parks]],
+     [Libraries, [libraries]], [Health, [health]], [Human Services, [welfare, housing]], [Planning and Zoning, [planning]], [Environment, [environment]], [Finance, [finance]], [Administration, [administration]]],
+     boards: [[Planning Board, [planning, environment]], [Utilities Board, [water, waste, roads]], [Parks and Libraries Board, [parks, libraries]], [Health and Human Services Board, [health, welfare, housing]],
+     [Public Safety Board, [police, fire]], [Transportation Board, [airports, transit]]]}
+  - {tier: 8, under: 1000000000, seats: 5, departments: [[Police, [police]], [Fire Rescue, [fire]], [Streets and Roads, [roads]], [Solid Waste, [waste]], [Utilities, [water]], [Transit, [transit]], [Aviation, [airports]],
+     [Parks and Recreation, [parks]], [Libraries, [libraries]], [Health, [health]], [Social Services, [welfare]], [Housing, [housing]], [Planning and Zoning, [planning]], [Environment, [environment]], [Finance, [finance]],
+     [Administration, [administration]]],
+     boards: [[Planning Board, [planning, environment]], [Utilities Board, [water, waste, roads]], [Parks and Libraries Board, [parks, libraries]], [Health and Human Services Board, [health, welfare, housing]],
+     [Public Safety Board, [police, fire]], [Transportation Board, [airports, transit]], [Budget Board, [finance, administration]]]}
+jobs:  # the functions each job qualifies a character for. A job with none qualifies for nothing.
+  attorney: [administration, planning]
+  physician: [health]
+  professor: [libraries]
+  engineer: [roads, water, transit, airports]
+  accountant: [finance]
+  teacher: [libraries, parks]
+  social_worker: [welfare, housing, health]
+  business_executive: [administration, finance]
+  banker: [finance, housing]
+  nonprofit_director: [welfare, housing, parks]
+  lobbyist: [administration]
+  journalist: [libraries]
+  nurse: [health, welfare]
+  software_developer: [administration]
+  pastor: [welfare]
+  realtor: [planning, housing]
+  office_worker: [administration]
+  government_employee: [administration, finance]
+  police_officer: [police]
+  firefighter: [fire]
+  corrections_officer: [police]
+  veteran: [police, fire]
+  tradesman: [water, roads]
+  lineman: [water]
+  small_business_owner: [planning]
+  salesperson: []
+  restaurant_worker: []
+  hospitality_worker: []
+  barber: []
+  healthcare_aide: [health, welfare]
+  mechanic: [transit, airports]
+  construction_worker: [roads, housing]
+  factory_worker: []
+  truck_driver: [waste, transit]
+  warehouse_worker: [waste]
+  custodian: [waste]
+  farmer: [environment]
+  rancher: [environment]
+  farmworker: [environment]
+  fisherman: [environment]
+elected_jobs:  # jobs that make a credible candidate for an elected county office. Not used yet.
+  county.sheriff: [police_officer, corrections_officer]
+  county.clerk: [attorney, accountant]
+  county.tax_collector: [accountant]
+  county.property_appraiser: [realtor]
+  county.elections: [government_employee]

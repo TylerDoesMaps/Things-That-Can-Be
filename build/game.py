@@ -3,7 +3,7 @@
 
 For each county writes the county file (every place: county, commission districts, cities and the unincorporated
 area, neighbourhoods, with what its pops add up to) and the seed file (one named leader per pop, a holder for every
-local seat, and each pop's starting mood). State and federal seats and their holders go in one statewide seed file.
+local seat, and each pop's starting mood). A leader who holds elected office stops leading: their pop gets a new leader and stays their home. State and federal seats and their holders go in one statewide seed file.
 Shapes for the map are written to WORK_DIR/game for tiles.py. Characters are names and parties only for now.
 Usage: game.py DATA_DIR WORK_DIR COUNTY_TABLE_CSV OFFICES_YAML NAMES_JSON SEED
 """
@@ -168,7 +168,7 @@ for r in table:
     add(county_id, "county", f"{COUNTY} County", ST, hoods, shapes.geometry.union_all(), {"circuit": int(r["circuit"])})
 
     # ---- a leader for every pop
-    people, leader = {}, {}
+    people, leader, pop_by_id = {}, {}, {p["id"]: p for p in pops}
     for p in pops:
         spot, pie = rng.random(), p["pie"]
         party = "rep" if spot < pie["R"] else "ind" if spot < pie["R"] + pie["I"] else "dem"
@@ -229,13 +229,19 @@ for r in table:
                 council.append(local(town["members"], False))
                 seat(by_id["city.council"], f"Group {i + 1}", council[-1], town["id"])
             seat(by_id["city.mayor.chosen"], "", rng.choice(council), town["id"])
-            for oid in ("city.manager", "city.clerk", "city.police_chief"):
-                seat(by_id[oid], "", local(town["members"], False), town["id"])
-        else:  # a mayor and four commissioners, all elected by the whole city, and a manager they hire
+        else:  # a mayor and four commissioners, all elected by the whole city. There is no hired manager: departments answer to the mayor
             seat(by_id["city.mayor"], "", local(town["members"], False), town["id"])
             for i in range(by_id["city.council.generic"]["seats"]):
                 seat(by_id["city.council.generic"], f"Seat {i + 1}", local(town["members"], False), town["id"])
-            seat(by_id["city.manager"], "", local(town["members"], False), town["id"])
+
+    # ---- nobody holds elected office and leads a pop: each pop whose leader sits in a seat gets a new leader
+    for s in seats:
+        old = people[s["holder"]]
+        if s["chosen"] == "elected" and leader.get(old["pop"]) == old["id"]:
+            p, spot = pop_by_id[old["pop"]], rng.random()
+            pid = f"s{SEED}-{CODE}-{len(people) + 1:05d}"
+            people[pid] = {"id": pid, "name": named(rng, p["race"], taken), "party": "rep" if spot < p["pie"]["R"] else "ind" if spot < p["pie"]["R"] + p["pie"]["I"] else "dem", "pop": p["id"], "home": p["hood"], "after": old["id"]}
+            leader[p["id"]], old["heir"] = pid, pid
 
     # ---- mood toward each level starts higher where the pop's side holds it
     board = Counter(people[s["holder"]]["party"] for s in seats if s["office"] == "county.commissioner").most_common(1)[0][0]

@@ -34,17 +34,28 @@ const IDX = { counties: [], byFips: {}, byId: {}, byCode: {} };
 const G = { state: "", places: {}, kinds: {} }, POPS = {}, S = { seed: SEED, people: {}, leaders: {}, moods: {}, seats: [], local: {} };
 const lines = new Set(["county", "city"]), loading = {};
 const VOTE = { places: {}, wide: [], local: {}, summary: null }, BOOK = { stats: {}, traits: {} };
+const ORG = { list: [], kinds: [["church", "Churches"], ["union", "Unions"], ["business", "Business groups"], ["civic", "Civic and advocacy groups"], ["party", "Parties"]], chapters: {}, departments: {}, boards: {}, executives: {} }, POSTS = {};
+const FUNCTION = { police: "police", fire: "fire", roads: "roads", water: "water and power", waste: "solid waste", parks: "parks", libraries: "libraries", health: "health", welfare: "social services", housing: "housing", planning: "planning",
+  environment: "natural resources", airports: "airports", transit: "transit", finance: "finance", administration: "administration" };
+const OFFICERS = { "county.sheriff": "police and corrections", "county.clerk": "records and audit", "county.property_appraiser": "assessment", "county.tax_collector": "tax collection", "county.elections": "elections" };
 let map, state = { layer: "hood", shade: "party", selected: null, tab: "overview", ptab: "overview", olevel: "local", county: HOME };
 
 /* ---------- loading ---------- */
 function ensure(fips) {
   if (!fips || !IDX.byFips[fips]) return Promise.resolve();
-  return (loading[fips] ||= Promise.all([get(`data/game/fl-${fips}.json`), get(`data/pops/fl-${fips}.json`), get(`data/seeds/${SEED}/fl-${fips}.json`), get(`data/seeds/${SEED}/election-2024/fl-${fips}.json`).catch(() => ({ races: [] }))]).then(([g, p, s, v]) => {
+  return (loading[fips] ||= Promise.all([get(`data/game/fl-${fips}.json`), get(`data/pops/fl-${fips}.json`), get(`data/seeds/${SEED}/fl-${fips}.json`), get(`data/seeds/${SEED}/election-2024/fl-${fips}.json`).catch(() => ({ races: [] })),
+    get(`data/orgs/fl-${fips}.json`).catch(() => ({ organizations: [], pies: [] }))]).then(([g, p, s, v, o]) => {
     VOTE.local[fips] = v.races;
     Object.assign(G.places, g.places);
-    for (const x of p.pops) { x.pie = [x.pie.R, x.pie.I, x.pie.D]; (POPS[x.hood] ||= []).push(x); }
+    if (o.organizations.length) ORG.list = o.organizations;
+    p.pops.forEach((x, i) => { x.pie = [x.pie.R, x.pie.I, x.pie.D]; x.orgs = o.pies[i] || []; (POPS[x.hood] ||= []).push(x); });
     Object.assign(S.people, s.people); Object.assign(S.leaders, s.leaders); Object.assign(S.moods, s.moods);
     S.local[fips] = s.seats;
+    ORG.chapters[fips] = s.chapters || []; ORG.departments[fips] = s.departments || []; ORG.boards[fips] = s.boards || []; Object.assign(ORG.executives, s.executives || {});
+    const post = (pid, text) => (POSTS[pid] ||= []).push(text);
+    for (const d of ORG.departments[fips]) post(d.head, `Head of ${d.name}, ${g.places[d.gov].name}`);
+    for (const b of ORG.boards[fips]) for (const m of b.members) post(m, `${b.name}, ${g.places[b.gov].name}`);
+    for (const c of ORG.chapters[fips]) post(c.leader, `Leads the ${c.name}, ${g.county} County`);
   }));
 }
 const fipsOfPlace = (id) => (IDX.byId[id] || IDX.byCode[String(id).split("-")[0].toUpperCase()] || {}).fips;
@@ -68,8 +79,17 @@ const seatsOf = (pid) => S.seats.concat(...Object.values(S.local)).filter((s) =>
 const role = (pid) => {
   const seats = seatsOf(pid), c = S.people[pid];
   if (seats.length) return seats.map((s) => s.title + (s.label ? ", " + s.label : "")).join("; ");
-  return c.pop ? "Speaks for a pop in " + c.home : "";
+  if (POSTS[pid]) return POSTS[pid].join("; ");
+  return c.pop ? (S.leaders[c.pop] === pid ? "Speaks for a pop in " : "Lives in ") + c.home : "";
 };
+const slices = (flat) => { const out = []; for (let i = 0; i < flat.length; i += 2) out.push([flat[i], flat[i + 1]]); return out; };
+const joined = (pop) => ORG.kinds.map(([kind]) => slices(pop.orgs).filter(([i]) => ORG.list[i][2] === kind).sort((a, b) => b[1] - a[1])[0]).filter(Boolean).map(([i]) => ORG.list[i][1]);
+function orgBars(ps, most) {
+  const sum = {};
+  ps.forEach((p) => slices(p.orgs).forEach(([i, n]) => { sum[i] = (sum[i] || 0) + n; }));
+  const rows = Object.entries(sum).sort((a, b) => b[1] - a[1]).slice(0, most);
+  return rows.map(([i, n]) => mbar(ORG.list[i][1], n / (ps.length * 100 || 1))).join("");
+}
 const countyPicker = (id, chosen) => `<select id="${id}" aria-label="County">${IDX.counties.map((c) => `<option value="${c.fips}"${c.fips === chosen ? " selected" : ""}>${esc(c.name)}</option>`).join("")}</select>`;
 
 function covers(seat, q) {
@@ -161,7 +181,8 @@ function placeTab(q, tab, wide) {
       <div class="ib-h">Party ID</div>${partyBars(q.party)}
       <div class="ib-h">Mood</div><table class="mini">${["federal", "state", "local"].map((l) => { const c = {}; ps.forEach((p) => { const m = S.moods[p.id][l]; c[m] = (c[m] || 0) + 1; });
         return `<tr><td>${l[0].toUpperCase() + l.slice(1)}</td><td><span class="pie wide">${Object.keys(MOOD_COL).map((m) => `<i style="width:${(c[m] || 0) / n * 100}%;background:${MOOD_COL[m]}"></i>`).join("")}</span></td><td class="pt">${Object.keys(MOOD_COL).filter((m) => c[m]).map((m) => `${m} ${num(c[m])}`).join(", ")}</td></tr>`; }).join("")}</table>
-      <div class="ib-h">Pop leaders</div>${partyBars(ORDER.map((k) => heads[k] / n))}${soon("orgs")}`;
+      <div class="ib-h">Pop leaders</div>${partyBars(ORDER.map((k) => heads[k] / n))}
+      <div class="ib-h">Organizations, share of people</div>${orgBars(ps, wide ? 14 : 6)}`;
   }
   return seatTable(seatsOver(q), wide);
 }
@@ -171,7 +192,18 @@ function seatTable(seats, wide) {
     : s.government === "city" ? "City of " + (place(s.area) || {}).name : s.government === "school" ? s.county + " County School District" : s.county + " County, other districts";
   seats.forEach((s) => (groups[head(s)] ||= []).push(s));
   return Object.entries(groups).map(([g, list]) => `<div class="ib-h">${esc(g)}</div><table class="mini${wide ? " wide" : ""}">${list.map((s) =>
-    `<tr><td>${esc(s.title)}${s.label ? ` <span class="pt">${esc(s.label)}</span>` : ""}</td><td>${who(s.holder)}</td>${wide ? `<td class="pt">${s.chosen === "elected" ? (s.partisan ? "Elected by party" : "Elected, no party") : "Appointed"}</td><td class="n">${s.next.join(", ")}</td>` : ""}</tr>`).join("")}</table>`).join("");
+    `<tr><td>${esc(s.title)}${s.label ? ` <span class="pt">${esc(s.label)}</span>` : ""}${s.chair ? ' <span class="pt">Chair</span>' : ""}</td><td>${who(s.holder)}</td>${wide ? `<td class="pt">${s.chosen === "elected" ? (s.partisan ? "Elected by party" : "Elected, no party") : "Appointed"}</td><td class="n">${s.next.join(", ")}</td>` : ""}</tr>`).join("")}</table>`).join("");
+}
+function appointed(fips) {
+  const govs = [...new Set(ORG.departments[fips].map((d) => d.gov))];
+  return govs.map((gov) => {
+    const q = place(gov), officers = q.kind === "county" ? S.local[fips].filter((s) => OFFICERS[s.office]) : [];
+    const rows = officers.map((s) => `<tr><td>${esc(s.title)}</td><td class="pt">${OFFICERS[s.office]}</td><td>${who(s.holder)}</td><td class="pt">Elected</td><td></td></tr>`)
+      .concat(ORG.departments[fips].filter((d) => d.gov === gov).map((d) => `<tr><td>${esc(d.name)}</td><td class="pt">${d.functions.map((f) => FUNCTION[f]).join(", ")}</td><td>${who(d.head)}</td><td class="pt">${d.hired ? "Hired from within" : "Appointed"}</td><td class="n">${d.skill}</td></tr>`));
+    const boards = ORG.boards[fips].filter((b) => b.gov === gov).map((b) => `<tr><td>${esc(b.name)}</td><td>${b.members.map(who).join(", ")}</td></tr>`).join("");
+    return `<div class="ib-h">${esc(q.name)} · named by ${who(ORG.executives[gov])}</div><table class="mini wide"><tr><th>Department</th><th>Covers</th><th>Head</th><th></th><th>Skill</th></tr>${rows.join("")}</table>
+      ${boards ? `<table class="mini wide"><tr><th>Board</th><th>Members</th></tr>${boards}</table>` : ""}`;
+  }).join("");
 }
 function popTable(all) {
   const ps = all.slice(0, 300), more = all.length > ps.length ? `<p class="pt">First ${ps.length} of ${num(all.length)} pops</p>` : "";
@@ -195,7 +227,7 @@ async function route() {
   $("gres").hidden = true;
   show(view);
   const here = IDX.byFips[state.county];
-  if (["voters", "elections", "officials"].includes(view)) await ensure(state.county);
+  if (["voters", "elections", "officials", "groups"].includes(view)) await ensure(state.county);
   if (view === "place") await ensure(fipsOfPlace(id));
   if (view === "person") await ensure(fipsOfPerson(id));
   const county = place(here.id);
@@ -232,7 +264,14 @@ async function route() {
     const seats = level === "federal" ? S.seats.filter((s) => s.government === "federal" && covers(s, county)) : level === "state" ? S.seats.filter((s) => s.government === "state" && covers(s, county)) : S.local[state.county];
     page(`<h1>Officeholders</h1><div class="from">${level === "federal" ? "United States" : level === "state" ? "State of " + esc(G.state) : esc(here.name)} · ${seats.length} seats · seed ${S.seed}</div>
       <div class="tabs2" role="tablist">${[["federal", "Federal"], ["state", "State"], ["local", "Local"]].map(([k, l]) => `<button role="tab" aria-selected="${level === k}" data-go="#/officials/${k}">${l}</button>`).join("")}</div>
-      <p>${countyPicker("pcounty", state.county)}</p><div class="ib-body">${seatTable(seats, true)}</div>${soon("office")}${soon("history")}`);
+      <p>${countyPicker("pcounty", state.county)}</p><div class="ib-body">${seatTable(seats, true)}</div>${level === "local" ? `<h2>Departments and boards</h2><div class="ib-body">${appointed(state.county)}</div>` : ""}${soon("office")}${soon("history")}`);
+    pickCounty("pcounty");
+  } else if (view === "groups") {
+    const people = county.pops * 100, all = ORG.chapters[state.county];
+    page(`<h1>Organizations</h1><div class="from">${esc(here.name)} · ${all.length} chapters · seed ${S.seed}</div><p>${countyPicker("pcounty", state.county)}</p>
+      ${ORG.kinds.map(([kind, label]) => { const rows = all.filter((c) => c.kind === kind).sort((a, b) => b.members - a.members);
+        return `<h2>${label}</h2><table class="wt"><tr><th>Organization</th><th>Members</th><th>Share of people</th><th>Leader</th><th>Leadership vote</th></tr>${rows.map((c) =>
+          `<tr><td>${esc(c.name)}</td><td class="n">${num(c.members)}</td><td class="n">${pct(c.members / people)}</td><td>${who(c.leader)}</td><td>${c.vote.map(([pid, v]) => `${who(pid)} <span class="pt" style="display:inline">${num(v)}</span>`).join(" · ")}</td></tr>`).join("")}</table>`; }).join("")}`);
     pickCounty("pcounty");
   } else if (view === "stats") {
     page(`<h1>Stats</h1><div class="from">State of ${esc(G.state)}</div>${soon("services")}${soon("bills")}${soon("issues")}`);
@@ -248,8 +287,12 @@ async function route() {
     const c = S.people[id], seats = seatsOf(id), pop = c.pop && (POPS[c.home] || []).find((p) => p.id === c.pop);
     page(`<div class="crumbs"><button class="back" data-go="#/map">Map</button></div><h1 class="who ${c.party}" style="text-decoration:none;cursor:default;display:block">${esc(c.name)}</h1><div class="from">${esc(role(id))}</div>
       <table class="facts"><tr><th>Party</th><td>${PARTIES[c.party].name}</td></tr><tr><th>Home</th><td>${place(c.home) ? placeLink(c.home) : esc(c.home)}</td></tr>
-      ${pop ? `<tr><th>Speaks for</th><td>${esc(pop.race)}, ${esc(pop.age)}, ${esc(pop.education.toLowerCase())} <span class="pt">${esc(pop.words.join(", "))}</span></td></tr><tr><th>Work</th><td>${esc(pop.work)}</td></tr>
-      <tr><th>Mood</th><td>${["federal", "state", "local"].map((l) => `${l[0].toUpperCase() + l.slice(1)} ${mood(pop.id, l)}`).join(" · ")}</td></tr>` : ""}
+      ${c.known !== undefined ? `<tr><th>Name ID</th><td><b>${c.known}</b>${place(c.known_in) ? ` <span class="pt">known in ${esc(place(c.known_in).name)}</span>` : c.known_in === "state" ? ' <span class="pt">known across the state</span>' : c.known_in === "country" ? ' <span class="pt">known across the country</span>' : ""}</td></tr>` : ""}
+      ${(POSTS[id] || []).map((t) => `<tr><th>Post</th><td>${esc(t)}</td></tr>`).join("")}${c.hired ? `<tr><th>Hired</th><td>From within ${esc(c.hired)}</td></tr>` : ""}
+      ${c.after && S.people[c.after] ? `<tr><th>Took over from</th><td>${who(c.after)}</td></tr>` : ""}${c.heir && S.people[c.heir] ? `<tr><th>Pop now led by</th><td>${who(c.heir)}</td></tr>` : ""}
+      ${pop ? `<tr><th>${S.leaders[pop.id] === id ? "Speaks for" : "Home pop"}</th><td>${esc(pop.race)}, ${esc(pop.age)}, ${esc(pop.education.toLowerCase())} <span class="pt">${esc(pop.words.join(", "))}</span></td></tr><tr><th>Work</th><td>${esc(pop.work)}</td></tr>
+      <tr><th>Mood</th><td>${["federal", "state", "local"].map((l) => `${l[0].toUpperCase() + l.slice(1)} ${mood(pop.id, l)}`).join(" · ")}</td></tr>
+      <tr><th>Belongs to</th><td>${joined(pop).concat(c.party === "ind" ? [] : [c.party === "rep" ? "Republican Party" : "Democratic Party"]).map(esc).join(", ")}</td></tr>` : ""}
       ${seats.map((s) => `<tr><th>Office</th><td>${esc(s.title)}${s.label ? ", " + esc(s.label) : ""}${s.next.length ? ` <span class="pt">next election ${s.next.join(", ")}</span>` : ""}</td></tr>`).join("")}
       ${c.ran ? `<tr><th>Ran for</th><td>${esc(c.ran)}</td></tr>` : ""}
       <tr><th>Seed</th><td>${S.seed}</td></tr></table><h2>Character</h2>
@@ -356,7 +399,7 @@ $("gsearch").oninput = async (e) => {
   const rows = /[a-z]/.test(words[0][0]) ? await shelf(words[0][0]) : [];
   if (mine !== asked) return;
   const people = rows.filter((r) => { const parts = r[1].toLowerCase().split(" "); return words.every((w) => parts.some((part) => part.startsWith(w))); }).slice(0, 10)
-    .map((r) => `<button data-pid="${r[0]}"><span class="who ${r[2]}" style="text-decoration:none">${esc(r[1])}</span><span class="k">${esc(r[3] || (r[4] ? "Speaks for a pop in " + r[4] : PARTIES[r[2]].name))}</span></button>`);
+    .map((r) => `<button data-pid="${r[0]}"><span class="who ${r[2]}" style="text-decoration:none">${esc(r[1])}</span><span class="k">${esc(r[3] || (r[4] ? "Lives in " + r[4] : PARTIES[r[2]].name))}</span></button>`);
   box.innerHTML = places.concat(people).join("") || `<button disabled>Nothing found</button>`;
   box.hidden = false;
 };

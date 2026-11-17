@@ -36,6 +36,8 @@ YEAR, SIZE = 2024, 100
 STAT_POINTS = {"cha": 0.6, "gri": 0.25, "dip": 0.25, "sta": 0.15, "cun": 0.15}  # per point of the stat
 HOME_HOOD, HOME_AREA = 4.0, 2.0  # in the candidate's own neighbourhood; own district or county
 # Name ID, 0 to 100: how well a character is known. It scales how much of their stats and traits reach voters; an unknown runs close to the party line.
+OPINION = 5  # a pop's opinion of a character runs from -100 to 100; this many points of opinion are worth one point of vote share
+PARTY_OPINION = 45  # outside the ballot (where party already decides most of the vote), a pop likes a character more the more of it shares their party: this times its share above a third
 UNKNOWN, ELSEWHERE = 0.35, 0.3  # the share of a candidate's appeal that lands with no name ID at all; how much of their name ID carries outside the area that knows them
 KNOWN = {"us.senator": 80, "fl.governor": 85, "us.representative": 60, "fl.senator": 45, "fl.representative": 40, "fl.state_attorney": 35, "fl.public_defender": 30, "county.sheriff": 55, "county.mayor": 55, "county.chair": 55,
          "county.commissioner": 40, "school.superintendent": 40, "school.board": 28, "fl.county_judge": 20, "district.conservation": 8, "city.mayor": 45, "city.mayor.chosen": 40}  # others: 60 statewide, 35 county, 30 city
@@ -542,7 +544,7 @@ for c in counties.values():
         rr, dd = r[idx].sum(), d[idx].sum()
         place_share[q["id"]] = [round(float(rr / (rr + dd)), 3) if rr + dd else None, round(float(rr + dd))]
 # ---- departments, boards and organization chapters
-ctx = SimpleNamespace(SEED=SEED, DATA=DATA, people=people, dress=dress, appeal=appeal, named=named, book=book)
+ctx = SimpleNamespace(SEED=SEED, DATA=DATA, people=people, dress=dress, appeal=appeal, named=named, book=book, OPINION=OPINION, PARTY_OPINION=PARTY_OPINION)
 filled = [society.fill(c, ctx) for c in counties.values()]
 print(sum(f[0] for f in filled), "departments,", sum(f[2] for f in filled), "of them hired from within;", sum(f[1] for f in filled), "boards;", sum(f[3] for f in filled), "chapters;", handed, "pops handed to a new leader")
 for c in counties.values():
@@ -582,7 +584,10 @@ order = ["hood", "kind", "lean", "turnout", "r", "i", "gap"]
 (out / "pops.bin").write_bytes(b"".join(np.concatenate(cols[k]).tobytes() for k in order))
 (out / "pops.json").write_text(json.dumps({"n": int(sum(len(c.pops) for c in counties.values())), "columns": [[k, str(np.concatenate(cols[k]).dtype)] for k in order], "lists": LISTS, "bits": BITS,
                                            "hoods": hood_ids, "parents": parents, "point": POINT, "size": SIZE, "nation_gap": NATION_GAP, "presets": SHIFTS["presets"]}, separators=(",", ":")))
-(DATA / "traits.json").write_text(json.dumps({"stats": book["stats"], "traits": {t["id"]: t["name"] for t in trait.values()}}, separators=(",", ":")))
+(DATA / "traits.json").write_text(json.dumps({"stats": book["stats"], "traits": {t["id"]: t["name"] for t in trait.values()}, "likes": {t["id"]: t["likes"] for t in trait.values() if t.get("likes")},
+                                              "personality": {t["id"]: t.get("opposite") for t in book["families"]["personality"]},
+                                              "dials": {"stat": STAT_POINTS, "home_hood": HOME_HOOD, "home_area": HOME_AREA, "unknown": UNKNOWN, "elsewhere": ELSEWHERE, "opinion": OPINION, "party": PARTY_OPINION, "blue": sorted(BLUE), "same_party": 15, "same_trait": 5, "opposed_trait": -10, "same_hood": 10, "same_seat": -20}},
+                                             separators=(",", ":")))
 
 # search: everyone in the seed under the first letter of each of their names, officeholders first
 role = {}

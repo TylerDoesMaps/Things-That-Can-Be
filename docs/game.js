@@ -33,7 +33,7 @@ const SHADES = [
 const IDX = { counties: [], byFips: {}, byId: {}, byCode: {} };
 const G = { state: "", places: {}, kinds: {} }, POPS = {}, S = { seed: SEED, people: {}, leaders: {}, moods: {}, seats: [], local: {} };
 const lines = new Set(["county", "city"]), loading = {};
-const VOTE = { places: {}, wide: [], local: {}, summary: null }, BOOK = { stats: {}, traits: {} };
+const VOTE = { places: {}, wide: [], local: {}, summary: null }, BOOK = { stats: {}, traits: {}, likes: {}, personality: {}, dials: null }, POPID = {};
 const ORG = { list: [], kinds: [["church", "Churches"], ["union", "Unions"], ["business", "Business groups"], ["civic", "Civic and advocacy groups"], ["party", "Parties"]], chapters: {}, departments: {}, boards: {}, executives: {} }, POSTS = {};
 const FUNCTION = { police: "police", fire: "fire", roads: "roads", water: "water and power", waste: "solid waste", parks: "parks", libraries: "libraries", health: "health", welfare: "social services", housing: "housing", planning: "planning",
   environment: "natural resources", airports: "airports", transit: "transit", finance: "finance", administration: "administration" };
@@ -48,7 +48,7 @@ function ensure(fips) {
     VOTE.local[fips] = v.races;
     Object.assign(G.places, g.places);
     if (o.organizations.length) ORG.list = o.organizations;
-    p.pops.forEach((x, i) => { x.pie = [x.pie.R, x.pie.I, x.pie.D]; x.orgs = o.pies[i] || []; (POPS[x.hood] ||= []).push(x); });
+    p.pops.forEach((x, i) => { x.pie = [x.pie.R, x.pie.I, x.pie.D]; x.orgs = o.pies[i] || []; (POPS[x.hood] ||= []).push(x); POPID[x.id] = x; });
     Object.assign(S.people, s.people); Object.assign(S.leaders, s.leaders); Object.assign(S.moods, s.moods);
     S.local[fips] = s.seats;
     ORG.chapters[fips] = s.chapters || []; ORG.departments[fips] = s.departments || []; ORG.boards[fips] = s.boards || []; Object.assign(ORG.executives, s.executives || {});
@@ -90,6 +90,50 @@ function orgBars(ps, most) {
   const rows = Object.entries(sum).sort((a, b) => b[1] - a[1]).slice(0, most);
   return rows.map(([i, n]) => mbar(ORG.list[i][1], n / (ps.length * 100 || 1))).join("");
 }
+/* ---------- opinion: -100 to 100, a list of reasons. Only what exists before anyone acts: stats, traits, where they live, party. ---------- */
+const AUD = { everyone: () => true, no_college: (p) => p.education === "No college", college: (p) => p.education === "Bachelor's or more", low_income: (p) => p.income === "Under $35,000", high_income: (p) => p.income === "Over $150,000",
+  rural: (p) => p.area === "rural", small_town: (p) => p.area === "small town", urban: (p) => p.area === "urban", suburban: (p) => p.area === "suburban", young: (p) => p.age === "18 to 29", old: (p) => p.age === "65 and over",
+  farm: (p) => p.work === "Farm and ranch", blue_collar: (p) => BOOK.dials.blue.includes(p.work), service: (p) => p.work === "Shops and service", government: (p) => p.work === "Government and military" };
+function knownTo(c, pop) {
+  const a = c.known_in, h = place(pop.hood);
+  if (!a || a === "Elsewhere") return false;
+  return a === "state" || a === "country" || a === pop.hood || (h ? covers({ area: a }, h) : false);
+}
+function popOpinion(pop, c) {
+  const d = BOOK.dials;
+  if (!d || !c || !c.traits) return null;
+  const reach = d.unknown + (1 - d.unknown) * (c.known / 100) * (knownTo(c, pop) ? 1 : d.elsewhere), rows = [], side = ORDER.indexOf(c.party);
+  for (const [k, per] of Object.entries(d.stat)) if (c.stats[k]) rows.push([`${BOOK.stats[k]} ${c.stats[k]}`, c.stats[k] * per * reach * d.opinion]);
+  for (const t of c.traits) {
+    let v = 0;
+    for (const [aud, w] of Object.entries(BOOK.likes[t] || {})) v += w * (aud === "base" ? pop.pie[side] : aud === "independents" ? pop.pie[1] : aud === "same_race" ? +(pop.race === c.race) : aud === "against_incumbent" ? 0 : +AUD[aud](pop));
+    if (v) rows.push([BOOK.traits[t], v * reach * d.opinion]);
+  }
+  const mine = place(pop.hood), theirs = place(c.home);
+  if (c.home === pop.hood) rows.push(["Lives in this neighbourhood", d.home_hood * d.opinion]);
+  if (mine && theirs && mine.fips === theirs.fips && mine.district === theirs.district) rows.push(["Lives in this commission district", d.home_area * d.opinion]);
+  rows.push([`${pct(pop.pie[side])} of the pop is ${PARTIES[c.party].name}`, d.party * (pop.pie[side] - 1 / 3)]);
+  return opinion(rows, `Known here: ${pct(reach)} of their appeal lands`);
+}
+function between(a, b, rivals) {
+  const d = BOOK.dials, rows = [];
+  if (!d || !a || !b) return null;
+  if (a.party === b.party) rows.push(["Same party", d.same_party]);
+  if (a.home === b.home && place(a.home)) rows.push(["Same neighbourhood", d.same_hood]);
+  for (const t of a.traits || []) if (t in BOOK.personality) {
+    if ((b.traits || []).includes(t)) rows.push(["Both " + BOOK.traits[t], d.same_trait]);
+    else if (BOOK.personality[t] && (b.traits || []).includes(BOOK.personality[t])) rows.push([`${BOOK.traits[t]} against ${BOOK.traits[BOOK.personality[t]]}`, d.opposed_trait]);
+  }
+  if (rivals) rows.push(["Ran for the same seat", d.same_seat]);
+  return opinion(rows);
+}
+function opinion(rows, note) {
+  rows = rows.map(([t, v]) => [t, Math.round(v)]).filter((r) => r[1]).sort((x, y) => y[1] - x[1]);
+  const total = Math.max(-100, Math.min(100, rows.reduce((s, r) => s + r[1], 0))), sign = (v) => (v > 0 ? "+" : "") + v;
+  return `<details class="op"><summary><b class="${total >= 0 ? "pos" : "neg"}">${sign(total)}</b></summary>${rows.map(([t, v]) => `<div class="${v > 0 ? "pos" : "neg"}"><span>${sign(v)}</span>${esc(t)}</div>`).join("")}${note ? `<div class="pt">${esc(note)}</div>` : ""}</details>`;
+}
+const popName = (p) => `${p.race}, ${p.age}, ${p.education.toLowerCase()}`;
+const popLink = (p) => `<button class="lk" data-pop="${esc(p.id)}">${esc(popName(p))}</button>`;
 const countyPicker = (id, chosen) => `<select id="${id}" aria-label="County">${IDX.counties.map((c) => `<option value="${c.fips}"${c.fips === chosen ? " selected" : ""}>${esc(c.name)}</option>`).join("")}</select>`;
 
 function covers(seat, q) {
@@ -202,6 +246,14 @@ function seatTable(seats, wide) {
   return Object.entries(groups).map(([g, list]) => `<div class="ib-h">${esc(g)}</div><table class="mini${wide ? " wide" : ""}">${list.map((s) =>
     `<tr><td>${esc(s.title)}${s.label ? ` <span class="pt">${esc(s.label)}</span>` : ""}${s.chair ? ' <span class="pt">Chair</span>' : ""}</td><td>${who(s.holder)}</td>${wide ? `<td class="pt">${s.chosen === "elected" ? (s.partisan ? "Elected by party" : "Elected, no party") : "Appointed"}</td><td class="n">${s.next.join(", ")}</td>` : ""}</tr>`).join("")}</table>`).join("");
 }
+function relations(id) {
+  const c = S.people[id], links = [];
+  if (c.after) links.push([c.after, "Led this pop before", false]);
+  if (c.heir) links.push([c.heir, "Leads their old pop", false]);
+  for (const r of VOTE.wide.concat(...Object.values(VOTE.local))) if (r.cands.length === 2 && r.cands.some((x) => x.id === id)) links.push([r.cands.find((x) => x.id !== id).id, `Opponent for ${r.title}${r.label ? ", " + r.label : ""}, 2024`, true]);
+  const rows = links.filter(([pid]) => S.people[pid]).map(([pid, what, rivals]) => `<tr><td>${who(pid)}</td><td class="pt">${esc(what)}</td><td>${between(c, S.people[pid], rivals) || ""}</td></tr>`).join("");
+  return rows ? `<h2>Relations</h2><table class="wt"><tr><th>Character</th><th></th><th>Opinion of each other</th></tr>${rows}</table>` : "";
+}
 function appointed(fips) {
   const govs = [...new Set(ORG.departments[fips].map((d) => d.gov))];
   return govs.map((gov) => {
@@ -216,7 +268,7 @@ function appointed(fips) {
 function popTable(all) {
   const ps = all.slice(0, 300), more = all.length > ps.length ? `<p class="pt">First ${ps.length} of ${num(all.length)} pops</p>` : "";
   return `<table class="wt"><tr><th>Pop</th><th>Neighbourhood</th><th>Leader</th><th>Work</th><th>Party ID</th><th>Turnout</th><th>Mood, local</th></tr>${ps.map((p) =>
-    `<tr><td>${esc(p.race)}, ${esc(p.age)}, ${esc(p.education.toLowerCase())}<span class="pt">${esc(p.words.join(", "))}</span></td><td>${placeLink(p.hood)}</td><td>${who(S.leaders[p.id])}</td><td>${esc(p.work)}</td><td>${pie(p.pie)}${lead(p.pie)}</td><td class="n">${pct(p.turnout)}</td><td>${mood(p.id, "local")}</td></tr>`).join("")}</table>${more}`;
+    `<tr><td>${popLink(p)}<span class="pt">${esc(p.words.join(", "))}</span></td><td>${placeLink(p.hood)}</td><td>${who(S.leaders[p.id])}</td><td>${esc(p.work)}</td><td>${pie(p.pie)}${lead(p.pie)}</td><td class="n">${pct(p.turnout)}</td><td>${mood(p.id, "local")}</td></tr>`).join("")}</table>${more}`;
 }
 
 /* ---------- pages ---------- */
@@ -237,7 +289,7 @@ async function route() {
   show(view);
   const here = IDX.byFips[state.county];
   if (["voters", "elections", "officials", "groups"].includes(view)) await ensure(state.county);
-  if (view === "place") await ensure(fipsOfPlace(id));
+  if (view === "place" || view === "pop") await ensure(fipsOfPlace(id));
   if (view === "person") await ensure(fipsOfPerson(id));
   const county = place(here.id);
   if (view === "voters") {
@@ -292,6 +344,18 @@ async function route() {
     page(`<div class="crumbs"><button class="back" data-go="#/map">Map</button>${up.map((u) => placeLink(u)).join(" › ")}</div><h1>${esc(q.name)}</h1><div class="from">${esc(q.sub)}</div>
       <div class="tabs2" role="tablist">${TABS.map(([k, l]) => `<button role="tab" aria-selected="${state.ptab === k}" data-ptab="${k}">${l}</button>`).join("")}</div><div class="ib-body">${placeTab(q, state.ptab, true)}</div>`);
     document.querySelectorAll("[data-ptab]").forEach((b) => b.onclick = () => { state.ptab = b.dataset.ptab; route(); });
+  } else if (view === "pop" && POPID[id]) {
+    const p = POPID[id], hood = place(p.hood), boss = S.leaders[p.id], seen = new Set([boss]);
+    const pies = ORG.kinds.filter(([k]) => k !== "party").map(([kind, label]) => { const mine = slices(p.orgs).filter(([i]) => ORG.list[i][2] === kind).sort((a, b) => b[1] - a[1]), out = 100 - mine.reduce((s, x) => s + x[1], 0);
+      return `<div><div class="ib-h">${label}</div>${mine.map(([i, n]) => mbar(ORG.list[i][1], n / 100)).join("")}${mbar("Uninvolved", out / 100, "var(--g2)")}</div>`; }).join("");
+    const rows = [[boss, "Leads this pop"]].concat(seatsOver(hood).filter((s) => !seen.has(s.holder) && seen.add(s.holder)).map((s) => [s.holder, s.title + (s.label ? ", " + s.label : "")]))
+      .filter(([pid]) => S.people[pid] && S.people[pid].traits).map(([pid, what]) => `<tr><td>${who(pid)}</td><td class="pt">${esc(what)}</td><td>${popOpinion(p, S.people[pid])}</td></tr>`).join("");
+    page(`<div class="crumbs"><button class="back" data-go="#/map">Map</button>${placeLink(hood.county)} › ${placeLink(hood.id)}</div><h1>${esc(popName(p))}</h1><div class="from">A pop of 100 people in ${esc(hood.name)} · ${esc(p.words.join(", "))}</div>
+      <table class="facts"><tr><th>Leader</th><td>${who(boss)}</td></tr><tr><th>Neighbourhood</th><td>${placeLink(hood.id)}</td></tr><tr><th>Work</th><td>${esc(p.work)}</td></tr><tr><th>Household income</th><td>${esc(p.income)}</td></tr>
+      <tr><th>Area type</th><td>${esc(p.area)}</td></tr><tr><th>Party ID</th><td>${pie(p.pie)}${lead(p.pie)}</td></tr><tr><th>Expected turnout</th><td>${pct(p.turnout)}</td></tr>
+      <tr><th>Mood</th><td>${["federal", "state", "local"].map((l) => `${l[0].toUpperCase() + l.slice(1)} ${mood(p.id, l)}`).join(" · ")}</td></tr></table>
+      <h2>Organizations</h2><div class="cols">${pies}</div>
+      <h2>Opinions</h2><table class="wt"><tr><th>Character</th><th></th><th>Opinion</th></tr>${rows}</table>${soon("known")}`);
   } else if (view === "person" && S.people[id]) {
     const c = S.people[id], seats = seatsOf(id), pop = c.pop && (POPS[c.home] || []).find((p) => p.id === c.pop);
     page(`<div class="crumbs"><button class="back" data-go="#/map">Map</button></div><h1 class="who ${c.party}" style="text-decoration:none;cursor:default;display:block">${esc(c.name)}</h1><div class="from">${esc(role(id))}</div>
@@ -299,13 +363,13 @@ async function route() {
       ${c.known !== undefined ? `<tr><th>Name ID</th><td><b>${c.known}</b>${place(c.known_in) ? ` <span class="pt">known in ${esc(place(c.known_in).name)}</span>` : c.known_in === "state" ? ' <span class="pt">known across the state</span>' : c.known_in === "country" ? ' <span class="pt">known across the country</span>' : ""}</td></tr>` : ""}
       ${(POSTS[id] || []).map((t) => `<tr><th>Post</th><td>${esc(t)}</td></tr>`).join("")}${c.hired ? `<tr><th>Hired</th><td>From within ${esc(c.hired)}</td></tr>` : ""}
       ${c.after && S.people[c.after] ? `<tr><th>Took over from</th><td>${who(c.after)}</td></tr>` : ""}${c.heir && S.people[c.heir] ? `<tr><th>Pop now led by</th><td>${who(c.heir)}</td></tr>` : ""}
-      ${pop ? `<tr><th>${S.leaders[pop.id] === id ? "Speaks for" : "Home pop"}</th><td>${esc(pop.race)}, ${esc(pop.age)}, ${esc(pop.education.toLowerCase())} <span class="pt">${esc(pop.words.join(", "))}</span></td></tr><tr><th>Work</th><td>${esc(pop.work)}</td></tr>
+      ${pop ? `<tr><th>${S.leaders[pop.id] === id ? "Speaks for" : "Home pop"}</th><td>${popLink(pop)} <span class="pt">${esc(pop.words.join(", "))}</span></td></tr>${c.traits ? `<tr><th>Its opinion</th><td>${popOpinion(pop, c)}</td></tr>` : ""}<tr><th>Work</th><td>${esc(pop.work)}</td></tr>
       <tr><th>Mood</th><td>${["federal", "state", "local"].map((l) => `${l[0].toUpperCase() + l.slice(1)} ${mood(pop.id, l)}`).join(" · ")}</td></tr>
       <tr><th>Belongs to</th><td>${joined(pop).concat(c.party === "ind" ? [] : [c.party === "rep" ? "Republican Party" : "Democratic Party"]).map(esc).join(", ")}</td></tr>` : ""}
       ${seats.map((s) => `<tr><th>Office</th><td>${esc(s.title)}${s.label ? ", " + esc(s.label) : ""}${s.next.length ? ` <span class="pt">next election ${s.next.join(", ")}</span>` : ""}</td></tr>`).join("")}
       ${c.ran ? `<tr><th>Ran for</th><td>${esc(c.ran)}</td></tr>` : ""}
       <tr><th>Seed</th><td>${S.seed}</td></tr></table><h2>Character</h2>
-      ${c.traits ? `<table class="facts"><tr><th>Stats</th><td>${Object.entries(c.stats).map(([k, v]) => `${esc(BOOK.stats[k] || k)} <b>${v}</b>`).join(" · ")}</td></tr><tr><th>Traits</th><td>${c.traits.map((t) => `<span class="trait">${esc(BOOK.traits[t] || t)}</span>`).join(" ")}</td></tr></table>` : ""}${soon("you")}${soon("known")}${soon("intrigue")}`);
+      ${c.traits ? `<table class="facts"><tr><th>Stats</th><td>${Object.entries(c.stats).map(([k, v]) => `${esc(BOOK.stats[k] || k)} <b>${v}</b>`).join(" · ")}</td></tr><tr><th>Traits</th><td>${c.traits.map((t) => `<span class="trait">${esc(BOOK.traits[t] || t)}</span>`).join(" ")}</td></tr></table>` : ""}${relations(id)}${soon("you")}${soon("known")}${soon("intrigue")}`);
   }
 }
 
@@ -389,6 +453,7 @@ document.addEventListener("click", (e) => {
   if (t.dataset.href) location.href = t.dataset.href;
   if (t.dataset.place) location.hash = "#/place/" + encodeURIComponent(t.dataset.place);
   if (t.dataset.pid) location.hash = "#/person/" + t.dataset.pid;
+  if (t.dataset.pop) location.hash = "#/pop/" + encodeURIComponent(t.dataset.pop);
   if (t.dataset.layer) { state.layer = t.dataset.layer; state.selected = null; paint(); infobox(); }
   if (t.dataset.line) { lines.has(t.dataset.line) ? lines.delete(t.dataset.line) : lines.add(t.dataset.line); paint(); }
   if (t.dataset.shade) { state.shade = t.dataset.shade; paint(); }

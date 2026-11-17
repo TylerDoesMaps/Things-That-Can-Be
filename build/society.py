@@ -22,7 +22,6 @@ orgbook = yaml.safe_load(open(HERE.parent / "docs/content/organizations/organiza
 BOUND = 3        # what a job bound to the department adds to Statecraft when judging a head
 LOOK = 40        # how many local leaders an executive considers for each post
 RUNNERS = 3      # candidates for a chapter's leadership
-OWN_PARTY = 10   # points a pop gives a candidate for each full share of it that belongs to the candidate's party
 
 
 def tier_of(pops):
@@ -109,9 +108,9 @@ def fill(c, x):
     letter = {"rep": "R", "ind": "I", "dem": "D"}
     worth = {}
 
-    def regard(pid):  # what every pop in the county thinks of this character
+    def regard(pid):  # every pop's opinion of this character, -100 to 100 before clipping: their appeal there, and how much of the pop shares their party
         if pid not in worth:
-            worth[pid] = x.appeal(pid, c, everyone, False, False) + OWN_PARTY * c.pie[letter[party_of(pid)]]
+            worth[pid] = x.OPINION * x.appeal(pid, c, everyone, False, False) + x.PARTY_OPINION * (c.pie[letter[party_of(pid)]] - 1 / 3)
         return worth[pid]
 
     def elect(weights, eligible):

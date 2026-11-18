@@ -290,7 +290,7 @@ issues:
   - [-75, Protect single-family]
   nation: -5
   florida: -15
-  source: Cooperative Election Study 2024
+  source: Cooperative Election Study 2024, age and education pulls hand-set
   pulls:
     Democrat: 21
     Republican: -10
@@ -299,11 +299,12 @@ issues:
     Asian: 11
     under $35k: 10
     over $150k: 3
-    under 30: 5
+    under 30: 15
     65 and over: -4
     urban: 15
     rural: 4
     suburban: -5
+    college: 10
 - id: homelessness
   name: Homelessness
   category: Housing and land
@@ -719,7 +720,8 @@ issues:
     rural: -25
     Democrat: 20
     Republican: -15
-    under 30: 10
+    under 30: 20
+    college: 10
 - id: voting
   name: Voting rules
   category: Government and elections

@@ -1,0 +1,495 @@
+note: 'Camps: factions inside each party, each with a fixed position on every issue, written as the stop''s wording from issues.yaml. A pop''s Democrats, Republicans and independents each belong to the
+  camp of their party whose positions are nearest. First draft.'
+camps:
+- id: progressive_left
+  name: Progressive Left
+  party: dem
+  positions:
+    income_tax: Tax the top far more
+    property_tax: Raise for services
+    sales_tax: Cut, shift to income
+    business_tax: Raise, end breaks
+    government_size: Expand services
+    debt: Borrow to invest
+    minimum_wage: Living wage
+    unions: Card check, expand
+    public_pay: Raise pay and pensions
+    regulation: Much tighter
+    trade: Managed
+    growth: Slow growth
+    zoning: Build anywhere
+    homelessness: Housing first
+    school_funding: Large increase
+    school_choice: Public only
+    curriculum: Educators decide
+    health_coverage: Public plan for all
+    safety_net: Expand
+    social_security: Expand
+    policing: Shrink and redirect
+    sentencing: Shorter, more diversion
+    guns: Ban many
+    abortion: No limits
+    lgbt: Expand protections
+    religion: Strict separation
+    drugs: Legalize broadly
+    immigration_levels: More
+    enforcement: Sanctuary
+    climate: Rapid transition
+    conservation: Buy and protect land
+    transport: Transit first
+    voting: Automatic, mail for all
+    term_limits: Strict limits and disclosure
+    military: Cut deeply
+    intervention: Stay out
+    alliances: Deepen
+- id: mainstream_liberals
+  name: Mainstream Liberals
+  party: dem
+  positions:
+    income_tax: Raise on high earners
+    property_tax: Keep
+    sales_tax: Keep
+    business_tax: Keep
+    government_size: Grow slowly
+    debt: Borrow when needed
+    minimum_wage: Raise
+    unions: Protect
+    public_pay: Keep
+    regulation: Tighter
+    trade: Free trade
+    growth: Managed
+    zoning: Allow more
+    homelessness: Shelter and services
+    school_funding: Increase
+    school_choice: Limited charters
+    curriculum: Shared
+    health_coverage: Expand public plans
+    safety_net: Keep
+    social_security: Protect
+    policing: Reform
+    sentencing: Reform
+    guns: Tighter checks
+    abortion: Legal to viability
+    lgbt: Expand protections
+    religion: Keep
+    drugs: Legal marijuana
+    immigration_levels: More
+    enforcement: Limited cooperation
+    climate: Transition
+    conservation: Buy and protect land
+    transport: Transit first
+    voting: Easier
+    term_limits: Some
+    military: Keep
+    intervention: Engaged
+    alliances: Deepen
+- id: labor_democrats
+  name: Labor Democrats
+  party: dem
+  positions:
+    income_tax: Raise on high earners
+    property_tax: Keep
+    sales_tax: Cut, shift to income
+    business_tax: Raise, end breaks
+    government_size: Expand services
+    debt: Borrow to invest
+    minimum_wage: Living wage
+    unions: Card check, expand
+    public_pay: Raise pay and pensions
+    regulation: Tighter
+    trade: Targeted tariffs
+    growth: Welcome
+    zoning: Allow more
+    homelessness: Shelter and services
+    school_funding: Large increase
+    school_choice: Public only
+    curriculum: Shared
+    health_coverage: Public plan for all
+    safety_net: Expand
+    social_security: Expand
+    policing: Keep
+    sentencing: Reform
+    guns: Keep
+    abortion: Legal to viability
+    lgbt: Keep
+    religion: Keep
+    drugs: Legal marijuana
+    immigration_levels: Keep
+    enforcement: Limited cooperation
+    climate: Transition
+    conservation: Protect
+    transport: Balance
+    voting: Easier
+    term_limits: Some
+    military: Trim
+    intervention: Reluctant
+    alliances: Keep
+- id: church_and_community
+  name: Church and Community Democrats
+  party: dem
+  positions:
+    income_tax: Raise on high earners
+    property_tax: Keep
+    sales_tax: Cut, shift to income
+    business_tax: Raise, end breaks
+    government_size: Expand services
+    debt: Borrow to invest
+    minimum_wage: Living wage
+    unions: Protect
+    public_pay: Raise pay and pensions
+    regulation: Tighter
+    trade: Managed
+    growth: Welcome
+    zoning: Allow more
+    homelessness: Housing first
+    school_funding: Large increase
+    school_choice: Charters
+    curriculum: Parents decide
+    health_coverage: Expand public plans
+    safety_net: Expand
+    social_security: Expand
+    policing: Reform
+    sentencing: Reform
+    guns: Tighter checks
+    abortion: Early weeks only
+    lgbt: Keep
+    religion: Accommodate
+    drugs: Legal marijuana
+    immigration_levels: Keep
+    enforcement: Limited cooperation
+    climate: Transition
+    conservation: Protect
+    transport: Transit first
+    voting: Automatic, mail for all
+    term_limits: Some
+    military: Trim
+    intervention: Reluctant
+    alliances: Keep
+- id: blue_dogs
+  name: Blue Dogs
+  party: dem
+  positions:
+    income_tax: Keep
+    property_tax: Cap growth
+    sales_tax: Keep
+    business_tax: Keep
+    government_size: Hold
+    debt: Balance always
+    minimum_wage: Raise
+    unions: Protect
+    public_pay: Keep
+    regulation: Keep
+    trade: Managed
+    growth: Welcome
+    zoning: Keep
+    homelessness: Enforce camping bans
+    school_funding: Increase
+    school_choice: Limited charters
+    curriculum: Shared
+    health_coverage: Expand public plans
+    safety_net: Keep
+    social_security: Protect
+    policing: More officers
+    sentencing: Keep
+    guns: Keep
+    abortion: Early weeks only
+    lgbt: Keep
+    religion: Accommodate
+    drugs: Medical only
+    immigration_levels: Less
+    enforcement: Cooperate
+    climate: All sources
+    conservation: Protect
+    transport: Roads first
+    voting: Keep
+    term_limits: Some
+    military: Raise
+    intervention: Engaged
+    alliances: Keep
+- id: flag_and_faith
+  name: Flag and Faith Conservatives
+  party: rep
+  positions:
+    income_tax: Cut
+    property_tax: Cap growth
+    sales_tax: Raise, cut other taxes
+    business_tax: Cut
+    government_size: Trim
+    debt: Balance always
+    minimum_wage: Keep
+    unions: Right to work
+    public_pay: Freeze
+    regulation: Looser
+    trade: Managed
+    growth: Welcome
+    zoning: Protect single-family
+    homelessness: Enforce camping bans
+    school_funding: Keep
+    school_choice: Vouchers for all
+    curriculum: State restricts topics
+    health_coverage: Shrink
+    safety_net: Work requirements
+    social_security: Protect
+    policing: Much tougher
+    sentencing: Longer
+    guns: Looser carry
+    abortion: Rare exceptions
+    lgbt: Roll back
+    religion: Promote
+    drugs: Prohibit
+    immigration_levels: Less
+    enforcement: Cooperate
+    climate: Fossil first
+    conservation: Balance
+    transport: Roads first
+    voting: Much stricter
+    term_limits: Some
+    military: Raise
+    intervention: Hawkish
+    alliances: Keep
+- id: business_republicans
+  name: Business Republicans
+  party: rep
+  positions:
+    income_tax: Cut
+    property_tax: Cap growth
+    sales_tax: Keep
+    business_tax: Recruit with incentives
+    government_size: Trim
+    debt: Balance always
+    minimum_wage: Leave to the market
+    unions: Curb
+    public_pay: Freeze
+    regulation: Far looser
+    trade: Free trade
+    growth: Growth first
+    zoning: Allow more
+    homelessness: Enforce camping bans
+    school_funding: Keep
+    school_choice: Vouchers for all
+    curriculum: Parents decide
+    health_coverage: Shrink
+    safety_net: Work requirements
+    social_security: Trim for solvency
+    policing: More officers
+    sentencing: Keep
+    guns: Keep
+    abortion: Early weeks only
+    lgbt: Keep
+    religion: Keep
+    drugs: Medical only
+    immigration_levels: Keep
+    enforcement: Cooperate
+    climate: All sources
+    conservation: Open to use
+    transport: Roads first
+    voting: Stricter ID
+    term_limits: Keep
+    military: Raise
+    intervention: Engaged
+    alliances: Keep
+- id: populist_right
+  name: Populist Right
+  party: rep
+  positions:
+    income_tax: Keep
+    property_tax: Cap growth
+    sales_tax: Keep
+    business_tax: Keep
+    government_size: Hold
+    debt: Borrow when needed
+    minimum_wage: Raise
+    unions: Protect
+    public_pay: Keep
+    regulation: Keep
+    trade: Broad tariffs
+    growth: Welcome
+    zoning: Keep
+    homelessness: Enforce camping bans
+    school_funding: Keep
+    school_choice: Charters
+    curriculum: State restricts topics
+    health_coverage: Keep
+    safety_net: Keep
+    social_security: Protect
+    policing: More officers
+    sentencing: Longer
+    guns: Looser carry
+    abortion: Early weeks only
+    lgbt: Limit
+    religion: Accommodate
+    drugs: Medical only
+    immigration_levels: Far less
+    enforcement: Mass removal
+    climate: Fossil first
+    conservation: Balance
+    transport: Roads first
+    voting: Much stricter
+    term_limits: Strict limits and disclosure
+    military: Keep
+    intervention: Stay out
+    alliances: Go it alone
+- id: liberty_republicans
+  name: Liberty Republicans
+  party: rep
+  positions:
+    income_tax: Flat or none
+    property_tax: Cut deeply
+    sales_tax: Raise, cut other taxes
+    business_tax: Cut
+    government_size: Cut deeply
+    debt: Balance always
+    minimum_wage: Leave to the market
+    unions: Curb
+    public_pay: Cut pensions
+    regulation: Far looser
+    trade: Free trade
+    growth: Growth first
+    zoning: Build anywhere
+    homelessness: Shelter and services
+    school_funding: Cut
+    school_choice: Vouchers for all
+    curriculum: Parents decide
+    health_coverage: Private only
+    safety_net: Cut
+    social_security: Privatize in part
+    policing: Reform
+    sentencing: Reform
+    guns: No limits
+    abortion: Legal to viability
+    lgbt: Keep
+    religion: Strict separation
+    drugs: Legalize broadly
+    immigration_levels: Keep
+    enforcement: Limited cooperation
+    climate: All sources
+    conservation: Balance
+    transport: Roads first
+    voting: Keep
+    term_limits: Strict limits and disclosure
+    military: Cut deeply
+    intervention: Stay out
+    alliances: Reduce
+- id: left_behind
+  name: Left Behind
+  party: ind
+  positions:
+    income_tax: Raise on high earners
+    property_tax: Cap growth
+    sales_tax: Cut, shift to income
+    business_tax: Raise, end breaks
+    government_size: Grow slowly
+    debt: Borrow when needed
+    minimum_wage: Raise
+    unions: Protect
+    public_pay: Keep
+    regulation: Tighter
+    trade: Targeted tariffs
+    growth: Managed
+    zoning: Keep
+    homelessness: Shelter and services
+    school_funding: Increase
+    school_choice: Limited charters
+    curriculum: Parents decide
+    health_coverage: Expand public plans
+    safety_net: Expand
+    social_security: Expand
+    policing: Keep
+    sentencing: Keep
+    guns: Keep
+    abortion: Early weeks only
+    lgbt: Keep
+    religion: Keep
+    drugs: Legal marijuana
+    immigration_levels: Less
+    enforcement: Cooperate
+    climate: Transition
+    conservation: Protect
+    transport: Balance
+    voting: Keep
+    term_limits: Strict limits and disclosure
+    military: Trim
+    intervention: Stay out
+    alliances: Reduce
+- id: pocketbook_moderates
+  name: Pocketbook Moderates
+  party: ind
+  positions:
+    income_tax: Keep
+    property_tax: Cap growth
+    sales_tax: Keep
+    business_tax: Keep
+    government_size: Hold
+    debt: Balance always
+    minimum_wage: Keep
+    unions: Right to work
+    public_pay: Keep
+    regulation: Keep
+    trade: Managed
+    growth: Managed
+    zoning: Keep
+    homelessness: Shelter and services
+    school_funding: Increase
+    school_choice: Limited charters
+    curriculum: Shared
+    health_coverage: Keep
+    safety_net: Keep
+    social_security: Protect
+    policing: Keep
+    sentencing: Keep
+    guns: Tighter checks
+    abortion: Legal to viability
+    lgbt: Keep
+    religion: Keep
+    drugs: Legal marijuana
+    immigration_levels: Keep
+    enforcement: Cooperate
+    climate: Transition
+    conservation: Buy and protect land
+    transport: Balance
+    voting: Keep
+    term_limits: Strict limits and disclosure
+    military: Keep
+    intervention: Reluctant
+    alliances: Keep
+- id: leave_me_alone
+  name: Leave Me Alone
+  party: ind
+  positions:
+    income_tax: Cut
+    property_tax: Cut deeply
+    sales_tax: Keep
+    business_tax: Cut
+    government_size: Trim
+    debt: Balance always
+    minimum_wage: Leave to the market
+    unions: Right to work
+    public_pay: Freeze
+    regulation: Looser
+    trade: Free trade
+    growth: Welcome
+    zoning: Allow more
+    homelessness: Shelter and services
+    school_funding: Keep
+    school_choice: Vouchers for all
+    curriculum: Parents decide
+    health_coverage: Shrink
+    safety_net: Work requirements
+    social_security: Trim for solvency
+    policing: Reform
+    sentencing: Shorter, more diversion
+    guns: Looser carry
+    abortion: Legal to viability
+    lgbt: Expand protections
+    religion: Strict separation
+    drugs: Legalize broadly
+    immigration_levels: Keep
+    enforcement: Limited cooperation
+    climate: All sources
+    conservation: Protect
+    transport: Roads first
+    voting: Keep
+    term_limits: Strict limits and disclosure
+    military: Cut deeply
+    intervention: Stay out
+    alliances: Reduce

@@ -8,6 +8,9 @@ and board members keep their pops. Confirmation votes are not simulated yet.
 Organizations: every chapter in docs/data/orgs elects a leader from the pop leaders who belong to it. Each pop backs
 the candidate it thinks most of, and its vote counts for the members it has in the chapter. The two parties have a
 chapter in every county, chosen the same way by their own people.
+Camps: inside each party, every camp with enough people stands as its own organization; smaller ones join their set
+partner until each is big enough, and a party left with one has none. Their leaders are chosen the same way, from pop
+leaders of the party whose own pop sits in one of the organization's camps. Needs docs/data/camps (build/camps.py).
 """
 import json
 import random
@@ -19,6 +22,8 @@ import yaml
 HERE = Path(__file__).parent
 ladder = yaml.safe_load(open(HERE.parent / "docs/content/government/departments.yaml"))
 orgbook = yaml.safe_load(open(HERE.parent / "docs/content/organizations/organizations.yaml"))
+campbook = yaml.safe_load(open(HERE.parent / "docs/content/camps/camps.yaml"))
+issuebook = yaml.safe_load(open(HERE.parent / "docs/content/issues/issues.yaml"))["issues"]
 BOUND = 3        # what a job bound to the department adds to Statecraft when judging a head
 LOOK = 40        # how many local leaders an executive considers for each post
 RUNNERS = 3      # candidates for a chapter's leadership
@@ -26,6 +31,59 @@ RUNNERS = 3      # candidates for a chapter's leadership
 
 def tier_of(pops):
     return next(t for t in ladder["tiers"] if pops < t["under"])
+
+
+def clubs(c, x, elect, leader_at, party_of, letter):
+    """The camp organizations of each party in one county."""
+    path = x.DATA / f"camps/fl-{c.fips}.json"
+    if not path.exists():
+        return []
+    rows = json.load(open(path))["pops"]   # one row per pop: the camp of its Democrats, independents and Republicans
+    assert len(rows) == len(c.pops), "run build/camps.py after the pops change"
+    camps, out = campbook["camps"], []
+    value = [{s[1]: s[0] for s in i["stops"]} for i in issuebook]
+    for party, col in (("dem", 0), ("rep", 2)):
+        mine = [k for k, camp in enumerate(camps) if camp["party"] == party]
+        people = c.pie[letter[party]] * 100
+        of = np.array([r[col] for r in rows])
+        size = {camps[k]["id"]: float(people[of == k].sum()) for k in mine}
+        home, total = {cid: cid for cid in size}, sum(size.values())
+        folds = {camp["id"]: camp["folds"] for camp in camps if camp["party"] == party}
+        fits = lambda h: size[h] >= campbook["bar"]["people"] and size[h] / total >= campbook["bar"]["share"]
+        while len(set(home.values())) > 1:
+            heads = set(home.values())
+            small = [h for h in heads if not fits(h)]
+            if not small:
+                break
+            least, seen = min(small, key=lambda h: size[h]), set()
+            to = folds[least]
+            while home[to] == least:   # its partner already sits inside it: follow the chain, or take the largest other
+                seen.add(to)
+                to = folds[to]
+                if to in seen:
+                    to = max((h for h in heads if h != least), key=lambda h: size[h])
+                    break
+            to = home[to]
+            for cid in home:
+                if home[cid] == least:
+                    home[cid] = to
+            size[to] += size.pop(least)
+        heads = set(home.values())
+        if len(heads) < 2:
+            continue
+        for head in sorted(heads, key=lambda h: -size[h]):
+            held = [camp for camp in camps if camp["party"] == party and home[camp["id"]] == head]
+            ids = [camp["id"] for camp in held]
+            name = held[0]["club"] if len(held) == 1 else next((u["name"] for u in campbook["umbrellas"] if sorted(u["holds"]) == sorted(ids)), campbook["united"][party])
+            inside = np.isin(of, [k for k in mine if camps[k]["id"] in ids])
+            weights = np.where(inside, people, 0.0)
+            leader, vote = elect(weights, [j for j, pid in enumerate(leader_at) if party_of(pid) == party and inside[j]])
+            stand = []
+            for n, issue in enumerate(issuebook):   # the stop nearest the middle of its camps' positions
+                middle = sum(value[n][camp["positions"][issue["id"]]] for camp in held) / len(held)
+                stand.append(min(range(len(issue["stops"])), key=lambda i: abs(issue["stops"][i][0] - middle)))
+            out.append({"org": "+".join(ids), "name": name, "kind": "party", "party": party, "camps": ids, "members": int(round(size[head])), "leader": leader, "vote": vote, "stand": stand})
+    return out
 
 
 def fill(c, x):
@@ -133,5 +191,6 @@ def fill(c, x):
             weights = c.pie[letter[o["party"]]] * 100
             leader, vote = elect(weights, [j for j, pid in enumerate(leader_at) if party_of(pid) == o["party"]])
             chapters.append({"org": o["id"], "name": o["name"], "kind": "party", "members": int(round(weights.sum())), "leader": leader, "vote": vote})
+    chapters += clubs(c, x, elect, leader_at, party_of, letter)
     seed["chapters"] = chapters
     return len(departments), len(boards), hires, len(chapters)

@@ -56,3 +56,6 @@ table.wt td .pt { display: block; }
 .isspage .sv{display:inline-block;min-width:3.2em;font-variant-numeric:tabular-nums}
 #m-demo,#m-work,#m-race{max-height:70vh;overflow-y:auto}
 #m-demo button[disabled],#m-race button[disabled]{font-weight:600;color:var(--text,#202122);padding-top:8px}
+.portrait{border:1.5px solid #2b2d31;border-radius:4px;display:block}
+.facehead{display:flex;gap:16px;align-items:flex-start}
+.facehead>div{flex:1;min-width:0}

@@ -150,6 +150,26 @@ const slices = (flat) => { const out = []; for (let i = 0; i < flat.length; i +=
 /* a character's camp is that of their party's people in their own pop; their camp organization is whichever in their county holds that camp */
 const campOf = (c, pop) => (pop && pop.camps && c.party !== "ind" ? CAMP.list[pop.camps[c.party === "dem" ? 0 : 2]] : null);
 const clubOf = (c, pop) => { const camp = campOf(c, pop), hood = pop && place(pop.hood); return camp && hood ? (ORG.chapters[hood.fips] || []).find((ch) => ch.camps && ch.camps.includes(camp.id)) : null; };
+/* portraits: sex comes from the first name, age from the pop's age band, clothes from the highest office held or else the job */
+const NAMESEX = {};
+const hash = (text) => { let h = 2166136261; for (let i = 0; i < text.length; i++) h = Math.imul(h ^ text.charCodeAt(i), 16777619); return h >>> 0; };
+const sexOf = (c) => { const first = c.name.split(" ")[0], s = NAMESEX[first]; return s === "M" || s === "F" ? s : hash(c.id) % 2 ? "M" : "F"; };
+const AGES = { "18 to 29": [22, 29], "30 to 44": [30, 44], "45 to 64": [45, 64], "65 and over": [65, 84] };
+const ageOf = (c, pop) => { const [a, b] = (pop && AGES[pop.age]) || [38, 72]; return a + hash(c.id + "age") % (b - a + 1); };
+const OUTFIT = { farmer: "farm", rancher: "farm", farmworker: "farm", fisherman: "farm", tradesman: "trades", lineman: "trades", mechanic: "trades", construction_worker: "trades", factory_worker: "trades", truck_driver: "trades", warehouse_worker: "trades", custodian: "trades",
+  nurse: "health", healthcare_aide: "health", physician: "health", police_officer: "uniform", firefighter: "uniform", corrections_officer: "uniform", restaurant_worker: "service", hospitality_worker: "service", barber: "service", salesperson: "service" };
+function dressOf(c) {
+  const offices = seatsOf(c.id).map((s) => s.office);
+  if (offices.includes("county.sheriff")) return { dress: 0, job: "uniform" };
+  const level = offices.reduce((a, o) => Math.max(a, /^us\.|^fl\.(governor|lieutenant_governor|attorney_general|chief_financial_officer|agriculture)/.test(o) ? 4 : /^fl\./.test(o) ? 3 : 2), 0);
+  if (level) return { dress: level, job: "office" };
+  const job = OUTFIT[(c.traits || [])[2]];
+  return job ? { dress: 0, job } : { dress: 1, job: "office" };
+}
+function face(c, pop, size) {
+  if (typeof portrait !== "function") return "";
+  return portraitSvg(portrait(hash(c.id), { sex: sexOf(c), age: ageOf(c, pop), race: c.race || (pop && pop.race) || undefined, build: (hash(c.id + "build") % 200) / 100 - 1, party: c.party, mood: 0, ...dressOf(c) }), size);
+}
 const joined = (pop) => ORG.kinds.map(([kind]) => slices(pop.orgs).filter(([i]) => ORG.list[i][2] === kind).sort((a, b) => b[1] - a[1])[0]).filter(Boolean).map(([i]) => ORG.list[i][1]);
 function orgBars(ps, most) {
   const sum = {};
@@ -444,7 +464,7 @@ async function route() {
     const rows = [[boss, "Leads this pop"]].concat(seatsOver(hood).filter((s) => !seen.has(s.holder) && seen.add(s.holder)).map((s) => [s.holder, s.title + (s.label ? ", " + s.label : "")]))
       .filter(([pid]) => S.people[pid] && S.people[pid].traits).map(([pid, what]) => `<tr><td>${who(pid)}</td><td class="pt">${esc(what)}</td><td>${popOpinion(p, S.people[pid])}</td></tr>`).join("");
     page(`<div class="crumbs"><button class="back" data-go="#/map">Map</button>${placeLink(hood.county)} › ${placeLink(hood.id)}</div><h1>${esc(popName(p))}</h1><div class="from">A pop of 100 people in ${esc(hood.name)} · ${esc(popWords(p))}</div>
-      <table class="facts"><tr><th>Leader</th><td>${who(boss)}</td></tr><tr><th>Neighbourhood</th><td>${placeLink(hood.id)}</td></tr><tr><th>Work</th><td>${esc(p.work)}</td></tr><tr><th>Household income</th><td>${esc(p.income)}</td></tr>
+      <table class="facts"><tr><th>Leader</th><td><div style="display:flex;gap:10px;align-items:center">${S.people[boss] ? face(S.people[boss], p, 44) : ""}${who(boss)}</div></td></tr><tr><th>Neighbourhood</th><td>${placeLink(hood.id)}</td></tr><tr><th>Work</th><td>${esc(p.work)}</td></tr><tr><th>Household income</th><td>${esc(p.income)}</td></tr>
       <tr><th>Area type</th><td>${esc(p.area)}</td></tr><tr><th>Party ID</th><td>${pie(p.pie)}${lead(p.pie)}</td></tr><tr><th>Expected turnout</th><td>${pct(p.turnout)}</td></tr>
       <tr><th>Mood</th><td>${["federal", "state", "local"].map((l) => `${l[0].toUpperCase() + l.slice(1)} ${mood(p.id, l)}`).join(" · ")}</td></tr></table>
       <h2>Organizations</h2><div class="cols">${pies}</div>
@@ -453,7 +473,7 @@ async function route() {
       <h2>Opinions</h2><table class="wt"><tr><th>Character</th><th></th><th>Opinion</th></tr>${rows}</table>${soon("known")}`);
   } else if (view === "person" && S.people[id]) {
     const c = S.people[id], seats = seatsOf(id), pop = c.pop && (POPS[c.home] || []).find((p) => p.id === c.pop);
-    page(`<div class="crumbs"><button class="back" data-go="#/map">Map</button></div><h1 class="who ${c.party}" style="text-decoration:none;cursor:default;display:block">${esc(c.name)}</h1><div class="from">${esc(role(id))}</div>
+    page(`<div class="crumbs"><button class="back" data-go="#/map">Map</button></div><div class="facehead">${face(c, pop, 120)}<div><h1 class="who ${c.party}" style="text-decoration:none;cursor:default;display:block">${esc(c.name)}</h1><div class="from">${esc(role(id))}</div>
       <table class="facts"><tr><th>Party</th><td>${PARTIES[c.party].name}</td></tr><tr><th>Home</th><td>${place(c.home) ? placeLink(c.home) : esc(c.home)}</td></tr>
       ${c.known !== undefined ? `<tr><th>Name ID</th><td><b>${c.known}</b>${place(c.known_in) ? ` <span class="pt">known in ${esc(place(c.known_in).name)}</span>` : c.known_in === "state" ? ' <span class="pt">known across the state</span>' : c.known_in === "country" ? ' <span class="pt">known across the country</span>' : ""}</td></tr>` : ""}
       ${(POSTS[id] || []).map((t) => `<tr><th>Post</th><td>${esc(t)}</td></tr>`).join("")}${c.hired ? `<tr><th>Hired</th><td>From within ${esc(c.hired)}</td></tr>` : ""}
@@ -463,7 +483,7 @@ async function route() {
       <tr><th>Belongs to</th><td>${joined(pop).concat(c.party === "ind" ? [] : [c.party === "rep" ? "Republican Party" : "Democratic Party"]).concat(clubOf(c, pop) ? [clubOf(c, pop).name] : []).map(esc).join(", ")}</td></tr>${campOf(c, pop) ? `<tr><th>Camp</th><td>${esc(campOf(c, pop).name)}</td></tr>` : ""}` : ""}
       ${seats.map((s) => `<tr><th>Office</th><td>${esc(s.title)}${s.label ? ", " + esc(s.label) : ""}${s.next.length ? ` <span class="pt">next election ${s.next.join(", ")}</span>` : ""}</td></tr>`).join("")}
       ${c.ran ? `<tr><th>Ran for</th><td>${esc(c.ran)}</td></tr>` : ""}
-      <tr><th>Seed</th><td>${S.seed}</td></tr></table><h2>Character</h2>
+      <tr><th>Seed</th><td>${S.seed}</td></tr></table></div></div><h2>Character</h2>
       ${c.traits ? `<table class="facts"><tr><th>Stats</th><td>${Object.entries(c.stats).map(([k, v]) => `${esc(BOOK.stats[k] || k)} <b>${v}</b>`).join(" · ")}</td></tr><tr><th>Traits</th><td>${c.traits.map((t) => `<span class="trait">${esc(BOOK.traits[t] || t)}</span>`).join(" ")}</td></tr></table>` : ""}${relations(id)}${soon("you")}${soon("known")}${soon("intrigue")}`);
   }
 }
@@ -474,7 +494,9 @@ maplibregl.addProtocol("pmtiles", protocol.tile);
 Promise.all([get("data/game/fl-index.json"), get(`data/seeds/${SEED}/fl-state.json`), get(`data/seeds/${SEED}/election-2024/map.json`).catch(() => ({})),
   get(`data/seeds/${SEED}/election-2024/fl-state.json`).catch(() => ({ races: [], summary: null })), get("data/traits.json").catch(() => ({ stats: {}, traits: {} })),
   get("data/issues.json").catch(() => ({ issues: [], usual: {}, places: {} })), get("data/camps.json").catch(() => ({ camps: [], places: {} })),
-  get("data/shades.json").catch(() => ({ fields: [], places: {}, districts: {}, names: {} }))]).then(async ([index, top, shares, wide, book, issues, camps, shades]) => {
+  get("data/shades.json").catch(() => ({ fields: [], places: {}, districts: {}, names: {} })),
+  get("data/names.json").catch(() => ({ first: {} }))]).then(async ([index, top, shares, wide, book, issues, camps, shades, names]) => {
+  for (const [key, list] of Object.entries(names.first)) for (const [n] of list) NAMESEX[n] = NAMESEX[n] && NAMESEX[n] !== key[0] ? "?" : key[0];
   Object.assign(SH, shades, { on: -1 });
   const menuOf = (groups) => SH.fields.flatMap((f, i) => (groups.includes(f.group) ? [[f, i]] : [])).flatMap(([f, i], n, all) => (n === 0 || all[n - 1][0].group !== f.group ? (n ? [null] : []).concat([["", f.heading]]) : []).concat([["f_" + i, f.label]]));
   if (SH.fields.length) {

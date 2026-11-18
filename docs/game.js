@@ -51,7 +51,7 @@ function popIssues(p) {
 }
 const signed = (v) => (v > 0 ? "+" : v < 0 ? "−" : "") + Math.abs(v);
 const nearest = (x, v) => x.stops.reduce((a, b) => (Math.abs(b[0] - v) < Math.abs(a[0] - v) ? b : a));
-const issueColour = (v) => (v === 0 ? "inherit" : PARTIES[v > 0 ? "dem" : "rep"].colour);
+const issueColour = (v) => (v === 0 ? "inherit" : v > 0 ? "#1a7790" : "#b9560f");
 function issueTable(nums) {
   let last = "";
   return `<table class="wt iss"><tr><th>Issue</th><th class="n">Stands at</th><th>Nearest position</th></tr>${ISS.list.map((x, k) => { const head = x.category === last ? "" : `<tr class="cat"><td colspan="3">${esc(x.category)}</td></tr>`; last = x.category;
@@ -175,6 +175,7 @@ const seatsOver = (q) => S.seats.concat(S.local[q.fips] || []).filter((s) => cov
 const stops = (prefix, list) => list.flatMap(([at, i]) => [at, css(`--${prefix}${i}`)]);
 const grey = (value, top) => ["interpolate", ["linear"], value, ...stops("g", [0, 1, 2, 3, 4, 5, 6].map((i) => [top * i / 6, i]))];
 const diverge = (value, span) => ["interpolate", ["linear"], value, ...stops("d", [7, 5, 3, 1].map((i) => [-span * i / 7, i])), 0, css("--r0"), ...stops("r", [1, 3, 5, 7].map((i) => [span * i / 7, i]))];
+const split = (value, span) => ["interpolate", ["linear"], value, ...stops("o", [7, 5, 3, 1].map((i) => [-span * i / 7, i])), 0, css("--m0"), ...stops("c", [1, 3, 5, 7].map((i) => [span * i / 7, i]))];
 const match = (field, table) => ["match", ["get", field], ...Object.entries(table).flat(), "#ffffff"];
 function shadeOf(kind) {
   const s = state.shade, n = (k) => ["get", k];
@@ -182,7 +183,7 @@ function shadeOf(kind) {
   const by = (ramp, a, b, c, list) => ["interpolate", ["linear"], margin(a, b, c), ...stops(ramp, list)];
   const colour = s === "party" ? ["case", ["all", [">=", n("pr"), n("pi")], [">=", n("pr"), n("pd")]], by("r", "pr", "pi", "pd", [[0, 1], [0.1, 3], [0.25, 5], [0.45, 7]]),
     [">=", n("pd"), n("pi")], by("d", "pd", "pi", "pr", [[0, 1], [0.1, 3], [0.25, 5], [0.45, 7]]), by("g", "pi", "pr", "pd", [[0, 1], [0.1, 2], [0.25, 3], [0.45, 4]])]
-    : s.startsWith("iss_") ? ["case", ["==", ["feature-state", "iss"], null], "#ffffff", diverge(["-", 0, ["feature-state", "iss"]], 60)]
+    : s.startsWith("iss_") ? ["case", ["==", ["feature-state", "iss"], null], "#ffffff", split(["feature-state", "iss"], 60)]
     : s === "r2024" ? ["case", ["==", ["feature-state", "s24"], null], "#ffffff", diverge(["-", ["feature-state", "s24"], 0.5], 0.3)] : s === "real" ? diverge(["-", n("r24"), 0.5], 0.3) : s === "local" ? diverge(n("local"), 15) : s === "race" ? match("race", RACE_COL) : s === "area" ? match("area", AREA_COL)
     : s === "race_White" ? grey(n("rw"), 1) : s === "race_Black" ? grey(n("rb"), 1) : s === "race_Hispanic" ? grey(n("rh"), 1) : s === "pops" ? grey(n("pops"), MOST[kind])
     : s === "ba" ? grey(n("ba"), 0.5) : s === "old" ? grey(n("old"), 0.6) : grey(n("inc"), 0.7);
@@ -204,7 +205,7 @@ function legend() {
   const ik = s.startsWith("iss_") ? ISS.list[+s.slice(4)] : null;
   const title = ik ? ik.name : { party: "Party ID", r2024: "President, 2024", real: "Real 2024", local: "Local lean", race: "Largest group", area: "Area type", pops: "Pops", ba: "Bachelor's degree", old: "Age 65 and over", income: "Income under $35,000" }[s] || "Share " + s.slice(5);
   const party = () => ORDER.map((k) => `<div class="prow"><span>${PARTIES[k].letter}</span><div class="bar">${(k === "ind" ? [1, 2, 3, 4] : [1, 3, 5, 7]).map((i) => `<span style="background:${css("--" + PARTIES[k].ramp + i)}"></span>`).join("")}</div></div>`).join("") + `<div class="ends"><span>Narrow lead</span><span>Wide lead</span></div>`;
-  const body = ik ? bar(dv, esc(ik.stops[0][1]), esc(ik.stops[ik.stops.length - 1][1])) : s === "party" ? party() : s === "r2024" || s === "real" || s === "local" ? bar(dv, "Democratic", "Republican") : s === "race" ? cat(RACE_COL) : s === "area" ? cat(AREA_COL) : bar(gr, "Fewer", "More");
+  const body = ik ? bar([7, 5, 3, 1].map((i) => css("--c" + i)).concat([1, 3, 5, 7].map((i) => css("--o" + i))), esc(ik.stops[0][1]), esc(ik.stops[ik.stops.length - 1][1])) : s === "party" ? party() : s === "r2024" || s === "real" || s === "local" ? bar(dv, "Democratic", "Republican") : s === "race" ? cat(RACE_COL) : s === "area" ? cat(AREA_COL) : bar(gr, "Fewer", "More");
   $("legend").innerHTML = `<div class="t">${title}</div>${body}`;
 }
 function paint() {

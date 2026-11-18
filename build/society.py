@@ -49,7 +49,9 @@ def clubs(c, x, elect, leader_at, party_of, letter):
         size = {camps[k]["id"]: float(people[of == k].sum()) for k in mine}
         home, total = {cid: cid for cid in size}, sum(size.values())
         folds = {camp["id"]: camp["folds"] for camp in camps if camp["party"] == party}
-        fits = lambda h: size[h] >= campbook["bar"]["people"] and size[h] / total >= campbook["bar"]["share"]
+        own = {camp["id"]: {**campbook["bar"], **camp.get("bar", {})} for camp in camps}   # a camp may set its own bar
+        need = lambda h, what: min(own[cid][what] for cid in home if home[cid] == h)
+        fits = lambda h: size[h] >= need(h, "people") and size[h] / total >= need(h, "share")
         while len(set(home.values())) > 1:
             heads = set(home.values())
             small = [h for h in heads if not fits(h)]

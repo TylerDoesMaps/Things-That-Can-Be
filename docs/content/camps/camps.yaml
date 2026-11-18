@@ -2,7 +2,7 @@ note: 'Camps: factions inside each party, each with a fixed position on every is
   camp of their party whose positions are nearest. First draft. ''draws'' makes a camp nearer for some pops: where every listed thing is true of the pop, its distance to the camp is multiplied by ''by''.
   Hand-set. Party camps are also organizations: ''club'' is a camp''s name as one, and ''bar'' is what it needs in a county to stand alone (people, and share of its party there). A camp under the bar joins
   the camp in ''folds''. ''umbrellas'' names the mixes that result; any other mix takes the ''united'' name. Where a party would have a single organization in a county it has none. An umbrella''s position
-  on an issue is the stop nearest the middle of its camps'' positions.'
+  on an issue is the stop nearest the middle of its camps'' positions. A camp can carry its own ''bar'' to stand alone on a smaller share.'
 bar:
   people: 4000
   share: 0.08
@@ -448,6 +448,12 @@ camps:
   colour: '#c9a227'
   club: Liberty Caucus
   folds: populist_right
+  bar:
+    share: 0.03
+  draws:
+  - age:
+    - 18 to 29
+    by: 0.85
   positions:
     income_tax: Flat or none
     property_tax: Cut deeply

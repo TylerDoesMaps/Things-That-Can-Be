@@ -31,6 +31,10 @@ Florida is the working state. The map, offices and pops pages read Florida; the 
 
 `docs/content/issues/issues.yaml` lists the issues: each one's stops (the positions a character can take, each at a fixed value from -100 to 100, left end positive), its weight at local, state and national level, and the pulls of each kind of pop. `build/issues.py docs/data` gives every pop a number on every issue and writes `docs/data/issues.json` with each place's averages and each party's usual stop. The game works a single pop's numbers out from the same base and pulls. Pulls marked with a survey in `source` were fitted from the Cooperative Election Study (2020, 2022, 2024); the survey files are not kept here. Run it after `organizations.py`.
 
+## Camps
+
+`docs/content/camps/camps.yaml` lists the camps inside each party, each with a fixed position on every issue. `build/camps.py docs/data` sorts each pop's Democrats, independents and Republicans into the nearest camp of their party and writes `docs/data/camps/` (one row per pop) and `docs/data/camps.json` (each place's share of people in each camp). Run it after `issues.py`.
+
 ## Events
 
 Each event is one file in `docs/content/events/`, named by its ID. The game and the builder read the same files.

@@ -26,6 +26,7 @@ groups:
   blue-collar: Building and transport, Factory and plant
   farm: Farm and ranch
   oil and mining: Oil, gas and mining
+  no college: No college
 issues:
 - id: income_tax
   name: Income tax
@@ -245,7 +246,7 @@ issues:
   - [-80, Broad tariffs]
   nation: -5
   florida: -3
-  source: Cooperative Election Study 2020
+  source: Cooperative Election Study 2020, education and work pulls hand-set
   pulls:
     Democrat: 27
     Republican: -44
@@ -259,7 +260,8 @@ issues:
     church: -7
     union: -6
     farm: 10
-    blue-collar: -5
+    blue-collar: -10
+    no college: -10
 - id: growth
   name: Growth and development
   category: Economy
@@ -626,7 +628,7 @@ issues:
   - [-95, Far less]
   nation: -15
   florida: -2
-  source: Cooperative Election Study 2024
+  source: Cooperative Election Study 2024, education and work pulls hand-set
   pulls:
     Democrat: 45
     Republican: -49
@@ -637,6 +639,8 @@ issues:
     65 and over: -8
     rural: -5
     church: -6
+    no college: -10
+    blue-collar: -8
 - id: enforcement
   name: Enforcement
   category: Immigration
@@ -648,7 +652,7 @@ issues:
   - [-90, Mass removal]
   nation: -15
   florida: -2
-  source: Cooperative Election Study 2024
+  source: Cooperative Election Study 2024, education and work pulls hand-set
   pulls:
     Democrat: 45
     Republican: -49
@@ -659,6 +663,8 @@ issues:
     65 and over: -8
     rural: -5
     church: -6
+    no college: -10
+    blue-collar: -8
 - id: climate
   name: Climate and energy
   category: Environment and energy
@@ -784,7 +790,7 @@ issues:
   - [-80, Hawkish]
   nation: 25
   florida: -2
-  source: Cooperative Election Study 2022
+  source: Cooperative Election Study 2022, education and work pulls hand-set
   pulls:
     Democrat: -16
     Republican: -16
@@ -794,6 +800,7 @@ issues:
     over $150k: -7
     under 30: 6
     church: -3
+    no college: 8
 - id: alliances
   name: Alliances and aid
   category: Foreign affairs and defense
@@ -805,7 +812,7 @@ issues:
   - [-80, Go it alone]
   nation: 15
   florida: -5
-  source: Cooperative Election Study 2022
+  source: Cooperative Election Study 2022, education and work pulls hand-set
   pulls:
     Democrat: 49
     Republican: -13
@@ -818,3 +825,4 @@ issues:
     65 and over: 5
     rural: -4
     church: -7
+    no college: -8

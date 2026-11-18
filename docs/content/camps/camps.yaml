@@ -4,6 +4,7 @@ camps:
 - id: progressive_left
   name: Progressive Left
   party: dem
+  colour: '#7b3fa0'
   positions:
     income_tax: Tax the top far more
     property_tax: Raise for services
@@ -45,6 +46,7 @@ camps:
 - id: mainstream_liberals
   name: Mainstream Liberals
   party: dem
+  colour: '#2f558e'
   positions:
     income_tax: Raise on high earners
     property_tax: Keep
@@ -86,6 +88,7 @@ camps:
 - id: labor_democrats
   name: Labor Democrats
   party: dem
+  colour: '#2a8fa6'
   positions:
     income_tax: Raise on high earners
     property_tax: Keep
@@ -127,6 +130,7 @@ camps:
 - id: church_and_community
   name: Church and Community Democrats
   party: dem
+  colour: '#1f7a5c'
   positions:
     income_tax: Raise on high earners
     property_tax: Keep
@@ -168,6 +172,7 @@ camps:
 - id: blue_dogs
   name: Blue Dogs
   party: dem
+  colour: '#7fa3d1'
   positions:
     income_tax: Keep
     property_tax: Cap growth
@@ -209,6 +214,7 @@ camps:
 - id: flag_and_faith
   name: Flag and Faith Conservatives
   party: rep
+  colour: '#8a1f22'
   positions:
     income_tax: Cut
     property_tax: Cap growth
@@ -250,6 +256,7 @@ camps:
 - id: business_republicans
   name: Business Republicans
   party: rep
+  colour: '#d46c1e'
   positions:
     income_tax: Cut
     property_tax: Cap growth
@@ -291,6 +298,7 @@ camps:
 - id: populist_right
   name: Populist Right
   party: rep
+  colour: '#b0527a'
   positions:
     income_tax: Keep
     property_tax: Cap growth
@@ -332,6 +340,7 @@ camps:
 - id: liberty_republicans
   name: Liberty Republicans
   party: rep
+  colour: '#c9a227'
   positions:
     income_tax: Flat or none
     property_tax: Cut deeply
@@ -373,6 +382,7 @@ camps:
 - id: left_behind
   name: Left Behind
   party: ind
+  colour: '#6b6f76'
   positions:
     income_tax: Raise on high earners
     property_tax: Cap growth
@@ -414,6 +424,7 @@ camps:
 - id: pocketbook_moderates
   name: Pocketbook Moderates
   party: ind
+  colour: '#a3a8ad'
   positions:
     income_tax: Keep
     property_tax: Cap growth
@@ -455,6 +466,7 @@ camps:
 - id: leave_me_alone
   name: Leave Me Alone
   party: ind
+  colour: '#5b4a3a'
   positions:
     income_tax: Cut
     property_tax: Cut deeply

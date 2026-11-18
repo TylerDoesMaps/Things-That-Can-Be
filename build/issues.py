@@ -29,7 +29,7 @@ def traits(pop, pie, kinds):
     t = {"Democrat": pop["pie"]["D"], "Republican": pop["pie"]["R"], pop["race"]: 1, pop["area"]: 1, **share}
     t[{"Under $35,000": "under $35k", "Over $150,000": "over $150k"}.get(pop["income"], "")] = 1
     t[{"18 to 29": "under 30", "65 and over": "65 and over"}.get(pop["age"], "")] = 1
-    t["college" if pop["education"] == "Bachelor's or more" else ""] = 1
+    t[{"Bachelor's or more": "college", "No college": "no college"}.get(pop["education"], "")] = 1
     t[WORK.get(pop["work"], "")] = 1
     return t
 

@@ -13,7 +13,7 @@ const HOME = "12065", SEED = 1;
 const LAYERS = [["county", "County"], ["district", "Commission districts"], ["muni", "Municipal"], ["hood", "Neighbourhoods"]];
 const LINES = [["county", "Counties", "#202122"], ["district", "Commission districts", "#202122"], ["city", "Cities", "#202122"], ["hood", "Neighbourhoods", "#72777d"],
   ["house", "State House", "#7a3fb0"], ["senate", "State Senate", "#0b7a75"], ["congress", "Congress", "#b36b00"]];
-const TABS = [["overview", "Overview"], ["people", "People"], ["party", "Party"], ["gov", "Officeholders"]];
+const TABS = [["overview", "Overview"], ["people", "People"], ["party", "Party"], ["issues", "Issues"], ["gov", "Officeholders"]];
 const RACE_COL = { White: "#8c6bb1", Black: "#41ab5d", Hispanic: "#f16913", Asian: "#3690c0", Other: "#969696" };
 const AREA_COL = { urban: "#54278f", suburban: "#9e9ac8", "small town": "#fdae6b", rural: "#a1d99b" };
 const MOOD_COL = { Angry: "#b2182b", Dissatisfied: "#ef8a62", Neutral: "#bdbdbd", Content: "#7fbf7b", Happy: "#1b7837" };
@@ -38,6 +38,31 @@ const ORG = { list: [], kinds: [["church", "Churches"], ["union", "Unions"], ["b
 const FUNCTION = { police: "police", fire: "fire", roads: "roads", water: "water and power", waste: "solid waste", parks: "parks", libraries: "libraries", health: "health", welfare: "social services", housing: "housing", planning: "planning",
   environment: "natural resources", airports: "airports", transit: "transit", finance: "finance", administration: "administration" };
 const OFFICERS = { "county.sheriff": "police and corrections", "county.clerk": "records and audit", "county.property_appraiser": "assessment", "county.tax_collector": "tax collection", "county.elections": "elections" };
+const ISS = { list: [], usual: {}, places: {}, on: -1 };
+/* issues: positive is the left end. A pop's number is the issue's base plus the pulls of what the pop is, the same sum as build/issues.py */
+const WORKPULL = { "Government and military": "government work", "Schools and health": "schools and health", "Shops and service": "service work", "Building and transport": "blue-collar", "Factory and plant": "blue-collar", "Farm and ranch": "farm", "Oil, gas and mining": "oil and mining" };
+function popIssues(p) {
+  const t = { Republican: p.pie[0], Democrat: p.pie[2], [p.race]: 1, [p.area]: 1, church: 0, union: 0, business: 0 };
+  for (let i = 0; i < p.orgs.length; i += 2) { const k = ORG.list[p.orgs[i]][2]; if (k in t) t[k] += p.orgs[i + 1] / 100; }
+  t[{ "Under $35,000": "under $35k", "Over $150,000": "over $150k" }[p.income]] = 1; t[{ "18 to 29": "under 30", "65 and over": "65 and over" }[p.age]] = 1;
+  if (p.education === "Bachelor's or more") t.college = 1;
+  t[WORKPULL[p.work]] = 1;
+  return ISS.list.map((x) => Math.max(-100, Math.min(100, Math.round(x.base + Object.entries(x.pulls).reduce((a, [g, v]) => a + v * (t[g] || 0), 0)))));
+}
+const signed = (v) => (v > 0 ? "+" : v < 0 ? "−" : "") + Math.abs(v);
+const nearest = (x, v) => x.stops.reduce((a, b) => (Math.abs(b[0] - v) < Math.abs(a[0] - v) ? b : a));
+const issueColour = (v) => (v === 0 ? "inherit" : PARTIES[v > 0 ? "dem" : "rep"].colour);
+function issueTable(nums) {
+  let last = "";
+  return `<table class="wt iss"><tr><th>Issue</th><th class="n">Stands at</th><th>Nearest position</th></tr>${ISS.list.map((x, k) => { const head = x.category === last ? "" : `<tr class="cat"><td colspan="3">${esc(x.category)}</td></tr>`; last = x.category;
+    return `${head}<tr><td>${esc(x.name)}</td><td class="n" style="color:${issueColour(nums[k])}">${signed(nums[k])}</td><td>${esc(nearest(x, nums[k])[1])}</td></tr>`; }).join("")}</table>`;
+}
+const layerOf = (id) => G.kinds[id] || (IDX.byId[id] ? "county" : /-D\d+$/.test(id) ? "district" : /^[A-Z]{3}-\d+$/.test(id) ? "hood" : "muni");
+function issueState(k) {
+  if (!map || ISS.on === k) return;
+  ISS.on = k;
+  for (const [id, v] of Object.entries(ISS.places)) if (id !== "__state") map.setFeatureState({ source: "fl", sourceLayer: layerOf(id), id }, { iss: v[k] });
+}
 let map, state = { layer: "hood", shade: "party", selected: null, tab: "overview", ptab: "overview", olevel: "local", county: HOME };
 
 /* ---------- loading ---------- */
@@ -157,6 +182,7 @@ function shadeOf(kind) {
   const by = (ramp, a, b, c, list) => ["interpolate", ["linear"], margin(a, b, c), ...stops(ramp, list)];
   const colour = s === "party" ? ["case", ["all", [">=", n("pr"), n("pi")], [">=", n("pr"), n("pd")]], by("r", "pr", "pi", "pd", [[0, 1], [0.1, 3], [0.25, 5], [0.45, 7]]),
     [">=", n("pd"), n("pi")], by("d", "pd", "pi", "pr", [[0, 1], [0.1, 3], [0.25, 5], [0.45, 7]]), by("g", "pi", "pr", "pd", [[0, 1], [0.1, 2], [0.25, 3], [0.45, 4]])]
+    : s.startsWith("iss_") ? ["case", ["==", ["feature-state", "iss"], null], "#ffffff", diverge(["-", 0, ["feature-state", "iss"]], 60)]
     : s === "r2024" ? ["case", ["==", ["feature-state", "s24"], null], "#ffffff", diverge(["-", ["feature-state", "s24"], 0.5], 0.3)] : s === "real" ? diverge(["-", n("r24"), 0.5], 0.3) : s === "local" ? diverge(n("local"), 15) : s === "race" ? match("race", RACE_COL) : s === "area" ? match("area", AREA_COL)
     : s === "race_White" ? grey(n("rw"), 1) : s === "race_Black" ? grey(n("rb"), 1) : s === "race_Hispanic" ? grey(n("rh"), 1) : s === "pops" ? grey(n("pops"), MOST[kind])
     : s === "ba" ? grey(n("ba"), 0.5) : s === "old" ? grey(n("old"), 0.6) : grey(n("inc"), 0.7);
@@ -165,7 +191,8 @@ function shadeOf(kind) {
 /* what the map is shading by, for one place: shown when the pointer is over it */
 function shown(p) {
   const s = state.shade, rd = (x) => `<span style="color:${PARTIES[x >= 0.5 ? "rep" : "dem"].colour}">${x >= 0.5 ? "R" : "D"} ${pct(Math.max(x, 1 - x))}</span>`, v = VOTE.places[p.id];
-  const text = s === "party" ? "Party ID " + lead([p.pr, p.pi, p.pd]) : s === "r2024" ? (v && v[0] !== null ? "President, 2024 " + rd(v[0]) : "") : s === "real" ? "Real 2024 " + rd(p.r24) : s === "local" ? "Local lean " + lean(p.local)
+  const k = s.startsWith("iss_") ? +s.slice(4) : -1, iv = k >= 0 && ISS.places[p.id] ? ISS.places[p.id][k] : null;
+  const text = k >= 0 ? (iv === null ? "" : `${esc(ISS.list[k].name)} <span style="color:${issueColour(iv)}">${signed(iv)}</span> · ${esc(nearest(ISS.list[k], iv)[1])}`) : s === "party" ? "Party ID " + lead([p.pr, p.pi, p.pd]) : s === "r2024" ? (v && v[0] !== null ? "President, 2024 " + rd(v[0]) : "") : s === "real" ? "Real 2024 " + rd(p.r24) : s === "local" ? "Local lean " + lean(p.local)
     : s === "race" ? "Largest group " + esc(p.race) : s === "area" ? "Area type " + esc(p.area) : s === "race_White" ? "White " + pct(p.rw) : s === "race_Black" ? "Black " + pct(p.rb) : s === "race_Hispanic" ? "Hispanic " + pct(p.rh)
     : s === "ba" ? "Bachelor's degree " + pct(p.ba) : s === "old" ? "Age 65 and over " + pct(p.old) : s === "income" ? "Income under $35,000 " + pct(p.inc) : "";
   return p.pops && text ? "<br>" + text : "";
@@ -174,13 +201,15 @@ function legend() {
   const s = state.shade, bar = (cols, a, b) => `<div class="bar">${cols.map((c) => `<span style="background:${c}"></span>`).join("")}</div><div class="ends"><span>${a}</span><span>${b}</span></div>`;
   const dv = [7, 5, 3, 1].map((i) => css("--d" + i)).concat([1, 3, 5, 7].map((i) => css("--r" + i))), gr = [0, 1, 2, 3, 4, 5, 6].map((i) => css("--g" + i));
   const cat = (table) => `<div class="cat">${Object.entries(table).map(([k, c]) => `<span><i style="background:${c}"></i>${esc(k[0].toUpperCase() + k.slice(1))}</span>`).join("")}</div>`;
-  const title = { party: "Party ID", r2024: "President, 2024", real: "Real 2024", local: "Local lean", race: "Largest group", area: "Area type", pops: "Pops", ba: "Bachelor's degree", old: "Age 65 and over", income: "Income under $35,000" }[s] || "Share " + s.slice(5);
+  const ik = s.startsWith("iss_") ? ISS.list[+s.slice(4)] : null;
+  const title = ik ? ik.name : { party: "Party ID", r2024: "President, 2024", real: "Real 2024", local: "Local lean", race: "Largest group", area: "Area type", pops: "Pops", ba: "Bachelor's degree", old: "Age 65 and over", income: "Income under $35,000" }[s] || "Share " + s.slice(5);
   const party = () => ORDER.map((k) => `<div class="prow"><span>${PARTIES[k].letter}</span><div class="bar">${(k === "ind" ? [1, 2, 3, 4] : [1, 3, 5, 7]).map((i) => `<span style="background:${css("--" + PARTIES[k].ramp + i)}"></span>`).join("")}</div></div>`).join("") + `<div class="ends"><span>Narrow lead</span><span>Wide lead</span></div>`;
-  const body = s === "party" ? party() : s === "r2024" || s === "real" || s === "local" ? bar(dv, "Democratic", "Republican") : s === "race" ? cat(RACE_COL) : s === "area" ? cat(AREA_COL) : bar(gr, "Fewer", "More");
+  const body = ik ? bar(dv, esc(ik.stops[0][1]), esc(ik.stops[ik.stops.length - 1][1])) : s === "party" ? party() : s === "r2024" || s === "real" || s === "local" ? bar(dv, "Democratic", "Republican") : s === "race" ? cat(RACE_COL) : s === "area" ? cat(AREA_COL) : bar(gr, "Fewer", "More");
   $("legend").innerHTML = `<div class="t">${title}</div>${body}`;
 }
 function paint() {
   if (!map || !map.getLayer("fill-hood")) return;
+  if (state.shade.startsWith("iss_")) issueState(+state.shade.slice(4));
   for (const [kind] of LAYERS) {
     const on = kind === state.layer ? "visible" : "none";
     for (const part of ["fill-", "edge-", "picked-"]) map.setLayoutProperty(part + kind, "visibility", on);
@@ -204,6 +233,7 @@ function infobox() {
 }
 function placeTab(q, tab, wide) {
   const ps = popsIn(q);
+  if (tab === "issues") return ISS.places[q.id] ? issueTable(ISS.places[q.id]) : "";
   if (tab === "overview") {
     const inside = q.kind === "hood" ? `<tr><th>County</th><td>${placeLink(q.county)}</td></tr><tr><th>Commission district</th><td>${placeLink(q.code + "-D" + q.district, "District " + q.district)}</td></tr><tr><th>State House</th><td>District ${q.house}</td></tr><tr><th>State Senate</th><td>District ${q.senate}</td></tr><tr><th>Congress</th><td>District ${q.congress}</td></tr><tr><th>Local lean</th><td>${lean(q.local)}</td></tr>` : "";
     let h = `<table><tr><th>People</th><td>${num(q.pops * 100)} <span class="pt">(${num(q.pops)} pops)</span></td></tr><tr><th>Party ID</th><td>${lead(q.party)}</td></tr>
@@ -335,7 +365,7 @@ async function route() {
           `<tr><td>${esc(c.name)}</td><td class="n">${num(c.members)}</td><td class="n">${pct(c.members / people)}</td><td>${who(c.leader)}</td><td>${c.vote.map(([pid, v]) => `${who(pid)} <span class="pt" style="display:inline">${num(v)}</span>`).join(" · ")}</td></tr>`).join("")}</table>`; }).join("")}`);
     pickCounty("pcounty");
   } else if (view === "stats") {
-    page(`<h1>Stats</h1><div class="from">State of ${esc(G.state)}</div>${soon("services")}${soon("bills")}${soon("issues")}`);
+    page(`<h1>Stats</h1><div class="from">State of ${esc(G.state)}</div>${ISS.places.__state ? "<h2>Issues</h2>" + issueTable(ISS.places.__state) : ""}${soon("services")}${soon("bills")}${soon("issues")}`);
   } else if (view === "soon" && SOON[id]) {
     page(`<h1>${esc(SOON[id][0])}</h1>${soon(id)}`);
   } else if (view === "place" && place(id)) {
@@ -355,6 +385,7 @@ async function route() {
       <tr><th>Area type</th><td>${esc(p.area)}</td></tr><tr><th>Party ID</th><td>${pie(p.pie)}${lead(p.pie)}</td></tr><tr><th>Expected turnout</th><td>${pct(p.turnout)}</td></tr>
       <tr><th>Mood</th><td>${["federal", "state", "local"].map((l) => `${l[0].toUpperCase() + l.slice(1)} ${mood(p.id, l)}`).join(" · ")}</td></tr></table>
       <h2>Organizations</h2><div class="cols">${pies}</div>
+      <h2>Issues</h2>${ISS.list.length ? issueTable(popIssues(p)) : ""}
       <h2>Opinions</h2><table class="wt"><tr><th>Character</th><th></th><th>Opinion</th></tr>${rows}</table>${soon("known")}`);
   } else if (view === "person" && S.people[id]) {
     const c = S.people[id], seats = seatsOf(id), pop = c.pop && (POPS[c.home] || []).find((p) => p.id === c.pop);
@@ -377,7 +408,10 @@ async function route() {
 const protocol = new pmtiles.Protocol();
 maplibregl.addProtocol("pmtiles", protocol.tile);
 Promise.all([get("data/game/fl-index.json"), get(`data/seeds/${SEED}/fl-state.json`), get(`data/seeds/${SEED}/election-2024/map.json`).catch(() => ({})),
-  get(`data/seeds/${SEED}/election-2024/fl-state.json`).catch(() => ({ races: [], summary: null })), get("data/traits.json").catch(() => ({ stats: {}, traits: {} }))]).then(async ([index, top, shares, wide, book]) => {
+  get(`data/seeds/${SEED}/election-2024/fl-state.json`).catch(() => ({ races: [], summary: null })), get("data/traits.json").catch(() => ({ stats: {}, traits: {} })),
+  get("data/issues.json").catch(() => ({ issues: [], usual: {}, places: {} }))]).then(async ([index, top, shares, wide, book, issues]) => {
+  ISS.list = issues.issues; ISS.usual = issues.usual; ISS.places = issues.places;
+  if (ISS.list.length) { let last = ""; SHADES.find((x) => x.id === "issues").menu = ISS.list.flatMap((x, k) => { const head = x.category === last ? [] : (last ? [null] : []).concat([["", x.category]]); last = x.category; return head.concat([["iss_" + k, x.name]]); }); }
   VOTE.places = shares; VOTE.wide = wide.races; VOTE.summary = wide.summary; Object.assign(BOOK, book);
   if (wide.summary) VOTE.places.__state = [wide.summary.florida_rep / 100, wide.races.length ? wide.races[0].cands.reduce((a, c) => a + c.votes, 0) : 0];
   G.state = index.state;

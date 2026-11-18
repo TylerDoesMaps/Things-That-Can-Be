@@ -42,3 +42,10 @@ table.wt td .pt { display: block; }
 .hist{display:flex;gap:4px;align-items:center;margin-left:12px}.hist .btn{min-width:30px;padding:2px 8px;font-size:18px;line-height:1.2}
 
 .pos{color:#1b7837}.neg{color:#b2182b}details.op summary{cursor:pointer;list-style:none}details.op summary::-webkit-details-marker{display:none}details.op summary::after{content:" ▸";color:#72777d;font-size:11px}details.op[open] summary::after{content:" ▾"}details.op div{font-size:12.5px;padding:1px 0}details.op div span{display:inline-block;min-width:34px;font-variant-numeric:tabular-nums}details.op div.pt{color:#54595d}
+
+/* issues */
+#m-issues{max-height:70vh;overflow-y:auto}
+#m-issues button[disabled]{font-weight:600;color:var(--text,#202122);padding-top:8px}
+.iss tr.cat td{font-weight:600;background:var(--head,#eaecf0)}
+#legend{min-width:190px}
+#legend .ends span+span{text-align:right}

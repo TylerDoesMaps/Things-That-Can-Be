@@ -1,0 +1,816 @@
+note: 'Issues every pop and character holds a position on. Positive is the left end. ''stops'' are the positions a character can take, each at a fixed value. ''weights'' are local, state, national (0 ignored,
+  3 central). ''nation'' is where the average American sits, placed by hand. ''florida'' is the state''s distance from the nation in the survey, kept within 15. ''pulls'' are points added if a whole pop
+  were that group: party pulls use the pop''s party pie, church, union and business use its share of members. Pulls marked hand-set are guesses; the rest are fitted from the survey named in ''source''.'
+groups:
+  Democrat: party pie
+  Republican: party pie
+  Black: race
+  Hispanic: race
+  Asian: race
+  under $35k: income
+  over $150k: income
+  college: Bachelor's or more
+  under 30: age 18 to 29
+  65 and over: age
+  urban: area
+  suburban: area
+  rural: area
+  church: share in churches
+  union: share in unions
+  business: share in business groups
+  government work: Government and military
+  schools and health: Schools and health
+  service work: Shops and service
+  blue-collar: Building and transport, Factory and plant
+  farm: Farm and ranch
+  oil and mining: Oil, gas and mining
+issues:
+- id: income_tax
+  name: Income tax
+  category: Taxation
+  weights: [0, 2, 3]
+  stops:
+  - [100, Tax the top far more]
+  - [55, Raise on high earners]
+  - [0, Keep]
+  - [-45, Cut]
+  - [-90, Flat or none]
+  nation: 10
+  florida: -4
+  source: Cooperative Election Study 2024
+  pulls:
+    Democrat: 43
+    Republican: -43
+    Black: -15
+    Hispanic: -8
+    Asian: -4
+    under $35k: 4
+    over $150k: -3
+    college: 3
+    rural: -3
+    church: -12
+    union: 10
+- id: property_tax
+  name: Property tax
+  category: Taxation
+  weights: [3, 2, 0]
+  stops:
+  - [70, Raise for services]
+  - [15, Keep]
+  - [-35, Cap growth]
+  - [-85, Cut deeply]
+  nation: -20
+  florida: 0
+  source: hand-set
+  pulls:
+    Democrat: 15
+    Republican: -20
+    65 and over: -10
+    urban: 5
+    rural: -5
+- id: sales_tax
+  name: Sales tax
+  category: Taxation
+  weights: [2, 3, 0]
+  stops:
+  - [70, 'Cut, shift to income']
+  - [0, Keep]
+  - [-65, 'Raise, cut other taxes']
+  nation: 0
+  florida: 0
+  source: hand-set
+  pulls:
+    Democrat: 15
+    Republican: -15
+    under $35k: 10
+    over $150k: -5
+- id: business_tax
+  name: Business tax and incentives
+  category: Taxation
+  weights: [3, 3, 3]
+  stops:
+  - [85, 'Raise, end breaks']
+  - [25, Keep]
+  - [-30, Cut]
+  - [-75, Recruit with incentives]
+  nation: 15
+  florida: -1
+  source: Cooperative Election Study 2024
+  pulls:
+    Democrat: 63
+    Republican: -42
+    Black: -12
+    Hispanic: -11
+    over $150k: -7
+    college: -3
+    under 30: -14
+    rural: -3
+    church: -13
+    union: 12
+    business: -15
+- id: government_size
+  name: Size of government
+  category: Spending
+  weights: &id001 [3, 3, 3]
+  stops:
+  - [100, Expand services]
+  - [45, Grow slowly]
+  - [0, Hold]
+  - [-45, Trim]
+  - [-95, Cut deeply]
+  nation: 10
+  florida: 2
+  source: Cooperative Election Study 2024
+  pulls:
+    Democrat: 27
+    Republican: -14
+    Black: 3
+    under $35k: 7
+    over $150k: -3
+    under 30: 4
+    urban: 3
+    church: -6
+    government work: 10
+- id: debt
+  name: Debt and deficits
+  category: Spending
+  weights: *id001
+  stops:
+  - [70, Borrow to invest]
+  - [10, Borrow when needed]
+  - [-70, Balance always]
+  nation: -20
+  florida: 0
+  source: hand-set
+  pulls:
+    Democrat: 20
+    Republican: -25
+    under 30: 10
+    65 and over: -10
+- id: minimum_wage
+  name: Minimum wage
+  category: Labor
+  weights: &id002 [1, 3, 3]
+  stops:
+  - [100, Living wage]
+  - [50, Raise]
+  - [-20, Keep]
+  - [-85, Leave to the market]
+  nation: 25
+  florida: -1
+  source: Cooperative Election Study 2020
+  pulls:
+    Democrat: 43
+    Republican: -57
+    Black: 15
+    Hispanic: 9
+    Asian: 9
+    under $35k: 20
+    over $150k: -5
+    college: -9
+    under 30: 6
+    65 and over: -6
+    urban: 9
+    church: -12
+    service work: 10
+    business: -10
+- id: unions
+  name: Unions
+  category: Labor
+  weights: *id002
+  stops:
+  - [95, 'Card check, expand']
+  - [40, Protect]
+  - [-40, Right to work]
+  - [-90, Curb]
+  nation: 5
+  florida: 0
+  source: hand-set
+  pulls:
+    Democrat: 40
+    Republican: -40
+    union: 35
+    blue-collar: 5
+    government work: 10
+    church: -5
+    business: -15
+- id: public_pay
+  name: Public employee pay
+  category: Labor
+  weights: [2, 3, 2]
+  stops:
+  - [80, Raise pay and pensions]
+  - [20, Keep]
+  - [-35, Freeze]
+  - [-85, Cut pensions]
+  nation: 5
+  florida: 0
+  source: hand-set
+  pulls:
+    Democrat: 30
+    Republican: -30
+    government work: 30
+    schools and health: 10
+    union: 15
+- id: regulation
+  name: Business regulation
+  category: Economy
+  weights: [2, 3, 3]
+  stops:
+  - [100, Much tighter]
+  - [50, Tighter]
+  - [0, Keep]
+  - [-50, Looser]
+  - [-100, Far looser]
+  nation: 0
+  florida: 0
+  source: hand-set
+  pulls:
+    Democrat: 45
+    Republican: -45
+    under 30: 10
+    church: -10
+    farm: -10
+    business: -20
+- id: trade
+  name: Trade
+  category: Economy
+  weights: [0, 0, 3]
+  stops:
+  - [80, Free trade]
+  - [25, Managed]
+  - [-30, Targeted tariffs]
+  - [-85, Broad tariffs]
+  nation: -5
+  florida: -3
+  source: Cooperative Election Study 2020
+  pulls:
+    Democrat: 27
+    Republican: -44
+    Black: -10
+    Hispanic: -5
+    under $35k: 3
+    over $150k: 5
+    college: 12
+    under 30: 17
+    65 and over: -8
+    church: -7
+    union: -6
+    farm: 10
+    blue-collar: -5
+- id: growth
+  name: Growth and development
+  category: Economy
+  weights: [3, 2, 0]
+  stops:
+  - [75, Slow growth]
+  - [25, Managed]
+  - [-25, Welcome]
+  - [-80, Growth first]
+  nation: 5
+  florida: 0
+  source: hand-set
+  pulls:
+    college: 10
+    65 and over: 10
+    suburban: 10
+    Republican: -10
+    blue-collar: -10
+    business: -20
+- id: zoning
+  name: Zoning and density
+  category: Housing and land
+  weights: &id003 [3, 2, 1]
+  stops:
+  - [85, Build anywhere]
+  - [35, Allow more]
+  - [-25, Keep]
+  - [-80, Protect single-family]
+  nation: -5
+  florida: -15
+  source: Cooperative Election Study 2024
+  pulls:
+    Democrat: 21
+    Republican: -10
+    Black: 22
+    Hispanic: 3
+    Asian: 11
+    under $35k: 10
+    over $150k: 3
+    under 30: 5
+    65 and over: -4
+    urban: 15
+    rural: 4
+    suburban: -5
+- id: homelessness
+  name: Homelessness
+  category: Housing and land
+  weights: *id003
+  stops:
+  - [80, Housing first]
+  - [15, Shelter and services]
+  - [-75, Enforce camping bans]
+  nation: -5
+  florida: 0
+  source: hand-set
+  pulls:
+    Democrat: 30
+    Republican: -35
+    under 30: 15
+    65 and over: -10
+    church: -5
+    suburban: -5
+- id: school_funding
+  name: School funding
+  category: Education
+  weights: &id004 [3, 3, 1]
+  stops:
+  - [95, Large increase]
+  - [45, Increase]
+  - [-15, Keep]
+  - [-80, Cut]
+  nation: 35
+  florida: 0
+  source: Cooperative Election Study 2024
+  pulls:
+    Democrat: 29
+    Republican: -12
+    Black: 5
+    under 30: 5
+    urban: 3
+    church: -8
+    union: 3
+    schools and health: 10
+- id: school_choice
+  name: School choice
+  category: Education
+  weights: *id004
+  stops:
+  - [90, Public only]
+  - [30, Limited charters]
+  - [-30, Charters]
+  - [-90, Vouchers for all]
+  nation: -10
+  florida: -9
+  source: Cooperative Election Study 2024
+  pulls:
+    Democrat: 47
+    Republican: -35
+    Black: -38
+    Hispanic: -13
+    Asian: -5
+    under $35k: -4
+    over $150k: 4
+    college: 12
+    under 30: -5
+    65 and over: 11
+    urban: -6
+    church: -18
+    union: 8
+- id: curriculum
+  name: Curriculum
+  category: Education
+  weights: *id004
+  stops:
+  - [85, Educators decide]
+  - [20, Shared]
+  - [-40, Parents decide]
+  - [-90, State restricts topics]
+  nation: -5
+  florida: 0
+  source: hand-set
+  pulls:
+    Democrat: 40
+    Republican: -40
+    college: 10
+    under 30: 10
+    church: -20
+    Black: -10
+- id: health_coverage
+  name: Health coverage
+  category: Health and welfare
+  weights: &id005 [1, 3, 3]
+  stops:
+  - [100, Public plan for all]
+  - [50, Expand public plans]
+  - [0, Keep]
+  - [-50, Shrink]
+  - [-95, Private only]
+  nation: 25
+  florida: 3
+  source: Cooperative Election Study 2024
+  pulls:
+    Democrat: 39
+    Republican: -32
+    under $35k: 8
+    over $150k: -3
+    college: -3
+    under 30: 7
+    65 and over: -5
+    rural: -4
+    church: -12
+- id: safety_net
+  name: Safety net
+  category: Health and welfare
+  weights: *id005
+  stops:
+  - [90, Expand]
+  - [25, Keep]
+  - [-40, Work requirements]
+  - [-90, Cut]
+  nation: 0
+  florida: 0
+  source: Cooperative Election Study 2024
+  pulls:
+    Democrat: 27
+    Republican: -26
+    Black: -4
+    Hispanic: -8
+    Asian: -7
+    under $35k: 17
+    over $150k: -8
+    college: -3
+    under 30: 4
+    65 and over: -23
+    urban: 4
+    church: -8
+- id: social_security
+  name: Social Security and Medicare
+  category: Health and welfare
+  weights: [0, 0, 3]
+  stops:
+  - [90, Expand]
+  - [35, Protect]
+  - [-45, Trim for solvency]
+  - [-90, Privatize in part]
+  nation: 40
+  florida: 0
+  source: hand-set
+  pulls:
+    Democrat: 25
+    Republican: -20
+    65 and over: 25
+    under $35k: 10
+    under 30: -15
+    over $150k: -15
+- id: policing
+  name: Policing
+  category: Public safety
+  weights: &id006 [3, 3, 2]
+  stops:
+  - [100, Shrink and redirect]
+  - [45, Reform]
+  - [-10, Keep]
+  - [-55, More officers]
+  - [-95, Much tougher]
+  nation: -30
+  florida: 2
+  source: Cooperative Election Study 2024
+  pulls:
+    Democrat: 27
+    Republican: -35
+    Hispanic: -8
+    Asian: -7
+    under $35k: 4
+    college: 10
+    under 30: 30
+    65 and over: -27
+    church: -13
+- id: sentencing
+  name: Sentencing
+  category: Public safety
+  weights: *id006
+  stops:
+  - [85, 'Shorter, more diversion']
+  - [35, Reform]
+  - [-25, Keep]
+  - [-85, Longer]
+  nation: 15
+  florida: 2
+  source: Cooperative Election Study 2022
+  pulls:
+    Democrat: 36
+    Republican: -31
+    Hispanic: -12
+    Asian: -21
+    over $150k: 4
+    college: 6
+    under 30: 6
+    65 and over: -14
+    urban: 4
+    church: -19
+- id: guns
+  name: Guns
+  category: Public safety
+  weights: *id006
+  stops:
+  - [100, Ban many]
+  - [45, Tighter checks]
+  - [-15, Keep]
+  - [-60, Looser carry]
+  - [-100, No limits]
+  nation: 20
+  florida: 2
+  source: Cooperative Election Study 2024
+  pulls:
+    Democrat: 45
+    Republican: -29
+    Black: -6
+    Asian: 10
+    college: 7
+    under 30: 3
+    65 and over: 10
+    rural: -10
+    church: -4
+    union: -6
+- id: abortion
+  name: Abortion
+  category: Social policy
+  weights: &id007 [1, 3, 3]
+  stops:
+  - [100, No limits]
+  - [50, Legal to viability]
+  - [-15, Early weeks only]
+  - [-65, Rare exceptions]
+  - [-100, Banned]
+  nation: 20
+  florida: 1
+  source: Cooperative Election Study 2024
+  pulls:
+    Democrat: 39
+    Republican: -36
+    Black: -10
+    Hispanic: -9
+    Asian: -3
+    under $35k: -5
+    over $150k: 4
+    college: 5
+    under 30: 6
+    urban: -3
+    rural: -5
+    church: -34
+- id: lgbt
+  name: LGBT rights
+  category: Social policy
+  weights: *id007
+  stops:
+  - [90, Expand protections]
+  - [30, Keep]
+  - [-40, Limit]
+  - [-90, Roll back]
+  nation: 5
+  florida: -1
+  source: Cooperative Election Study 2024
+  pulls:
+    Democrat: 51
+    Republican: -37
+    Black: -22
+    Hispanic: -7
+    Asian: -5
+    over $150k: 4
+    college: 9
+    under 30: 19
+    65 and over: -4
+    rural: -8
+    church: -28
+    union: 5
+- id: religion
+  name: Religion in public life
+  category: Social policy
+  weights: *id007
+  stops:
+  - [85, Strict separation]
+  - [20, Keep]
+  - [-35, Accommodate]
+  - [-85, Promote]
+  nation: -5
+  florida: 0
+  source: hand-set
+  pulls:
+    Democrat: 30
+    Republican: -30
+    church: -40
+    Black: -15
+    college: 10
+    under 30: 10
+- id: drugs
+  name: Drugs
+  category: Social policy
+  weights: *id007
+  stops:
+  - [90, Legalize broadly]
+  - [40, Legal marijuana]
+  - [-30, Medical only]
+  - [-90, Prohibit]
+  nation: 25
+  florida: 0
+  source: hand-set
+  pulls:
+    Democrat: 25
+    Republican: -25
+    under 30: 25
+    65 and over: -25
+    church: -20
+- id: immigration_levels
+  name: Immigration levels
+  category: Immigration
+  weights: &id008 [1, 2, 3]
+  stops:
+  - [100, Much more]
+  - [50, More]
+  - [0, Keep]
+  - [-50, Less]
+  - [-100, Far less]
+  nation: -15
+  florida: -2
+  source: Cooperative Election Study 2024
+  pulls:
+    Democrat: 45
+    Republican: -49
+    Black: -5
+    Hispanic: 12
+    college: 8
+    under 30: 25
+    65 and over: -8
+    rural: -5
+    church: -6
+- id: enforcement
+  name: Enforcement
+  category: Immigration
+  weights: *id008
+  stops:
+  - [90, Sanctuary]
+  - [35, Limited cooperation]
+  - [-35, Cooperate]
+  - [-95, Mass removal]
+  nation: -15
+  florida: -2
+  source: Cooperative Election Study 2024
+  pulls:
+    Democrat: 45
+    Republican: -49
+    Black: -5
+    Hispanic: 12
+    college: 8
+    under 30: 25
+    65 and over: -8
+    rural: -5
+    church: -6
+- id: climate
+  name: Climate and energy
+  category: Environment and energy
+  weights: &id009 [2, 3, 3]
+  stops:
+  - [95, Rapid transition]
+  - [40, Transition]
+  - [-30, All sources]
+  - [-90, Fossil first]
+  nation: 10
+  florida: 1
+  source: Cooperative Election Study 2024
+  pulls:
+    Democrat: 50
+    Republican: -45
+    Black: -4
+    Hispanic: 4
+    Asian: 11
+    under $35k: 6
+    under 30: 16
+    65 and over: -7
+    urban: 5
+    rural: -6
+    church: -11
+    union: 3
+    oil and mining: -25
+- id: conservation
+  name: Conservation and water
+  category: Environment and energy
+  weights: *id009
+  stops:
+  - [80, Buy and protect land]
+  - [30, Protect]
+  - [-20, Balance]
+  - [-80, Open to use]
+  nation: 30
+  florida: 0
+  source: hand-set
+  pulls:
+    Democrat: 25
+    Republican: -25
+    college: 10
+    farm: -15
+    blue-collar: -5
+    business: -10
+- id: transport
+  name: Roads and transit
+  category: Transportation
+  weights: [3, 3, 1]
+  stops:
+  - [80, Transit first]
+  - [0, Balance]
+  - [-75, Roads first]
+  nation: -15
+  florida: 0
+  source: hand-set
+  pulls:
+    urban: 30
+    rural: -25
+    Democrat: 20
+    Republican: -15
+    under 30: 10
+- id: voting
+  name: Voting rules
+  category: Government and elections
+  weights: &id010 [2, 3, 2]
+  stops:
+  - [100, 'Automatic, mail for all']
+  - [50, Easier]
+  - [0, Keep]
+  - [-50, Stricter ID]
+  - [-95, Much stricter]
+  nation: 0
+  florida: 0
+  source: hand-set
+  pulls:
+    Democrat: 50
+    Republican: -50
+    Black: 10
+    under 30: 5
+- id: term_limits
+  name: Ethics and term limits
+  category: Government and elections
+  weights: *id010
+  stops:
+  - [80, Strict limits and disclosure]
+  - [20, Some]
+  - [-60, Keep]
+  nation: 45
+  florida: 0
+  source: hand-set
+  pulls:
+    65 and over: 10
+    government work: -10
+- id: military
+  name: Military spending
+  category: Foreign affairs and defense
+  weights: &id011 [0, 0, 3]
+  stops:
+  - [90, Cut deeply]
+  - [35, Trim]
+  - [-25, Keep]
+  - [-80, Raise]
+  nation: -15
+  florida: 0
+  source: hand-set
+  pulls:
+    Democrat: 30
+    Republican: -35
+    under 30: 15
+    65 and over: -10
+    government work: -15
+    church: -5
+- id: intervention
+  name: Intervention abroad
+  category: Foreign affairs and defense
+  weights: *id011
+  stops:
+  - [80, Stay out]
+  - [25, Reluctant]
+  - [-30, Engaged]
+  - [-85, Hawkish]
+  nation: 25
+  florida: -2
+  source: Cooperative Election Study 2022
+  pulls:
+    Democrat: -16
+    Republican: -16
+    Black: 7
+    Hispanic: 9
+    under $35k: 3
+    over $150k: -7
+    under 30: 6
+    church: -3
+- id: alliances
+  name: Alliances and aid
+  category: Foreign affairs and defense
+  weights: *id011
+  stops:
+  - [80, Deepen]
+  - [30, Keep]
+  - [-35, Reduce]
+  - [-85, Go it alone]
+  nation: 15
+  florida: -5
+  source: Cooperative Election Study 2022
+  pulls:
+    Democrat: 49
+    Republican: -13
+    Black: -11
+    Hispanic: -10
+    under $35k: -3
+    over $150k: 5
+    college: 6
+    under 30: 5
+    65 and over: 5
+    rural: -4
+    church: -7

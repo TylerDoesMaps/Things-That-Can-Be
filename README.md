@@ -27,6 +27,10 @@ Florida is the working state. The map, offices and pops pages read Florida; the 
 
 `build/election.py` runs a seed's starting election and then calls `build/society.py`, which fills each county's and city's departments and boards from `docs/content/government/departments.yaml` and has every chapter elect a leader. Run order for a seed: `game.py`, `organizations.py`, `election.py`.
 
+## Issues
+
+`docs/content/issues/issues.yaml` lists the issues: each one's stops (the positions a character can take, each at a fixed value from -100 to 100, left end positive), its weight at local, state and national level, and the pulls of each kind of pop. `build/issues.py docs/data` gives every pop a number on every issue and writes `docs/data/issues.json` with each place's averages and each party's usual stop. The game works a single pop's numbers out from the same base and pulls. Pulls marked with a survey in `source` were fitted from the Cooperative Election Study (2020, 2022, 2024); the survey files are not kept here. Run it after `organizations.py`.
+
 ## Events
 
 Each event is one file in `docs/content/events/`, named by its ID. The game and the builder read the same files.

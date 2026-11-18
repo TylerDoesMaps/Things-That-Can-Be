@@ -15,7 +15,7 @@ import yaml
 
 DATA = Path(sys.argv[1])
 book = yaml.safe_load((DATA.parent / "content" / "issues" / "issues.yaml").read_text())
-ISSUES = book["issues"]
+ISSUES, SPREAD = book["issues"], book.get("spread", 1)
 WORK = {"Government and military": "government work", "Schools and health": "schools and health", "Shops and service": "service work", "Building and transport": "blue-collar",
         "Factory and plant": "blue-collar", "Farm and ranch": "farm", "Oil, gas and mining": "oil and mining"}
 
@@ -43,7 +43,7 @@ for f in sorted((DATA / "pops").glob("fl-*.json")):
     mine = [traits(p, orgs["pies"][i] if i < len(orgs["pies"]) else [], kinds) for i, p in enumerate(pops)]
     counties[fips] = (pops, mine)
     rows += mine
-raw = [[sum(v * t.get(g, 0) for g, v in issue["pulls"].items()) for issue in ISSUES] for t in rows]
+raw = [[SPREAD * sum(v * t.get(g, 0) for g, v in issue["pulls"].items()) for issue in ISSUES] for t in rows]
 base = [issue["nation"] + issue["florida"] - sum(r[k] for r in raw) / len(raw) for k, issue in enumerate(ISSUES)]
 clip = lambda x: max(-100, min(100, round(x)))
 hood, at, side = {}, 0, {p: [[0, 0] for _ in ISSUES] for p in "DIR"}
@@ -54,7 +54,7 @@ for fips, (pops, mine) in counties.items():
         hood.setdefault(p["hood"], []).append(nums)
         for party in "DIR":   # where a party's own people stand: the pop without its party pulls, plus that party's pull
             for k, issue in enumerate(ISSUES):
-                rest = base[k] + raw[at][k] - sum(issue["pulls"].get(g, 0) * p["pie"][c] for c, g in PARTY.items())
+                rest = base[k] + raw[at][k] / SPREAD - sum(issue["pulls"].get(g, 0) * p["pie"][c] for c, g in PARTY.items())
                 side[party][k][0] += (rest + issue["pulls"].get(PARTY[party], 0)) * p["pie"][party]
                 side[party][k][1] += p["pie"][party]
         at += 1
@@ -72,7 +72,7 @@ for party, name in (("D", "dem"), ("I", "ind"), ("R", "rep")):
     for k, issue in enumerate(ISSUES):
         mean = side[party][k][0] / side[party][k][1]
         usual[name].append(min(range(len(issue["stops"])), key=lambda i: abs(issue["stops"][i][0] - mean)))
-listing = [{**{k: issue[k] for k in ("id", "name", "category", "weights", "stops", "pulls")}, "base": round(base[i], 2)} for i, issue in enumerate(ISSUES)]
+listing = [{**{k: issue[k] for k in ("id", "name", "category", "weights", "stops")}, "pulls": {g: round(v * SPREAD, 2) for g, v in issue["pulls"].items()}, "base": round(base[i], 2)} for i, issue in enumerate(ISSUES)]
 (DATA / "issues.json").write_text(json.dumps({"issues": listing, "usual": usual, "places": places}, separators=(",", ":")))
 print(len(ISSUES), "issues,", at, "pops,", len(places), "places")
 for k, issue in enumerate(ISSUES):

@@ -1,6 +1,8 @@
 note: 'Issues every pop and character holds a position on. Positive is the left end. ''stops'' are the positions a character can take, each at a fixed value. ''weights'' are local, state, national (0 ignored,
   3 central). ''nation'' is where the average American sits, placed by hand. ''florida'' is the state''s distance from the nation in the survey, kept within 15. ''pulls'' are points added if a whole pop
-  were that group: party pulls use the pop''s party pie, church, union and business use its share of members. Pulls marked hand-set are guesses; the rest are fitted from the survey named in ''source''.'
+  were that group: party pulls use the pop''s party pie, church, union and business use its share of members. Pulls marked hand-set are guesses; the rest are fitted from the survey named in ''source''.
+  ''spread'' widens every pop''s distance from the state average, to stand for the sorting of like-minded people that a party pie does not capture; a party''s usual stop is worked out without it.'
+spread: 1.5
 groups:
   Democrat: party pie
   Republican: party pie
@@ -30,11 +32,11 @@ issues:
   category: Taxation
   weights: [0, 2, 3]
   stops:
-  - [100, Tax the top far more]
-  - [55, Raise on high earners]
+  - [95, Tax the top far more]
+  - [45, Raise on high earners]
   - [0, Keep]
-  - [-45, Cut]
-  - [-90, Flat or none]
+  - [-35, Cut]
+  - [-85, Flat or none]
   nation: 10
   florida: -4
   source: Cooperative Election Study 2024
@@ -55,10 +57,10 @@ issues:
   category: Taxation
   weights: [3, 2, 0]
   stops:
-  - [70, Raise for services]
-  - [15, Keep]
-  - [-35, Cap growth]
-  - [-85, Cut deeply]
+  - [65, Raise for services]
+  - [10, Keep]
+  - [-30, Cap growth]
+  - [-80, Cut deeply]
   nation: -20
   florida: 0
   source: hand-set
@@ -73,9 +75,9 @@ issues:
   category: Taxation
   weights: [2, 3, 0]
   stops:
-  - [70, 'Cut, shift to income']
+  - [65, 'Cut, shift to income']
   - [0, Keep]
-  - [-65, 'Raise, cut other taxes']
+  - [-60, 'Raise, cut other taxes']
   nation: 0
   florida: 0
   source: hand-set
@@ -89,10 +91,10 @@ issues:
   category: Taxation
   weights: [3, 3, 3]
   stops:
-  - [85, 'Raise, end breaks']
-  - [25, Keep]
-  - [-30, Cut]
-  - [-75, Recruit with incentives]
+  - [80, 'Raise, end breaks']
+  - [20, Keep]
+  - [-25, Cut]
+  - [-70, Recruit with incentives]
   nation: 15
   florida: -1
   source: Cooperative Election Study 2024
@@ -113,17 +115,17 @@ issues:
   category: Spending
   weights: &id001 [3, 3, 3]
   stops:
-  - [100, Expand services]
-  - [45, Grow slowly]
+  - [95, Expand services]
+  - [35, Grow slowly]
   - [0, Hold]
-  - [-45, Trim]
-  - [-95, Cut deeply]
+  - [-35, Trim]
+  - [-90, Cut deeply]
   nation: 10
   florida: 2
-  source: Cooperative Election Study 2024
+  source: Cooperative Election Study 2024, party pulls hand-set
   pulls:
-    Democrat: 27
-    Republican: -14
+    Democrat: 45
+    Republican: -45
     Black: 3
     under $35k: 7
     over $150k: -3
@@ -136,9 +138,9 @@ issues:
   category: Spending
   weights: *id001
   stops:
-  - [70, Borrow to invest]
+  - [65, Borrow to invest]
   - [10, Borrow when needed]
-  - [-70, Balance always]
+  - [-65, Balance always]
   nation: -20
   florida: 0
   source: hand-set
@@ -152,10 +154,10 @@ issues:
   category: Labor
   weights: &id002 [1, 3, 3]
   stops:
-  - [100, Living wage]
-  - [50, Raise]
-  - [-20, Keep]
-  - [-85, Leave to the market]
+  - [95, Living wage]
+  - [40, Raise]
+  - [-15, Keep]
+  - [-80, Leave to the market]
   nation: 25
   florida: -1
   source: Cooperative Election Study 2020
@@ -179,10 +181,10 @@ issues:
   category: Labor
   weights: *id002
   stops:
-  - [95, 'Card check, expand']
-  - [40, Protect]
-  - [-40, Right to work]
-  - [-90, Curb]
+  - [90, 'Card check, expand']
+  - [30, Protect]
+  - [-30, Right to work]
+  - [-85, Curb]
   nation: 5
   florida: 0
   source: hand-set
@@ -199,10 +201,10 @@ issues:
   category: Labor
   weights: [2, 3, 2]
   stops:
-  - [80, Raise pay and pensions]
-  - [20, Keep]
-  - [-35, Freeze]
-  - [-85, Cut pensions]
+  - [75, Raise pay and pensions]
+  - [15, Keep]
+  - [-30, Freeze]
+  - [-80, Cut pensions]
   nation: 5
   florida: 0
   source: hand-set
@@ -217,11 +219,11 @@ issues:
   category: Economy
   weights: [2, 3, 3]
   stops:
-  - [100, Much tighter]
-  - [50, Tighter]
+  - [95, Much tighter]
+  - [40, Tighter]
   - [0, Keep]
-  - [-50, Looser]
-  - [-100, Far looser]
+  - [-40, Looser]
+  - [-95, Far looser]
   nation: 0
   florida: 0
   source: hand-set
@@ -237,10 +239,10 @@ issues:
   category: Economy
   weights: [0, 0, 3]
   stops:
-  - [80, Free trade]
-  - [25, Managed]
-  - [-30, Targeted tariffs]
-  - [-85, Broad tariffs]
+  - [75, Free trade]
+  - [20, Managed]
+  - [-25, Targeted tariffs]
+  - [-80, Broad tariffs]
   nation: -5
   florida: -3
   source: Cooperative Election Study 2020
@@ -263,10 +265,10 @@ issues:
   category: Economy
   weights: [3, 2, 0]
   stops:
-  - [75, Slow growth]
-  - [25, Managed]
-  - [-25, Welcome]
-  - [-80, Growth first]
+  - [70, Slow growth]
+  - [20, Managed]
+  - [-20, Welcome]
+  - [-75, Growth first]
   nation: 5
   florida: 0
   source: hand-set
@@ -282,10 +284,10 @@ issues:
   category: Housing and land
   weights: &id003 [3, 2, 1]
   stops:
-  - [85, Build anywhere]
-  - [35, Allow more]
-  - [-25, Keep]
-  - [-80, Protect single-family]
+  - [80, Build anywhere]
+  - [30, Allow more]
+  - [-20, Keep]
+  - [-75, Protect single-family]
   nation: -5
   florida: -15
   source: Cooperative Election Study 2024
@@ -307,9 +309,9 @@ issues:
   category: Housing and land
   weights: *id003
   stops:
-  - [80, Housing first]
-  - [15, Shelter and services]
-  - [-75, Enforce camping bans]
+  - [75, Housing first]
+  - [10, Shelter and services]
+  - [-70, Enforce camping bans]
   nation: -5
   florida: 0
   source: hand-set
@@ -325,10 +327,10 @@ issues:
   category: Education
   weights: &id004 [3, 3, 1]
   stops:
-  - [95, Large increase]
-  - [45, Increase]
-  - [-15, Keep]
-  - [-80, Cut]
+  - [90, Large increase]
+  - [35, Increase]
+  - [-10, Keep]
+  - [-75, Cut]
   nation: 35
   florida: 0
   source: Cooperative Election Study 2024
@@ -346,10 +348,10 @@ issues:
   category: Education
   weights: *id004
   stops:
-  - [90, Public only]
-  - [30, Limited charters]
-  - [-30, Charters]
-  - [-90, Vouchers for all]
+  - [85, Public only]
+  - [25, Limited charters]
+  - [-25, Charters]
+  - [-85, Vouchers for all]
   nation: -10
   florida: -9
   source: Cooperative Election Study 2024
@@ -372,10 +374,10 @@ issues:
   category: Education
   weights: *id004
   stops:
-  - [85, Educators decide]
-  - [20, Shared]
-  - [-40, Parents decide]
-  - [-90, State restricts topics]
+  - [80, Educators decide]
+  - [15, Shared]
+  - [-30, Parents decide]
+  - [-85, State restricts topics]
   nation: -5
   florida: 0
   source: hand-set
@@ -391,11 +393,11 @@ issues:
   category: Health and welfare
   weights: &id005 [1, 3, 3]
   stops:
-  - [100, Public plan for all]
-  - [50, Expand public plans]
+  - [95, Public plan for all]
+  - [40, Expand public plans]
   - [0, Keep]
-  - [-50, Shrink]
-  - [-95, Private only]
+  - [-40, Shrink]
+  - [-90, Private only]
   nation: 25
   florida: 3
   source: Cooperative Election Study 2024
@@ -414,10 +416,10 @@ issues:
   category: Health and welfare
   weights: *id005
   stops:
-  - [90, Expand]
-  - [25, Keep]
-  - [-40, Work requirements]
-  - [-90, Cut]
+  - [85, Expand]
+  - [20, Keep]
+  - [-30, Work requirements]
+  - [-85, Cut]
   nation: 0
   florida: 0
   source: Cooperative Election Study 2024
@@ -439,10 +441,10 @@ issues:
   category: Health and welfare
   weights: [0, 0, 3]
   stops:
-  - [90, Expand]
-  - [35, Protect]
-  - [-45, Trim for solvency]
-  - [-90, Privatize in part]
+  - [85, Expand]
+  - [30, Protect]
+  - [-35, Trim for solvency]
+  - [-85, Privatize in part]
   nation: 40
   florida: 0
   source: hand-set
@@ -458,11 +460,11 @@ issues:
   category: Public safety
   weights: &id006 [3, 3, 2]
   stops:
-  - [100, Shrink and redirect]
-  - [45, Reform]
+  - [95, Shrink and redirect]
+  - [35, Reform]
   - [-10, Keep]
-  - [-55, More officers]
-  - [-95, Much tougher]
+  - [-45, More officers]
+  - [-90, Much tougher]
   nation: -30
   florida: 2
   source: Cooperative Election Study 2024
@@ -481,10 +483,10 @@ issues:
   category: Public safety
   weights: *id006
   stops:
-  - [85, 'Shorter, more diversion']
-  - [35, Reform]
-  - [-25, Keep]
-  - [-85, Longer]
+  - [80, 'Shorter, more diversion']
+  - [30, Reform]
+  - [-20, Keep]
+  - [-80, Longer]
   nation: 15
   florida: 2
   source: Cooperative Election Study 2022
@@ -504,11 +506,11 @@ issues:
   category: Public safety
   weights: *id006
   stops:
-  - [100, Ban many]
-  - [45, Tighter checks]
-  - [-15, Keep]
-  - [-60, Looser carry]
-  - [-100, No limits]
+  - [95, Ban many]
+  - [35, Tighter checks]
+  - [-10, Keep]
+  - [-50, Looser carry]
+  - [-95, No limits]
   nation: 20
   florida: 2
   source: Cooperative Election Study 2024
@@ -528,11 +530,11 @@ issues:
   category: Social policy
   weights: &id007 [1, 3, 3]
   stops:
-  - [100, No limits]
-  - [50, Legal to viability]
-  - [-15, Early weeks only]
-  - [-65, Rare exceptions]
-  - [-100, Banned]
+  - [95, No limits]
+  - [40, Legal to viability]
+  - [-10, Early weeks only]
+  - [-50, Rare exceptions]
+  - [-95, Banned]
   nation: 20
   florida: 1
   source: Cooperative Election Study 2024
@@ -554,10 +556,10 @@ issues:
   category: Social policy
   weights: *id007
   stops:
-  - [90, Expand protections]
-  - [30, Keep]
-  - [-40, Limit]
-  - [-90, Roll back]
+  - [85, Expand protections]
+  - [25, Keep]
+  - [-30, Limit]
+  - [-85, Roll back]
   nation: 5
   florida: -1
   source: Cooperative Election Study 2024
@@ -579,10 +581,10 @@ issues:
   category: Social policy
   weights: *id007
   stops:
-  - [85, Strict separation]
-  - [20, Keep]
-  - [-35, Accommodate]
-  - [-85, Promote]
+  - [80, Strict separation]
+  - [15, Keep]
+  - [-30, Accommodate]
+  - [-80, Promote]
   nation: -5
   florida: 0
   source: hand-set
@@ -598,10 +600,10 @@ issues:
   category: Social policy
   weights: *id007
   stops:
-  - [90, Legalize broadly]
-  - [40, Legal marijuana]
-  - [-30, Medical only]
-  - [-90, Prohibit]
+  - [85, Legalize broadly]
+  - [30, Legal marijuana]
+  - [-25, Medical only]
+  - [-85, Prohibit]
   nation: 25
   florida: 0
   source: hand-set
@@ -616,11 +618,11 @@ issues:
   category: Immigration
   weights: &id008 [1, 2, 3]
   stops:
-  - [100, Much more]
-  - [50, More]
+  - [95, Much more]
+  - [40, More]
   - [0, Keep]
-  - [-50, Less]
-  - [-100, Far less]
+  - [-40, Less]
+  - [-95, Far less]
   nation: -15
   florida: -2
   source: Cooperative Election Study 2024
@@ -639,10 +641,10 @@ issues:
   category: Immigration
   weights: *id008
   stops:
-  - [90, Sanctuary]
-  - [35, Limited cooperation]
-  - [-35, Cooperate]
-  - [-95, Mass removal]
+  - [85, Sanctuary]
+  - [30, Limited cooperation]
+  - [-30, Cooperate]
+  - [-90, Mass removal]
   nation: -15
   florida: -2
   source: Cooperative Election Study 2024
@@ -661,10 +663,10 @@ issues:
   category: Environment and energy
   weights: &id009 [2, 3, 3]
   stops:
-  - [95, Rapid transition]
-  - [40, Transition]
-  - [-30, All sources]
-  - [-90, Fossil first]
+  - [90, Rapid transition]
+  - [30, Transition]
+  - [-25, All sources]
+  - [-85, Fossil first]
   nation: 10
   florida: 1
   source: Cooperative Election Study 2024
@@ -687,10 +689,10 @@ issues:
   category: Environment and energy
   weights: *id009
   stops:
-  - [80, Buy and protect land]
-  - [30, Protect]
-  - [-20, Balance]
-  - [-80, Open to use]
+  - [75, Buy and protect land]
+  - [25, Protect]
+  - [-15, Balance]
+  - [-75, Open to use]
   nation: 30
   florida: 0
   source: hand-set
@@ -706,9 +708,9 @@ issues:
   category: Transportation
   weights: [3, 3, 1]
   stops:
-  - [80, Transit first]
+  - [75, Transit first]
   - [0, Balance]
-  - [-75, Roads first]
+  - [-70, Roads first]
   nation: -15
   florida: 0
   source: hand-set
@@ -723,11 +725,11 @@ issues:
   category: Government and elections
   weights: &id010 [2, 3, 2]
   stops:
-  - [100, 'Automatic, mail for all']
-  - [50, Easier]
+  - [95, 'Automatic, mail for all']
+  - [40, Easier]
   - [0, Keep]
-  - [-50, Stricter ID]
-  - [-95, Much stricter]
+  - [-40, Stricter ID]
+  - [-90, Much stricter]
   nation: 0
   florida: 0
   source: hand-set
@@ -741,9 +743,9 @@ issues:
   category: Government and elections
   weights: *id010
   stops:
-  - [80, Strict limits and disclosure]
-  - [20, Some]
-  - [-60, Keep]
+  - [75, Strict limits and disclosure]
+  - [15, Some]
+  - [-55, Keep]
   nation: 45
   florida: 0
   source: hand-set
@@ -755,10 +757,10 @@ issues:
   category: Foreign affairs and defense
   weights: &id011 [0, 0, 3]
   stops:
-  - [90, Cut deeply]
-  - [35, Trim]
-  - [-25, Keep]
-  - [-80, Raise]
+  - [85, Cut deeply]
+  - [30, Trim]
+  - [-20, Keep]
+  - [-75, Raise]
   nation: -15
   florida: 0
   source: hand-set
@@ -774,10 +776,10 @@ issues:
   category: Foreign affairs and defense
   weights: *id011
   stops:
-  - [80, Stay out]
-  - [25, Reluctant]
-  - [-30, Engaged]
-  - [-85, Hawkish]
+  - [75, Stay out]
+  - [20, Reluctant]
+  - [-25, Engaged]
+  - [-80, Hawkish]
   nation: 25
   florida: -2
   source: Cooperative Election Study 2022
@@ -795,10 +797,10 @@ issues:
   category: Foreign affairs and defense
   weights: *id011
   stops:
-  - [80, Deepen]
-  - [30, Keep]
-  - [-35, Reduce]
-  - [-85, Go it alone]
+  - [75, Deepen]
+  - [25, Keep]
+  - [-30, Reduce]
+  - [-80, Go it alone]
   nation: 15
   florida: -5
   source: Cooperative Election Study 2022

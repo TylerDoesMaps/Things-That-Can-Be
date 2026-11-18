@@ -50,3 +50,7 @@ table.wt td .pt { display: block; }
 #legend{min-width:190px}
 #legend .ends span+span{text-align:right}
 :root{--m0:#f5f3ee;--c1:#d9f0f3;--c2:#b5e0e6;--c3:#8fcfd9;--c4:#68bccb;--c5:#44a7bb;--c6:#2a8fa6;--c7:#1a7790;--o1:#fdebd8;--o2:#f9d3ad;--o3:#f4ba82;--o4:#eda05a;--o5:#e48638;--o6:#d46c1e;--o7:#b9560f}
+.isspage td{vertical-align:top}
+.isspage .stop{padding:1px 6px;border-left:3px solid transparent}
+.isspage .stop.at{border-left-color:var(--link,#3366cc);background:var(--link-bg,#eaf3ff)}
+.isspage .sv{display:inline-block;min-width:3.2em;font-variant-numeric:tabular-nums}

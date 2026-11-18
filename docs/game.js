@@ -319,7 +319,7 @@ async function route() {
   $("tip").hidden = true;
   show(view);
   const here = IDX.byFips[state.county];
-  if (["voters", "elections", "officials", "groups"].includes(view)) await ensure(state.county);
+  if (["voters", "elections", "officials", "groups", "issues"].includes(view)) await ensure(state.county);
   if (view === "place" || view === "pop") await ensure(fipsOfPlace(id));
   if (view === "person") await ensure(fipsOfPerson(id));
   const county = place(here.id);
@@ -364,6 +364,18 @@ async function route() {
       ${ORG.kinds.map(([kind, label]) => { const rows = all.filter((c) => c.kind === kind).sort((a, b) => b.members - a.members);
         return `<h2>${label}</h2><table class="wt"><tr><th>Organization</th><th>Members</th><th>Share of people</th><th>Leader</th><th>Leadership vote</th></tr>${rows.map((c) =>
           `<tr><td>${esc(c.name)}</td><td class="n">${num(c.members)}</td><td class="n">${pct(c.members / people)}</td><td>${who(c.leader)}</td><td>${c.vote.map(([pid, v]) => `${who(pid)} <span class="pt" style="display:inline">${num(v)}</span>`).join(" · ")}</td></tr>`).join("")}</table>`; }).join("")}`);
+    pickCounty("pcounty");
+  } else if (view === "issues") {
+    const fl = ISS.places.__state || [], co = ISS.places[here.id] || [], LV = ["Local", "State", "National"]; let last = "";
+    const cell = (v) => (v === undefined ? "" : `<span style="color:${issueColour(v)}">${signed(v)}</span>`);
+    page(`<h1>Issues</h1><div class="from">${ISS.list.length} issues · ${esc(G.state)} and ${esc(here.name)}</div><p>${countyPicker("pcounty", state.county)}</p>
+      <table class="wt isspage"><tr><th>Issue</th><th>Positions</th><th class="n">Nation</th><th class="n">${esc(G.state)}</th><th class="n">${esc(here.name.replace(/ County$/, ""))}</th></tr>${ISS.list.map((x, k) => {
+        const head = x.category === last ? "" : `<tr class="cat"><td colspan="5">${esc(x.category)}</td></tr>`; last = x.category;
+        const who = (i) => ["dem", "ind", "rep"].filter((p) => (ISS.usual[p] || [])[k] === i).map((p) => `<b style="color:${PARTIES[p].colour}">${PARTIES[p].letter}</b>`).join("");
+        const near = [fl[k], co[k]].map((v) => (v === undefined ? null : nearest(x, v)));
+        return `${head}<tr><td><b>${esc(x.name)}</b><div class="pt">${x.weights.map((w, i) => (w ? LV[i] + " " + w : "")).filter(Boolean).join(" · ")}</div></td>
+          <td>${x.stops.map((st, i) => `<div class="stop${near[1] === st ? " at" : ""}"><span class="sv" style="color:${issueColour(st[0])}">${signed(st[0])}</span>${esc(st[1])} ${who(i)}</div>`).join("")}</td>
+          <td class="n pt">–</td><td class="n">${cell(fl[k])}</td><td class="n">${cell(co[k])}</td></tr>`; }).join("")}</table>`);
     pickCounty("pcounty");
   } else if (view === "stats") {
     page(`<h1>Stats</h1><div class="from">State of ${esc(G.state)}</div>${ISS.places.__state ? "<h2>Issues</h2>" + issueTable(ISS.places.__state) : ""}${soon("services")}${soon("bills")}${soon("issues")}`);

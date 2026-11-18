@@ -147,6 +147,9 @@ const role = (pid) => {
   return c.pop ? (S.leaders[c.pop] === pid ? "Speaks for a pop in " : "Lives in ") + c.home : "";
 };
 const slices = (flat) => { const out = []; for (let i = 0; i < flat.length; i += 2) out.push([flat[i], flat[i + 1]]); return out; };
+/* a character's camp is that of their party's people in their own pop; their camp organization is whichever in their county holds that camp */
+const campOf = (c, pop) => (pop && pop.camps && c.party !== "ind" ? CAMP.list[pop.camps[c.party === "dem" ? 0 : 2]] : null);
+const clubOf = (c, pop) => { const camp = campOf(c, pop), hood = pop && place(pop.hood); return camp && hood ? (ORG.chapters[hood.fips] || []).find((ch) => ch.camps && ch.camps.includes(camp.id)) : null; };
 const joined = (pop) => ORG.kinds.map(([kind]) => slices(pop.orgs).filter(([i]) => ORG.list[i][2] === kind).sort((a, b) => b[1] - a[1])[0]).filter(Boolean).map(([i]) => ORG.list[i][1]);
 function orgBars(ps, most) {
   const sum = {};
@@ -410,7 +413,7 @@ async function route() {
     page(`<h1>Organizations</h1><div class="from">${esc(here.name)} · ${all.length} chapters · seed ${S.seed}</div><p>${countyPicker("pcounty", state.county)}</p>
       ${ORG.kinds.map(([kind, label]) => { const rows = all.filter((c) => c.kind === kind).sort((a, b) => b.members - a.members);
         return `<h2>${label}</h2><table class="wt"><tr><th>Organization</th><th>Members</th><th>Share of people</th><th>Leader</th><th>Leadership vote</th></tr>${rows.map((c) =>
-          `<tr><td>${esc(c.name)}</td><td class="n">${num(c.members)}</td><td class="n">${pct(c.members / people)}</td><td>${who(c.leader)}</td><td>${c.vote.map(([pid, v]) => `${who(pid)} <span class="pt" style="display:inline">${num(v)}</span>`).join(" · ")}</td></tr>`).join("")}</table>`; }).join("")}`);
+          `<tr><td>${esc(c.name)}${c.camps && c.camps.length > 1 ? `<div class="pt">${c.camps.map((id) => esc((CAMP.list.find((x) => x.id === id) || {}).name || id)).join(", ")}</div>` : ""}</td><td class="n">${num(c.members)}</td><td class="n">${pct(c.members / people)}</td><td>${who(c.leader)}</td><td>${c.vote.map(([pid, v]) => `${who(pid)} <span class="pt" style="display:inline">${num(v)}</span>`).join(" · ")}</td></tr>`).join("")}</table>`; }).join("")}`);
     pickCounty("pcounty");
   } else if (view === "issues") {
     const fl = ISS.places.__state || [], co = ISS.places[here.id] || [], LV = ["Local", "State", "National"]; let last = "";
@@ -457,7 +460,7 @@ async function route() {
       ${c.after && S.people[c.after] ? `<tr><th>Took over from</th><td>${who(c.after)}</td></tr>` : ""}${c.heir && S.people[c.heir] ? `<tr><th>Pop now led by</th><td>${who(c.heir)}</td></tr>` : ""}
       ${pop ? `<tr><th>${S.leaders[pop.id] === id ? "Speaks for" : "Home pop"}</th><td>${popLink(pop)} <span class="pt">${esc(popWords(pop))}</span></td></tr>${c.traits ? `<tr><th>Its opinion</th><td>${popOpinion(pop, c)}</td></tr>` : ""}<tr><th>Work</th><td>${esc(pop.work)}</td></tr>
       <tr><th>Mood</th><td>${["federal", "state", "local"].map((l) => `${l[0].toUpperCase() + l.slice(1)} ${mood(pop.id, l)}`).join(" · ")}</td></tr>
-      <tr><th>Belongs to</th><td>${joined(pop).concat(c.party === "ind" ? [] : [c.party === "rep" ? "Republican Party" : "Democratic Party"]).map(esc).join(", ")}</td></tr>` : ""}
+      <tr><th>Belongs to</th><td>${joined(pop).concat(c.party === "ind" ? [] : [c.party === "rep" ? "Republican Party" : "Democratic Party"]).concat(clubOf(c, pop) ? [clubOf(c, pop).name] : []).map(esc).join(", ")}</td></tr>${campOf(c, pop) ? `<tr><th>Camp</th><td>${esc(campOf(c, pop).name)}</td></tr>` : ""}` : ""}
       ${seats.map((s) => `<tr><th>Office</th><td>${esc(s.title)}${s.label ? ", " + esc(s.label) : ""}${s.next.length ? ` <span class="pt">next election ${s.next.join(", ")}</span>` : ""}</td></tr>`).join("")}
       ${c.ran ? `<tr><th>Ran for</th><td>${esc(c.ran)}</td></tr>` : ""}
       <tr><th>Seed</th><td>${S.seed}</td></tr></table><h2>Character</h2>

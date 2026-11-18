@@ -554,6 +554,14 @@ for c in counties.values():
     (out / f"fl-{c.fips}.json").write_text(json.dumps({"races": [card(r) for r in ballot if not r["wide"] and r["where"] == [c.fips]]}, separators=(",", ":")))
 state["people"] = {pid: p for pid, p in people.items() if "-x-" in pid and (pid in state["people"] or pid in (top["a"], top["b"]))}
 state["election"] = dict(top_line, year=YEAR, president=nation_winner, president_party=people[nation_winner]["party"])
+clubs = {}   # a camp organization exists statewide wherever at least one county has it
+for c in counties.values():
+    for ch in c.seed["chapters"]:
+        if ch.get("camps"):
+            row = clubs.setdefault(ch["org"], {"org": ch["org"], "name": ch["name"], "party": ch["party"], "camps": ch["camps"], "stand": ch["stand"], "members": 0, "counties": 0})
+            row["members"] += ch["members"]
+            row["counties"] += 1
+state["clubs"] = sorted(clubs.values(), key=lambda r: -r["members"])
 (DATA / f"seeds/{SEED}/fl-state.json").write_text(json.dumps(state, separators=(",", ":")))
 (out / "fl-state.json").write_text(json.dumps({"summary": state["election"], "races": [card(r) for r in ballot if r["wide"]]}, separators=(",", ":")))
 (out / "map.json").write_text(json.dumps(place_share, separators=(",", ":")))

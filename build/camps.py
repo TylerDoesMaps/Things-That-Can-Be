@@ -11,6 +11,8 @@ from pathlib import Path
 
 import yaml
 
+import wide
+
 sys.argv = [sys.argv[0], sys.argv[1]]
 DATA = Path(sys.argv[1])
 content = DATA.parent / "content"
@@ -24,6 +26,17 @@ base = {i["id"]: i["base"] for i in json.loads((DATA / "issues.json").read_text(
 WORK = {"Government and military": "government work", "Schools and health": "schools and health", "Shops and service": "service work", "Building and transport": "blue-collar",
         "Factory and plant": "blue-collar", "Farm and ranch": "farm", "Oil, gas and mining": "oil and mining"}
 PARTY = {"dem": ("D", "Democrat"), "rep": ("R", "Republican"), "ind": ("I", "")}
+
+
+def draw(camp, pop):
+    """What a pop's distance to a camp is multiplied by: under 1 where the camp draws pops like this one."""
+    by = 1
+    for d in camp.get("draws", []):
+        if pop["area"] in d.get("area", [pop["area"]]) and pop["age"] in d.get("age", [pop["age"]]) and pop["owners"] >= d.get("owners", 0):
+            by *= d["by"]
+    return by
+
+
 size = {c["id"]: 0 for c in CAMPS}
 whole = {p: 0 for p in PARTY}
 who = {c["id"]: {} for c in CAMPS}
@@ -60,7 +73,7 @@ for party in PARTY:
         c["z"] = [(c["at"][k] - cmean[k]) / csd[k] for k in range(n)]
     for p, w, s in rows:
         z = [(s[k] - mean[k]) / sd[k] for k in range(n)]
-        best = min(mine, key=lambda c: sum((a - b) ** 2 for a, b in zip(z, c["z"])))
+        best = min(mine, key=lambda c: draw(c, p) * sum((a - b) ** 2 for a, b in zip(z, c["z"])))
         p.setdefault("camps", {})[party] = CAMPS.index(best)
         size[best["id"]] += w
         whole[party] += w
@@ -81,6 +94,11 @@ for f in sorted((DATA / "game").glob("fl-12*.json")):
         if got:
             total = sum(sum(r) for r in got)
             places[q["id"]] = [round(1000 * sum(r[k] for r in got) / total) for k in range(len(CAMPS))]
+for pid, members in wide.districts(DATA).items():
+    got = [hood[h] for h in members if h in hood]
+    if got:
+        total = sum(sum(r) for r in got)
+        places[pid] = [round(1000 * sum(r[k] for r in got) / total) for k in range(len(CAMPS))]
 total = sum(sum(r) for r in hood.values())
 places["__state"] = [round(1000 * sum(r[k] for r in hood.values()) / total) for k in range(len(CAMPS))]
 (DATA / "camps.json").write_text(json.dumps({"camps": [{k: c[k] for k in ("id", "name", "party", "colour")} for c in CAMPS], "places": places}, separators=(",", ":")))

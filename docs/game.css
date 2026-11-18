@@ -54,3 +54,5 @@ table.wt td .pt { display: block; }
 .isspage .stop{padding:1px 6px;border-left:3px solid transparent}
 .isspage .stop.at{border-left-color:var(--link,#3366cc);background:var(--link-bg,#eaf3ff)}
 .isspage .sv{display:inline-block;min-width:3.2em;font-variant-numeric:tabular-nums}
+#m-demo,#m-work,#m-race{max-height:70vh;overflow-y:auto}
+#m-demo button[disabled],#m-race button[disabled]{font-weight:600;color:var(--text,#202122);padding-top:8px}

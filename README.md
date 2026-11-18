@@ -35,6 +35,10 @@ Florida is the working state. The map, offices and pops pages read Florida; the 
 
 `docs/content/camps/camps.yaml` lists the camps inside each party, each with a fixed position on every issue. `build/camps.py docs/data` sorts each pop's Democrats, independents and Republicans into the nearest camp of their party and writes `docs/data/camps/` (one row per pop) and `docs/data/camps.json` (each place's share of people in each camp). Run it after `issues.py`.
 
+## Map shading
+
+`build/shades.py docs/data` writes `docs/data/shades.json`: every field the map can shade by (race, age, education, income, work, area type, home owning, turnout, party) for every place with an outline, including State House, State Senate and Congress districts, which the tiles carry as shapes only. `build/wide.py` lists which neighbourhoods make up those districts; `issues.py` and `camps.py` use it too. Run `shades.py` after `game.py`.
+
 ## Events
 
 Each event is one file in `docs/content/events/`, named by its ID. The game and the builder read the same files.

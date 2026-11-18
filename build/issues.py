@@ -13,6 +13,8 @@ from pathlib import Path
 
 import yaml
 
+import wide
+
 DATA = Path(sys.argv[1])
 book = yaml.safe_load((DATA.parent / "content" / "issues" / "issues.yaml").read_text())
 ISSUES, SPREAD = book["issues"], book.get("spread", 1)
@@ -64,6 +66,10 @@ for f in sorted((DATA / "game").glob("fl-12*.json")):
         got = [nums for h in q["members"] for nums in hood.get(h, [])]
         if got:
             places[q["id"]] = [round(sum(n[k] for n in got) / len(got)) for k in range(len(ISSUES))]
+for pid, members in wide.districts(DATA).items():
+    got = [nums for h in members for nums in hood.get(h, [])]
+    if got:
+        places[pid] = [round(sum(n[k] for n in got) / len(got)) for k in range(len(ISSUES))]
 everyone = [nums for v in hood.values() for nums in v]
 places["__state"] = [round(sum(n[k] for n in everyone) / len(everyone)) for k in range(len(ISSUES))]
 usual = {}

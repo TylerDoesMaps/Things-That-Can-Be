@@ -1,5 +1,6 @@
 note: 'Camps: factions inside each party, each with a fixed position on every issue, written as the stop''s wording from issues.yaml. A pop''s Democrats, Republicans and independents each belong to the
-  camp of their party whose positions are nearest. First draft.'
+  camp of their party whose positions are nearest. First draft. ''draws'' makes a camp nearer for some pops: where every listed thing is true of the pop, its distance to the camp is multiplied by ''by''.
+  Hand-set.'
 camps:
 - id: progressive_left
   name: Progressive Left
@@ -211,6 +212,14 @@ camps:
     military: Raise
     intervention: Engaged
     alliances: Keep
+  draws:
+  - area:
+    - rural
+    age:
+    - 45 to 64
+    - 65 and over
+    owners: 0.6
+    by: 0.75
 - id: flag_and_faith
   name: Flag and Faith Conservatives
   party: rep
@@ -337,6 +346,14 @@ camps:
     military: Keep
     intervention: Stay out
     alliances: Go it alone
+  draws:
+  - area:
+    - rural
+    - small town
+    age:
+    - 18 to 29
+    - 30 to 44
+    by: 0.75
 - id: liberty_republicans
   name: Liberty Republicans
   party: rep

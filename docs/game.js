@@ -10,14 +10,15 @@ const get = (path) => fetch(path).then((r) => r.json());
 const PARTIES = { rep: { name: "Republican", letter: "R", colour: "#a95450", ramp: "r" }, ind: { name: "Independent", letter: "I", colour: "#8a8f94", ramp: "g" }, dem: { name: "Democrat", letter: "D", colour: "#2f558e", ramp: "d" } };
 const ORDER = ["rep", "ind", "dem"];
 const HOME = "12065", SEED = 1;
-const LAYERS = [["county", "County"], ["district", "Commission districts"], ["muni", "Municipal"], ["hood", "Neighbourhoods"]];
+const LAYERS = [["county", "County"], ["district", "Commission districts"], ["muni", "Municipal"], ["hood", "Neighbourhoods"], ["house", "State House"], ["senate", "State Senate"], ["congress", "Congress"]];
+const FAR = new Set(["house", "senate", "congress"]);   /* districts that cross county lines: their numbers come from data/shades.json, not the tiles */
 const LINES = [["county", "Counties", "#202122"], ["district", "Commission districts", "#202122"], ["city", "Cities", "#202122"], ["hood", "Neighbourhoods", "#72777d"],
   ["house", "State House", "#7a3fb0"], ["senate", "State Senate", "#0b7a75"], ["congress", "Congress", "#b36b00"]];
 const TABS = [["overview", "Overview"], ["people", "People"], ["party", "Party"], ["issues", "Issues"], ["gov", "Officeholders"]];
 const RACE_COL = { White: "#8c6bb1", Black: "#41ab5d", Hispanic: "#f16913", Asian: "#3690c0", Other: "#969696" };
 const AREA_COL = { urban: "#54278f", suburban: "#9e9ac8", "small town": "#fdae6b", rural: "#a1d99b" };
 const MOOD_COL = { Angry: "#b2182b", Dissatisfied: "#ef8a62", Neutral: "#bdbdbd", Content: "#7fbf7b", Happy: "#1b7837" };
-const MOST = { hood: 50, district: 1500, muni: 3000, county: 20000 };
+const MOST = { hood: 50, district: 1500, muni: 3000, county: 20000, house: 2000, senate: 5000, congress: 7000 };
 const SOON = {
   you: ["Character creation", 3], week: ["The week", 4], notebook: ["Notebook", 5], known: ["Who knows you", 5], orgs: ["Organizations", 6], issues: ["Issues and positions", 7],
   running: ["Running for office", 8], campaign: ["The campaign", 9], money: ["Money and fundraising", 11], election: ["Election day", 15], office: ["Holding office", 17],
@@ -25,10 +26,11 @@ const SOON = {
 };
 const SHADES = [
   { id: "party", label: "Party" },
-  { id: "race", label: "Race", menu: [["race", "Largest group"], null, ["race_White", "% White"], ["race_Black", "% Black"], ["race_Hispanic", "% Hispanic"]] },
+  { id: "race", label: "Race", menu: [["race", "Largest group"]] },
   { id: "issues", label: "Issues", menu: [["", "Issues and positions · update 7"]] },
   { id: "camps", label: "Camps", menu: [["camp_all", "Largest camp"], null, ["camp_dem", "Among Democrats"], ["camp_rep", "Among Republicans"], ["camp_ind", "Among independents"]] },
-  { id: "demo", label: "Demographics", menu: [["pops", "Pops"], ["area", "Area type"], ["ba", "% Bachelor's degree"], ["old", "% Age 65 and over"], ["income", "% Income under $35,000"]] },
+  { id: "demo", label: "Demographics", menu: [["pops", "Pops"], ["area", "Area type"]] },
+  { id: "work", label: "Work", menu: [] },
   { id: "results", label: "Results", menu: [["r2024", "President, 2024"], null, ["real", "Real 2024"], ["local", "Local lean"]] },
 ];
 const IDX = { counties: [], byFips: {}, byId: {}, byCode: {} };
@@ -41,6 +43,9 @@ const FUNCTION = { police: "police", fire: "fire", roads: "roads", water: "water
 const OFFICERS = { "county.sheriff": "police and corrections", "county.clerk": "records and audit", "county.property_appraiser": "assessment", "county.tax_collector": "tax collection", "county.elections": "elections" };
 const ISS = { list: [], usual: {}, places: {}, on: -1 };
 const CAMP = { list: [], places: {}, on: "" }, SIDES = ["dem", "ind", "rep"];
+const SH = { fields: [], places: {}, districts: {}, names: {}, on: -1 };   /* every field the map can shade by, for every outlined place */
+const shField = (key) => SH.fields.findIndex((f) => f.key === key);
+const shVal = (id, i) => (SH.places[id] ? SH.places[id][i + 1] / 1000 : null);
 /* issues: positive is the left end. A pop's number is the issue's base plus the pulls of what the pop is, the same sum as build/issues.py */
 const WORKPULL = { "Government and military": "government work", "Schools and health": "schools and health", "Shops and service": "service work", "Building and transport": "blue-collar", "Factory and plant": "blue-collar", "Farm and ranch": "farm", "Oil, gas and mining": "oil and mining" };
 function popIssues(p) {
@@ -68,13 +73,34 @@ const campBars = (row, total) => SIDES.map((side) => { const mine = CAMP.list.ma
 function campState(side) {
   if (!map || CAMP.on === side) return;
   CAMP.on = side;
-  for (const [id, row] of Object.entries(CAMP.places)) if (id !== "__state") map.setFeatureState({ source: "fl", sourceLayer: layerOf(id), id }, { camp: campLead(row, side === "all" ? "" : side) });
+  for (const [id, row] of Object.entries(CAMP.places)) if (id !== "__state") map.setFeatureState(feature(id), { camp: campLead(row, side === "all" ? "" : side) });
 }
-const layerOf = (id) => G.kinds[id] || (IDX.byId[id] ? "county" : /-D\d+$/.test(id) ? "district" : /^[A-Z]{3}-\d+$/.test(id) ? "hood" : "muni");
+const layerOf = (id) => (/^(house|senate|congress)-\d+$/.test(id) ? id.split("-")[0] : G.kinds[id] || (IDX.byId[id] ? "county" : /-D\d+$/.test(id) ? "district" : /^[A-Z]{3}-\d+$/.test(id) ? "hood" : "muni"));
+const feature = (id) => { const sourceLayer = layerOf(id); return { source: "fl", sourceLayer, id: FAR.has(sourceLayer) ? +id.split("-")[1] : id }; };
+function fieldState(i) {
+  if (!map || SH.on === i) return;
+  SH.on = i;
+  for (const [id, row] of Object.entries(SH.places)) map.setFeatureState(feature(id), { val: row[i + 1] / 1000 });
+}
+/* a far district's own numbers, set once: the same names the tiles give the other layers */
+function farState() {
+  const f = (k) => shField(k), races = ["White", "Black", "Hispanic", "Asian", "Other"], areas = ["urban", "suburban", "small town", "rural"], top = (keys, id) => keys.reduce((a, b) => (shVal(id, f(b)) > shVal(id, f(a)) ? b : a));
+  for (const id of Object.keys(SH.districts)) { const row = SH.places[id]; if (!row) continue;
+    map.setFeatureState(feature(id), { pops: row[0], pr: shVal(id, f("R")), pi: shVal(id, f("I")), pd: shVal(id, f("D")), r24: row[row.length - 2] === null ? 0.5 : row[row.length - 2] / 1000, local: row[row.length - 1] / 10, race: top(races, id), area: top(areas, id) }); }
+}
+function farVotes() {
+  for (const [id, hoods] of Object.entries(SH.districts)) { let r = 0, n = 0;
+    for (const h of hoods) { const v = VOTE.places[h]; if (v && v[0] !== null) { r += v[0] * v[1]; n += v[1]; } }
+    VOTE.places[id] = [n ? Math.round(r / n * 1000) / 1000 : null, Math.round(n)];
+    if (map && n) map.setFeatureState(feature(id), { s24: r / n }); }
+}
+function farPlace(kind, n) { const id = kind + "-" + n, row = SH.places[id] || [0], f = (k) => shVal(id, shField(k));
+  return { id, name: SH.names[id] || id, pops: row[0], pr: f("R"), pi: f("I"), pd: f("D"), r24: row.length > 2 && row[row.length - 2] !== null ? row[row.length - 2] / 1000 : null, local: row.length > 2 ? row[row.length - 1] / 10 : 0,
+    race: ["White", "Black", "Hispanic", "Asian", "Other"].reduce((a, b) => (f(b) > f(a) ? b : a)), area: ["urban", "suburban", "small town", "rural"].reduce((a, b) => (f(b) > f(a) ? b : a)) }; }
 function issueState(k) {
   if (!map || ISS.on === k) return;
   ISS.on = k;
-  for (const [id, v] of Object.entries(ISS.places)) if (id !== "__state") map.setFeatureState({ source: "fl", sourceLayer: layerOf(id), id }, { iss: v[k] });
+  for (const [id, v] of Object.entries(ISS.places)) if (id !== "__state") map.setFeatureState(feature(id), { iss: v[k] });
 }
 let map, state = { layer: "hood", shade: "party", selected: null, tab: "overview", ptab: "overview", olevel: "local", county: HOME };
 
@@ -191,16 +217,16 @@ const diverge = (value, span) => ["interpolate", ["linear"], value, ...stops("d"
 const split = (value, span) => ["interpolate", ["linear"], value, ...stops("o", [7, 5, 3, 1].map((i) => [-span * i / 7, i])), 0, css("--m0"), ...stops("c", [1, 3, 5, 7].map((i) => [span * i / 7, i]))];
 const match = (field, table) => ["match", ["get", field], ...Object.entries(table).flat(), "#ffffff"];
 function shadeOf(kind) {
-  const s = state.shade, n = (k) => ["get", k];
+  const s = state.shade, n = (k) => (FAR.has(kind) ? ["coalesce", ["feature-state", k], k === "race" || k === "area" ? "" : 0] : ["get", k]);
+  const fi = s.startsWith("f_") ? +s.slice(2) : -1;
   const margin = (a, b, c) => ["-", n(a), ["max", n(b), n(c)]];
   const by = (ramp, a, b, c, list) => ["interpolate", ["linear"], margin(a, b, c), ...stops(ramp, list)];
-  const colour = s === "party" ? ["case", ["all", [">=", n("pr"), n("pi")], [">=", n("pr"), n("pd")]], by("r", "pr", "pi", "pd", [[0, 1], [0.1, 3], [0.25, 5], [0.45, 7]]),
+  const colour = fi >= 0 ? grey(["coalesce", ["feature-state", "val"], 0], SH.fields[fi].top / 1000) : s === "party" ? ["case", ["all", [">=", n("pr"), n("pi")], [">=", n("pr"), n("pd")]], by("r", "pr", "pi", "pd", [[0, 1], [0.1, 3], [0.25, 5], [0.45, 7]]),
     [">=", n("pd"), n("pi")], by("d", "pd", "pi", "pr", [[0, 1], [0.1, 3], [0.25, 5], [0.45, 7]]), by("g", "pi", "pr", "pd", [[0, 1], [0.1, 2], [0.25, 3], [0.45, 4]])]
     : s.startsWith("camp_") ? ["match", ["coalesce", ["feature-state", "camp"], -1], ...CAMP.list.flatMap((c, i) => [i, c.colour]), "#ffffff"]
     : s.startsWith("iss_") ? ["case", ["==", ["feature-state", "iss"], null], "#ffffff", split(["feature-state", "iss"], 60)]
-    : s === "r2024" ? ["case", ["==", ["feature-state", "s24"], null], "#ffffff", diverge(["-", ["feature-state", "s24"], 0.5], 0.3)] : s === "real" ? diverge(["-", n("r24"), 0.5], 0.3) : s === "local" ? diverge(n("local"), 15) : s === "race" ? match("race", RACE_COL) : s === "area" ? match("area", AREA_COL)
-    : s === "race_White" ? grey(n("rw"), 1) : s === "race_Black" ? grey(n("rb"), 1) : s === "race_Hispanic" ? grey(n("rh"), 1) : s === "pops" ? grey(n("pops"), MOST[kind])
-    : s === "ba" ? grey(n("ba"), 0.5) : s === "old" ? grey(n("old"), 0.6) : grey(n("inc"), 0.7);
+    : s === "r2024" ? ["case", ["==", ["feature-state", "s24"], null], "#ffffff", diverge(["-", ["feature-state", "s24"], 0.5], 0.3)] : s === "real" ? diverge(["-", n("r24"), 0.5], 0.3) : s === "local" ? diverge(n("local"), 15) : s === "race" ? ["match", n("race"), ...Object.entries(RACE_COL).flat(), "#ffffff"] : s === "area" ? ["match", n("area"), ...Object.entries(AREA_COL).flat(), "#ffffff"]
+    : grey(n("pops"), MOST[kind]);
   return ["case", ["==", n("pops"), 0], "#ffffff", colour];
 }
 /* what the map is shading by, for one place: shown when the pointer is over it */
@@ -209,9 +235,9 @@ function shown(p) {
   const k = s.startsWith("iss_") ? +s.slice(4) : -1, iv = k >= 0 && ISS.places[p.id] ? ISS.places[p.id][k] : null;
   const cs = s.startsWith("camp_") ? s.slice(5) : "", crow = cs && CAMP.places[p.id], ci = crow ? campLead(crow, cs === "all" ? "" : cs) : -1;
   const ctotal = crow ? crow.reduce((a, v, i) => a + (cs === "all" || CAMP.list[i].party === cs ? v : 0), 0) : 0;
-  const text = cs ? (ci < 0 ? "" : `${esc(CAMP.list[ci].name)} ${pct(crow[ci] / ctotal)}`) : k >= 0 ? (iv === null ? "" : `${esc(ISS.list[k].name)} <span style="color:${issueColour(iv)}">${signed(iv)}</span> · ${esc(nearest(ISS.list[k], iv)[1])}`) : s === "party" ? "Party ID " + lead([p.pr, p.pi, p.pd]) : s === "r2024" ? (v && v[0] !== null ? "President, 2024 " + rd(v[0]) : "") : s === "real" ? "Real 2024 " + rd(p.r24) : s === "local" ? "Local lean " + lean(p.local)
-    : s === "race" ? "Largest group " + esc(p.race) : s === "area" ? "Area type " + esc(p.area) : s === "race_White" ? "White " + pct(p.rw) : s === "race_Black" ? "Black " + pct(p.rb) : s === "race_Hispanic" ? "Hispanic " + pct(p.rh)
-    : s === "ba" ? "Bachelor's degree " + pct(p.ba) : s === "old" ? "Age 65 and over " + pct(p.old) : s === "income" ? "Income under $35,000 " + pct(p.inc) : "";
+  const fx = s.startsWith("f_") ? +s.slice(2) : -1;
+  const text = fx >= 0 ? (shVal(p.id, fx) === null ? "" : `${esc(SH.fields[fx].label)} ${pct(shVal(p.id, fx))}`) : cs ? (ci < 0 ? "" : `${esc(CAMP.list[ci].name)} ${pct(crow[ci] / ctotal)}`) : k >= 0 ? (iv === null ? "" : `${esc(ISS.list[k].name)} <span style="color:${issueColour(iv)}">${signed(iv)}</span> · ${esc(nearest(ISS.list[k], iv)[1])}`) : s === "party" ? "Party ID " + lead([p.pr, p.pi, p.pd]) : s === "r2024" ? (v && v[0] !== null ? "President, 2024 " + rd(v[0]) : "") : s === "real" ? "Real 2024 " + rd(p.r24) : s === "local" ? "Local lean " + lean(p.local)
+    : s === "race" ? "Largest group " + esc(p.race) : s === "area" ? "Area type " + esc(p.area) : s === "pops" ? ""  : "";
   return p.pops && text ? "<br>" + text : "";
 }
 function legend() {
@@ -220,7 +246,8 @@ function legend() {
   const cat = (table) => `<div class="cat">${Object.entries(table).map(([k, c]) => `<span><i style="background:${c}"></i>${esc(k[0].toUpperCase() + k.slice(1))}</span>`).join("")}</div>`;
   const ik = s.startsWith("iss_") ? ISS.list[+s.slice(4)] : null;
   const cside = s.startsWith("camp_") ? s.slice(5) : "";
-  const title = cside ? { all: "Largest camp", dem: "Largest camp among Democrats", rep: "Largest camp among Republicans", ind: "Largest camp among independents" }[cside] : ik ? ik.name : { party: "Party ID", r2024: "President, 2024", real: "Real 2024", local: "Local lean", race: "Largest group", area: "Area type", pops: "Pops", ba: "Bachelor's degree", old: "Age 65 and over", income: "Income under $35,000" }[s] || "Share " + s.slice(5);
+  const lf = s.startsWith("f_") ? SH.fields[+s.slice(2)] : null;
+  const title = lf ? lf.label : cside ? { all: "Largest camp", dem: "Largest camp among Democrats", rep: "Largest camp among Republicans", ind: "Largest camp among independents" }[cside] : ik ? ik.name : { party: "Party ID", r2024: "President, 2024", real: "Real 2024", local: "Local lean", race: "Largest group", area: "Area type", pops: "Pops", ba: "Bachelor's degree", old: "Age 65 and over", income: "Income under $35,000" }[s] || "Share " + s.slice(5);
   const party = () => ORDER.map((k) => `<div class="prow"><span>${PARTIES[k].letter}</span><div class="bar">${(k === "ind" ? [1, 2, 3, 4] : [1, 3, 5, 7]).map((i) => `<span style="background:${css("--" + PARTIES[k].ramp + i)}"></span>`).join("")}</div></div>`).join("") + `<div class="ends"><span>Narrow lead</span><span>Wide lead</span></div>`;
   const body = cside ? cat(Object.fromEntries(CAMP.list.filter((c) => cside === "all" || c.party === cside).map((c) => [c.name, c.colour]))) : ik ? bar([7, 5, 3, 1].map((i) => css("--c" + i)).concat([1, 3, 5, 7].map((i) => css("--o" + i))), esc(ik.stops[0][1]), esc(ik.stops[ik.stops.length - 1][1])) : s === "party" ? party() : s === "r2024" || s === "real" || s === "local" ? bar(dv, "Democratic", "Republican") : s === "race" ? cat(RACE_COL) : s === "area" ? cat(AREA_COL) : bar(gr, "Fewer", "More");
   $("legend").innerHTML = `<div class="t">${title}</div>${body}`;
@@ -229,6 +256,7 @@ function paint() {
   if (!map || !map.getLayer("fill-hood")) return;
   if (state.shade.startsWith("iss_")) issueState(+state.shade.slice(4));
   if (state.shade.startsWith("camp_")) campState(state.shade.slice(5));
+  if (state.shade.startsWith("f_")) fieldState(+state.shade.slice(2));
   for (const [kind] of LAYERS) {
     const on = kind === state.layer ? "visible" : "none";
     for (const part of ["fill-", "edge-", "picked-"]) map.setLayoutProperty(part + kind, "visibility", on);
@@ -442,7 +470,15 @@ const protocol = new pmtiles.Protocol();
 maplibregl.addProtocol("pmtiles", protocol.tile);
 Promise.all([get("data/game/fl-index.json"), get(`data/seeds/${SEED}/fl-state.json`), get(`data/seeds/${SEED}/election-2024/map.json`).catch(() => ({})),
   get(`data/seeds/${SEED}/election-2024/fl-state.json`).catch(() => ({ races: [], summary: null })), get("data/traits.json").catch(() => ({ stats: {}, traits: {} })),
-  get("data/issues.json").catch(() => ({ issues: [], usual: {}, places: {} })), get("data/camps.json").catch(() => ({ camps: [], places: {} }))]).then(async ([index, top, shares, wide, book, issues, camps]) => {
+  get("data/issues.json").catch(() => ({ issues: [], usual: {}, places: {} })), get("data/camps.json").catch(() => ({ camps: [], places: {} })),
+  get("data/shades.json").catch(() => ({ fields: [], places: {}, districts: {}, names: {} }))]).then(async ([index, top, shares, wide, book, issues, camps, shades]) => {
+  Object.assign(SH, shades, { on: -1 });
+  const menuOf = (groups) => SH.fields.flatMap((f, i) => (groups.includes(f.group) ? [[f, i]] : [])).flatMap(([f, i], n, all) => (n === 0 || all[n - 1][0].group !== f.group ? (n ? [null] : []).concat([["", f.heading]]) : []).concat([["f_" + i, f.label]]));
+  if (SH.fields.length) {
+    SHADES.find((x) => x.id === "race").menu = [["race", "Largest group"], null].concat(menuOf(["race"]).slice(1));
+    SHADES.find((x) => x.id === "demo").menu = [["pops", "Pops"], ["area", "Area type"], null].concat(menuOf(["age", "education", "income", "area", "home", "vote"]));
+    SHADES.find((x) => x.id === "work").menu = menuOf(["work"]).slice(1);
+  }
   CAMP.list = camps.camps; CAMP.places = camps.places;
   ISS.list = issues.issues; ISS.usual = issues.usual; ISS.places = issues.places;
   if (ISS.list.length) { let last = ""; SHADES.find((x) => x.id === "issues").menu = ISS.list.flatMap((x, k) => { const head = x.category === last ? [] : (last ? [null] : []).concat([["", x.category]]); last = x.category; return head.concat([["iss_" + k, x.name]]); }); }
@@ -474,8 +510,9 @@ Promise.all([get("data/game/fl-index.json"), get(`data/seeds/${SEED}/fl-state.js
   map.on("load", () => {
     const b = home.bounds;
     map.fitBounds([[b[0], b[1]], [b[2], b[3]]], { padding: 60, duration: 0 });
-    map.addSource("fl", { type: "vector", url: "pmtiles://" + new URL("tiles/game-fl.pmtiles", location.href).href, promoteId: "id" });
-    for (const [id, v] of Object.entries(VOTE.places)) if (v[0] !== null) map.setFeatureState({ source: "fl", sourceLayer: G.kinds[id] || (IDX.byId[id] ? "county" : /-D\d+$/.test(id) ? "district" : /^[A-Z]{3}-\d+$/.test(id) ? "hood" : "muni"), id }, { s24: v[0] });
+    map.addSource("fl", { type: "vector", url: "pmtiles://" + new URL("tiles/game-fl.pmtiles", location.href).href, promoteId: { hood: "id", district: "id", muni: "id", county: "id", house: "n", senate: "n", congress: "n" } });
+    farState(); farVotes();
+    for (const [id, v] of Object.entries(VOTE.places)) if (v[0] !== null && id !== "__state") map.setFeatureState(feature(id), { s24: v[0] });
     const round = { "line-join": "round", "line-cap": "round" }, grow = (a, b) => ["interpolate", ["linear"], ["zoom"], 7, a, 13, b];
     for (const [kind] of LAYERS) {
       map.addLayer({ id: "fill-" + kind, type: "fill", source: "fl", "source-layer": kind, layout: { visibility: "none" }, paint: { "fill-color": "#ffffff", "fill-antialias": false } });
@@ -491,8 +528,9 @@ Promise.all([get("data/game/fl-index.json"), get(`data/seeds/${SEED}/fl-state.js
     }
     for (const [kind] of LAYERS) {
       map.addLayer({ id: "picked-" + kind, type: "line", source: "fl", "source-layer": kind, layout: { ...round, visibility: "none" }, filter: ["==", ["get", "id"], ""], paint: { "line-color": "#202122", "line-width": grow(2, 3.6) } });
-      map.on("click", "fill-" + kind, async (e) => { const p = e.features[0].properties; await ensure(p.fips); state.selected = p.id; paint(); infobox(); });
-      map.on("mousemove", "fill-" + kind, (e) => { const p = e.features[0].properties; tip(`<b>${esc(p.name)}</b>${kind === "county" ? "" : "<br>" + esc(IDX.byFips[p.fips].name)}<br>${num(p.pops)} pops${shown(p)}`, e.originalEvent); map.getCanvas().style.cursor = "pointer"; });
+      if (!FAR.has(kind)) map.on("click", "fill-" + kind, async (e) => { const p = e.features[0].properties; await ensure(p.fips); state.selected = p.id; paint(); infobox(); });
+      map.on("mousemove", "fill-" + kind, (e) => { const p = FAR.has(kind) ? farPlace(kind, e.features[0].properties.n) : e.features[0].properties;
+        tip(`<b>${esc(p.name)}</b>${kind === "county" || FAR.has(kind) ? "" : "<br>" + esc(IDX.byFips[p.fips].name)}<br>${num(p.pops)} pops${shown(p)}`, e.originalEvent); map.getCanvas().style.cursor = FAR.has(kind) ? "" : "pointer"; });
       map.on("mouseleave", "fill-" + kind, () => { $("tip").hidden = true; map.getCanvas().style.cursor = ""; });
     }
     paint();
@@ -597,8 +635,9 @@ async function recount() {
   for (const [id, [r, dd]] of Object.entries(sums)) {
     const share = r + dd ? r / (r + dd) : null;
     VOTE.places[id] = [share === null ? null : Math.round(share * 1000) / 1000, Math.round(r + dd)];
-    if (map && share !== null) map.setFeatureState({ source: "fl", sourceLayer: IDX.byId[id] ? "county" : G.kinds[id] || (/-D\d+$/.test(id) ? "district" : "hood"), id }, { s24: share });
+    if (map && share !== null) map.setFeatureState(feature(id), { s24: share });
   }
+  farVotes();
   const fl = allR / (allR + allD), nation = (2 * fl - 1) * 100 - d.nation_gap;
   VOTE.places.__state = [fl, Math.round(allR + allD)];
   $("wread").innerHTML = `Florida <span style="color:${PARTIES[fl >= 0.5 ? "rep" : "dem"].colour}">${fl >= 0.5 ? "R" : "D"} ${(Math.max(fl, 1 - fl) * 100).toFixed(1)}%</span><br>Country <span style="color:${PARTIES[nation > 0 ? "rep" : "dem"].colour}">${nation > 0 ? "R" : "D"} +${Math.abs(nation).toFixed(1)}</span>`;

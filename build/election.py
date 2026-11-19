@@ -112,7 +112,7 @@ class County:
         self.text = {"education": edu, "income": inc, "area": area, "age": age, "work": work, "race": self.race}
         self.shift(SHIFTS.get("active") or [])
         self.aud = {"everyone": np.ones(len(pops)), "no_college": edu == "No college", "college": edu == "Bachelor's or more", "low_income": inc == "Under $35,000", "high_income": inc == "Over $150,000",
-                    "rural": area == "rural", "small_town": area == "small town", "urban": area == "urban", "suburban": area == "suburban", "young": age == "18 to 29", "old": age == "65 and over",
+                    "rural": np.isin(area, ["rural", "exurban"]), "small_town": area == "small town", "urban": area == "urban", "suburban": area == "suburban", "young": age == "18 to 29", "old": age == "65 and over",
                     "farm": work == "Farm and ranch", "blue_collar": np.isin(work, list(BLUE)), "service": work == "Shops and service", "government": work == "Government and military"}
         self.pop_of = {p["id"]: p for p in pops}
         self.at = {p["id"]: i for i, p in enumerate(pops)}
@@ -189,7 +189,7 @@ def dress(pid):
     pop = counties[where[0]].pops[where[4]] if where else None
     area, income, edu, work = (pop["area"], pop["income"], pop["education"], pop["work"]) if pop else ("suburban", "$75,000 to $150,000", "Bachelor's or more", None)
     up = pick(rng, [("middle_family", 30), ("working_family", 22 if edu != "Bachelor's or more" else 10), ("poor_family", 12 if income == "Under $35,000" else 5), ("wealthy_family", 14 if income == "Over $150,000" else 4),
-                    ("farm_family", 20 if area == "rural" else 8 if area == "small town" else 1), ("military_family", 7), ("clergy_family", 4), ("political_family", 3 if pop else 12),
+                    ("farm_family", 20 if area == "rural" else 8 if area == "small town" else 5 if area == "exurban" else 1), ("military_family", 7), ("clergy_family", 4), ("political_family", 3 if pop else 12),
                     ("immigrant_family", 10 if pop and pop["race"] in ("Hispanic", "Asian") else 1)])
     level = pick(rng, [(1, 50), (2, 30), (3, 15), (4, 5)])
     child = rng.choice([t["id"] for t in book["families"]["childhood"] if t["level"] == level])
@@ -567,9 +567,9 @@ state["clubs"] = sorted(clubs.values(), key=lambda r: -r["members"])
 (out / "map.json").write_text(json.dumps(place_share, separators=(",", ":")))
 # ---- for the test panel: every pop in a few bytes, so the presidential vote can be recounted in the browser under any shifts
 LISTS = {"race": ["White", "Black", "Hispanic", "Asian", "Other"], "age": ["18 to 29", "30 to 44", "45 to 64", "65 and over"], "education": ["No college", "Some college", "Bachelor's or more"],
-         "area": ["urban", "suburban", "small town", "rural"], "income": ["Under $35,000", "$35,000 to $75,000", "$75,000 to $150,000", "Over $150,000"],
+         "area": ["urban", "suburban", "small town", "rural", "exurban"], "income": ["Under $35,000", "$35,000 to $75,000", "$75,000 to $150,000", "Over $150,000"],
          "work": ["Farm and ranch", "Oil, gas and mining", "Factory and plant", "Building and transport", "Shops and service", "Office and professional", "Schools and health", "Government and military", "Retired", "Student"]}
-BITS = {"race": 0, "age": 3, "education": 5, "area": 7, "income": 9, "work": 11}
+BITS = {"race": 0, "age": 3, "education": 5, "area": 7, "income": 10, "work": 12}
 cols, hood_ids, parents, base = defaultdict(list), [], [], 0
 for c in counties.values():
     places = c.game["places"]

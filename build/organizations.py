@@ -34,7 +34,7 @@ def rates(p):
     inc, own, rep, dem = INCOME[p["income"]], p.get("owners", 0.6), p["pie"]["R"], p["pie"]["D"]
     old, mid, college, country = age == "65 and over", age == "45 to 64", edu == "Bachelor's or more", area in ("rural", "small town")
     # ---- churches: who attends at all, then where
-    attends = {"White": 30, "Black": 45, "Hispanic": 35}.get(race, 20) + {"18 to 29": -12, "30 to 44": -5, "45 to 64": 0, "65 and over": 8}[age] + {"rural": 8, "small town": 5, "suburban": 0, "urban": -6}[area]
+    attends = {"White": 30, "Black": 45, "Hispanic": 35}.get(race, 20) + {"18 to 29": -12, "30 to 44": -5, "45 to 64": 0, "65 and over": 8}[age] + {"rural": 8, "small town": 5, "exurban": 5, "suburban": 0, "urban": -6}[area]
     if race == "White":
         attends += 20 * (rep - 0.4)
         split = {"baptist_association": 40, "pentecostal_fellowship": 20, "mainline_council": 20, "catholic_diocese": 17, "jewish_federation": 2, "latter_day_saint_stake": 1}
@@ -60,7 +60,7 @@ def rates(p):
                "Oil, gas and mining": {"building_trades_council": 6}, "Farm and ranch": {"farmworkers_association": 8} if race == "Hispanic" or inc == 0 else {}, "Office and professional": {"public_employees_union": 2},
                "Retired": {"labor_council": 2}}
     for org, n in by_work.get(work, {}).items():
-        add(org, n * {"urban": 1.3, "suburban": 1.0, "small town": 0.85, "rural": 0.7}[area])
+        add(org, n * {"urban": 1.3, "suburban": 1.0, "exurban": 0.8, "small town": 0.85, "rural": 0.7}[area])
     # ---- business: by line of work, more with income
     more = [0.5, 1, 1.5, 2.5][inc]
     by_work = {"Farm and ranch": {"growers_association": (35 if inc else 10) / more}, "Office and professional": {"chamber_of_commerce": 8, "realtors_association": 4, "bankers_association": 3, "bar_association": 2},
@@ -78,8 +78,8 @@ def rates(p):
         add("hispanic_civic_alliance", 6)
     add("veterans_post", {"18 to 29": 0, "30 to 44": 2, "45 to 64": 5, "65 and over": 8}[age] * (1.3 if country else 1) + (4 if work == "Government and military" else 0))
     add("seniors_association", 12 if old else 0)
-    add("sportsmens_association", {"rural": 10, "small town": 6, "suburban": 3, "urban": 1}[area] * 2 * rep)
-    add("homeowners_federation", {"rural": 0, "small town": 2, "suburban": 10, "urban": 4}[area] * own)
+    add("sportsmens_association", {"rural": 10, "small town": 6, "exurban": 7, "suburban": 3, "urban": 1}[area] * 2 * rep)
+    add("homeowners_federation", {"rural": 0, "small town": 2, "exurban": 6, "suburban": 10, "urban": 4}[area] * own)
     add("conservation_society", {"Bachelor's or more": 6, "Some college": 2, "No college": 0}[edu] * 2 * dem)
     add("womens_league", (4 if college else 0) + (2 if old or mid else 0))
     add("taxpayers_association", 8 * rep if inc >= 2 else 0)

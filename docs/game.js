@@ -16,7 +16,7 @@ const LINES = [["county", "Counties", "#202122"], ["district", "Commission distr
   ["house", "State House", "#7a3fb0"], ["senate", "State Senate", "#0b7a75"], ["congress", "Congress", "#b36b00"]];
 const TABS = [["overview", "Overview"], ["people", "People"], ["party", "Party"], ["issues", "Issues"], ["gov", "Officeholders"]];
 const RACE_COL = { White: "#8c6bb1", Black: "#41ab5d", Hispanic: "#f16913", Asian: "#3690c0", Other: "#969696" };
-const AREA_COL = { urban: "#54278f", suburban: "#9e9ac8", "small town": "#fdae6b", rural: "#a1d99b" };
+const AREA_COL = { urban: "#54278f", suburban: "#9e9ac8", exurban: "#f2e394", "small town": "#fdae6b", rural: "#a1d99b" };
 const MOOD_COL = { Angry: "#b2182b", Dissatisfied: "#ef8a62", Neutral: "#bdbdbd", Content: "#7fbf7b", Happy: "#1b7837" };
 const MOST = { hood: 50, district: 1500, muni: 3000, county: 20000, house: 2000, senate: 5000, congress: 7000 };
 const SOON = {
@@ -106,7 +106,7 @@ function fieldState(i) {
 }
 /* a far district's own numbers, set once: the same names the tiles give the other layers */
 function farState() {
-  const f = (k) => shField(k), races = ["White", "Black", "Hispanic", "Asian", "Other"], areas = ["urban", "suburban", "small town", "rural"], top = (keys, id) => keys.reduce((a, b) => (shVal(id, f(b)) > shVal(id, f(a)) ? b : a));
+  const f = (k) => shField(k), races = ["White", "Black", "Hispanic", "Asian", "Other"], areas = ["urban", "suburban", "exurban", "small town", "rural"], top = (keys, id) => keys.reduce((a, b) => (shVal(id, f(b)) > shVal(id, f(a)) ? b : a));
   for (const id of Object.keys(SH.districts)) { const row = SH.places[id]; if (!row) continue;
     map.setFeatureState(feature(id), { pops: row[0], pr: shVal(id, f("R")), pi: shVal(id, f("I")), pd: shVal(id, f("D")), r24: row[row.length - 2] === null ? 0.5 : row[row.length - 2] / 1000, local: row[row.length - 1] / 10, race: top(races, id), area: top(areas, id) }); }
 }
@@ -118,7 +118,7 @@ function farVotes() {
 }
 function farPlace(kind, n) { const id = kind + "-" + n, row = SH.places[id] || [0], f = (k) => shVal(id, shField(k));
   return { id, name: SH.names[id] || id, pops: row[0], pr: f("R"), pi: f("I"), pd: f("D"), r24: row.length > 2 && row[row.length - 2] !== null ? row[row.length - 2] / 1000 : null, local: row.length > 2 ? row[row.length - 1] / 10 : 0,
-    race: ["White", "Black", "Hispanic", "Asian", "Other"].reduce((a, b) => (f(b) > f(a) ? b : a)), area: ["urban", "suburban", "small town", "rural"].reduce((a, b) => (f(b) > f(a) ? b : a)) }; }
+    race: ["White", "Black", "Hispanic", "Asian", "Other"].reduce((a, b) => (f(b) > f(a) ? b : a)), area: ["urban", "suburban", "exurban", "small town", "rural"].reduce((a, b) => (f(b) > f(a) ? b : a)) }; }
 function issueState(k) {
   if (!map || ISS.on === k) return;
   ISS.on = k;
@@ -201,7 +201,7 @@ function orgBars(ps, most) {
 }
 /* ---------- opinion: -100 to 100, a list of reasons. Only what exists before anyone acts: stats, traits, where they live, party. ---------- */
 const AUD = { everyone: () => true, no_college: (p) => p.education === "No college", college: (p) => p.education === "Bachelor's or more", low_income: (p) => p.income === "Under $35,000", high_income: (p) => p.income === "Over $150,000",
-  rural: (p) => p.area === "rural", small_town: (p) => p.area === "small town", urban: (p) => p.area === "urban", suburban: (p) => p.area === "suburban", young: (p) => p.age === "18 to 29", old: (p) => p.age === "65 and over",
+  rural: (p) => p.area === "rural" || p.area === "exurban", small_town: (p) => p.area === "small town", urban: (p) => p.area === "urban", suburban: (p) => p.area === "suburban", young: (p) => p.age === "18 to 29", old: (p) => p.age === "65 and over",
   farm: (p) => p.work === "Farm and ranch", blue_collar: (p) => BOOK.dials.blue.includes(p.work), service: (p) => p.work === "Shops and service", government: (p) => p.work === "Government and military" };
 function knownTo(c, pop) {
   const a = c.known_in, h = place(pop.hood);
@@ -642,7 +642,7 @@ $("gsearch").oninput = async (e) => {
 const WORLD = { data: null, shifts: {}, groups: [
   ["Lean", "lean", [["everyone", "Everyone"]]],
   ["Lean by race", "lean", [["race:White", "White"], ["race:Black", "Black"], ["race:Hispanic", "Hispanic"], ["race:Asian", "Asian"], ["race:Other", "Other"]]],
-  ["Lean by area", "lean", [["area:urban", "Urban"], ["area:suburban", "Suburban"], ["area:small town", "Small town"], ["area:rural", "Rural"]]],
+  ["Lean by area", "lean", [["area:urban", "Urban"], ["area:suburban", "Suburban"], ["area:exurban", "Exurban"], ["area:small town", "Small town"], ["area:rural", "Rural"]]],
   ["Lean by age", "lean", [["age:18 to 29", "18 to 29"], ["age:30 to 44", "30 to 44"], ["age:45 to 64", "45 to 64"], ["age:65 and over", "65 and over"]]],
   ["Lean by education", "lean", [["education:No college", "No college"], ["education:Some college", "Some college"], ["education:Bachelor's or more", "Degree"]]],
   ["Lean by party", "lean", [["party:republicans", "Republicans"], ["party:independents", "Independents"], ["party:democrats", "Democrats"]]],
@@ -663,7 +663,7 @@ async function recount() {
   const list = Object.entries(WORLD.shifts).map(([key, v]) => { const [kind, who] = key.split("|"), [field, value] = who.split(":"); return { kind, field, code: field === "party" || field === "everyone" ? value : d.lists[field].indexOf(value), v }; }).filter((x) => x.v);
   const fired = { republicans: 0, independents: 0, democrats: 0 };
   list.filter((x) => x.kind === "turnout" && x.field === "party").forEach((x) => { fired[x.code] += x.v; });
-  const width = { race: 7, age: 3, education: 3, area: 3, income: 3, work: 15 };
+  const width = { race: 7, age: 3, education: 3, area: 7, income: 3, work: 15 };
   for (let i = 0; i < n; i++) {
     const r = d.r[i] / 255, ind = d.i[i] / 255, dem = Math.max(0, 1 - r - ind);
     let move = 0, more = 0;

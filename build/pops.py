@@ -38,7 +38,7 @@ LEAN = {"White": [0.64, 0.60, 0.45], "Black": [0.15, 0.15, 0.14], "Hispanic": [0
 # suburban 47, rural 69) at half strength, since race and education already explain part of it. Income, work and
 # housing have no source yet and are small on purpose.
 AGE_NUDGE = [-0.20, -0.10, 0.12, 0.10]
-AREA_NUDGE = {"urban": -0.30, "suburban": 0.0, "small town": 0.25, "rural": 0.45}
+AREA_NUDGE = {"urban": -0.30, "suburban": 0.0, "exurban": 0.35, "small town": 0.25, "rural": 0.45}
 INCOME_NUDGE = [-0.05, 0.0, 0.05, 0.0]
 WORK_NUDGE = {"Farm and ranch": 0.25, "Oil, gas and mining": 0.25, "Factory and plant": 0.10, "Building and transport": 0.15, "Shops and service": 0.0,
               "Office and professional": -0.05, "Schools and health": -0.20, "Government and military": -0.05, "Retired": 0.0, "Student": -0.25}
@@ -231,7 +231,7 @@ for t, group in by_tract.items():
 # ---- a few words for what sets each pop apart from the county
 common = {key: Counter(p[key] for p in pops).most_common(1)[0][0] for key in ("race", "age", "education", "income", "work", "area")}
 WORDS = {"18 to 29": "young", "30 to 44": "", "45 to 64": "middle-aged", "65 and over": "older", "No college": "", "Some college": "", "Bachelor's or more": "college-educated",
-         "Under $35,000": "lower-income", "Over $150,000": "well-off", "urban": "in the city", "suburban": "suburban", "small town": "in town", "rural": "rural"}
+         "Under $35,000": "lower-income", "Over $150,000": "well-off", "urban": "in the city", "suburban": "suburban", "exurban": "exurban", "small town": "in town", "rural": "rural"}
 for p in pops:
     words = [WORDS.get(p["age"], "") if p["age"] != common["age"] or p["age"] in ("18 to 29", "65 and over") else "", p["race"] if p["race"] != common["race"] else "",
              WORDS.get(p["education"], ""), WORDS.get(p["income"], ""), "renters" if p["owners"] < 0.5 else "", p["work"].lower() if p["work"] != common["work"] else "",

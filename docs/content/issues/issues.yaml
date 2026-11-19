@@ -1,7 +1,8 @@
 note: 'Issues every pop and character holds a position on. Positive is the left end. ''stops'' are the positions a character can take, each at a fixed value. ''weights'' are local, state, national (0 ignored,
   3 central). ''nation'' is where the average American sits, placed by hand. ''florida'' is the state''s distance from the nation in the survey, kept within 15. ''pulls'' are points added if a whole pop
   were that group: party pulls use the pop''s party pie, church, union and business use its share of members. Pulls marked hand-set are guesses; the rest are fitted from the survey named in ''source''.
-  ''spread'' widens every pop''s distance from the state average, to stand for the sorting of like-minded people that a party pie does not capture; a party''s usual stop is worked out without it.'
+  ''spread'' widens every pop''s distance from the state average, to stand for the sorting of like-minded people that a party pie does not capture; a party''s usual stop is worked out without it. Exurban
+  pulls are hand-set: the survey has no such category.'
 spread: 1.5
 groups:
   Democrat: party pie
@@ -27,6 +28,7 @@ groups:
   farm: Farm and ranch
   oil and mining: Oil, gas and mining
   no college: No college
+  exurban: area
 issues:
 - id: income_tax
   name: Income tax
@@ -71,6 +73,7 @@ issues:
     65 and over: -10
     urban: 5
     rural: -5
+    exurban: -6
 - id: sales_tax
   name: Sales tax
   category: Taxation
@@ -134,6 +137,7 @@ issues:
     urban: 3
     church: -6
     government work: 10
+    exurban: -6
 - id: debt
   name: Debt and deficits
   category: Spending
@@ -281,6 +285,7 @@ issues:
     Republican: -10
     blue-collar: -10
     business: -20
+    exurban: 6
 - id: zoning
   name: Zoning and density
   category: Housing and land
@@ -307,6 +312,7 @@ issues:
     rural: 4
     suburban: -5
     college: 10
+    exurban: -10
 - id: homelessness
   name: Homelessness
   category: Housing and land
@@ -325,6 +331,7 @@ issues:
     65 and over: -10
     church: -5
     suburban: -5
+    exurban: -6
 - id: school_funding
   name: School funding
   category: Education
@@ -372,6 +379,7 @@ issues:
     urban: -6
     church: -18
     union: 8
+    exurban: -4
 - id: curriculum
   name: Curriculum
   category: Education
@@ -528,6 +536,7 @@ issues:
     rural: -10
     church: -4
     union: -6
+    exurban: -12
 - id: abortion
   name: Abortion
   category: Social policy
@@ -579,6 +588,7 @@ issues:
     rural: -8
     church: -28
     union: 5
+    exurban: -5
 - id: religion
   name: Religion in public life
   category: Social policy
@@ -641,6 +651,7 @@ issues:
     church: -6
     no college: -10
     blue-collar: -8
+    exurban: -6
 - id: enforcement
   name: Enforcement
   category: Immigration
@@ -665,6 +676,7 @@ issues:
     church: -6
     no college: -10
     blue-collar: -8
+    exurban: -5
 - id: climate
   name: Climate and energy
   category: Environment and energy
@@ -691,6 +703,7 @@ issues:
     church: -11
     union: 3
     oil and mining: -25
+    exurban: -5
 - id: conservation
   name: Conservation and water
   category: Environment and energy
@@ -710,6 +723,7 @@ issues:
     farm: -15
     blue-collar: -5
     business: -10
+    exurban: -4
 - id: transport
   name: Roads and transit
   category: Transportation
@@ -728,6 +742,7 @@ issues:
     Republican: -15
     under 30: 20
     college: 10
+    exurban: -18
 - id: voting
   name: Voting rules
   category: Government and elections

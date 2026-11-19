@@ -16,7 +16,7 @@ DATA = Path(sys.argv[1])
 GROUPS = [("race", "Race", ["White", "Black", "Hispanic", "Asian", "Other"]), ("age", "Age", ["18 to 29", "30 to 44", "45 to 64", "65 and over"]),
           ("education", "Education", ["No college", "Some college", "Bachelor's or more"]), ("income", "Household income", ["Under $35,000", "$35,000 to $75,000", "$75,000 to $150,000", "Over $150,000"]),
           ("work", "Work", ["Office and professional", "Schools and health", "Shops and service", "Building and transport", "Factory and plant", "Government and military", "Farm and ranch", "Oil, gas and mining", "Student", "Retired"]),
-          ("area", "Area type", ["urban", "suburban", "small town", "rural"])]
+          ("area", "Area type", ["urban", "suburban", "exurban", "small town", "rural"])]
 FIELDS = [("party", "Party", k, k) for k in ("R", "I", "D")] + [(g, label, v, v) for g, label, values in GROUPS for v in values] + [("home", "Homes", "owners", "Homeowners"), ("vote", "Voting", "turnout", "Expected turnout")]
 tally = {}
 for f in sorted((DATA / "pops").glob("fl-*.json")):

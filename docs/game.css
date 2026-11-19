@@ -59,3 +59,5 @@ table.wt td .pt { display: block; }
 .portrait{border:1.5px solid #2b2d31;border-radius:4px;display:block}
 .facehead{display:flex;gap:16px;align-items:flex-start}
 .facehead>div{flex:1;min-width:0}
+.ddmenu{max-height:70vh;overflow-y:auto}
+.ddmenu button[disabled]{font-weight:600;color:var(--text,#202122);padding-top:8px;opacity:1}

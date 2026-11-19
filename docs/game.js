@@ -25,14 +25,20 @@ const SOON = {
   services: ["Government and services", 18], bills: ["Bills and votes", 19], news: ["News and the press", 22], intrigue: ["Intrigue and actions", 23], history: ["History and generation", 26], tools: ["Test tools", 0], saves: ["Saves", 0],
 };
 const SHADES = [
-  { id: "party", label: "Party" },
-  { id: "race", label: "Race", menu: [["race", "Largest group"]] },
-  { id: "issues", label: "Issues", menu: [["", "Issues and positions · update 7"]] },
+  { id: "politics", label: "Politics", menu: [["party", "Party ID"], null, ["", "Results"], ["r2024", "President, 2024"], ["real", "Real 2024"], ["local", "Local lean"]] },
   { id: "camps", label: "Camps", menu: [["camp_all", "Largest camp"], null, ["camp_dem", "Among Democrats"], ["camp_rep", "Among Republicans"], ["camp_ind", "Among independents"]] },
-  { id: "demo", label: "Demographics", menu: [["pops", "Pops"], ["area", "Area type"]] },
+  { id: "issues", label: "Issues", menu: [] },
+  { id: "people", label: "People", menu: [] },
   { id: "work", label: "Work", menu: [] },
-  { id: "results", label: "Results", menu: [["r2024", "President, 2024"], null, ["real", "Real 2024"], ["local", "Local lean"]] },
+  { id: "density", label: "Density", menu: [["pops", "Pops"]] },
 ];
+/* the colour of each group inside a field family, for the maps that show which group leads and by how much */
+const GROUP_COL = { race: RACE_COL, area: AREA_COL,
+  age: { "18 to 29": "#1f8a8a", "30 to 44": "#c9a227", "45 to 64": "#d46c1e", "65 and over": "#6b4a9a" },
+  education: { "No college": "#b5562a", "Some college": "#c9a227", "Bachelor's or more": "#2f558e" },
+  income: { "Under $35,000": "#8a3a4a", "$35,000 to $75,000": "#c9a227", "$75,000 to $150,000": "#3f7a52", "Over $150,000": "#2f558e" },
+  work: { "Office and professional": "#34506e", "Schools and health": "#2f7078", "Shops and service": "#6d4470", "Building and transport": "#a5562a", "Factory and plant": "#7a5a3a", "Government and military": "#1f2a44", "Farm and ranch": "#4d6b35", "Oil, gas and mining": "#3a3d42", Student: "#c9a227", Retired: "#8a8f96" } };
+const GROUP_NAME = { race: "Largest race", age: "Largest age group", education: "Largest education level", income: "Largest income band", work: "Largest line of work", area: "Area type" };
 const IDX = { counties: [], byFips: {}, byId: {}, byCode: {} };
 const G = { state: "", places: {}, kinds: {} }, POPS = {}, S = { seed: SEED, people: {}, leaders: {}, moods: {}, seats: [], local: {} };
 const lines = new Set(["county", "city"]), loading = {};
@@ -43,7 +49,7 @@ const FUNCTION = { police: "police", fire: "fire", roads: "roads", water: "water
 const OFFICERS = { "county.sheriff": "police and corrections", "county.clerk": "records and audit", "county.property_appraiser": "assessment", "county.tax_collector": "tax collection", "county.elections": "elections" };
 const ISS = { list: [], usual: {}, places: {}, on: -1 };
 const CAMP = { list: [], places: {}, on: "" }, SIDES = ["dem", "ind", "rep"];
-const SH = { fields: [], places: {}, districts: {}, names: {}, on: -1 };   /* every field the map can shade by, for every outlined place */
+const SH = { fields: [], places: {}, districts: {}, names: {}, on: -1 }, LEAD = { on: "" };   /* every field the map can shade by, for every outlined place */
 const shField = (key) => SH.fields.findIndex((f) => f.key === key);
 const shVal = (id, i) => (SH.places[id] ? SH.places[id][i + 1] / 1000 : null);
 /* issues: positive is the left end. A pop's number is the issue's base plus the pulls of what the pop is, the same sum as build/issues.py */
@@ -77,6 +83,22 @@ function campState(side) {
 }
 const layerOf = (id) => (/^(house|senate|congress)-\d+$/.test(id) ? id.split("-")[0] : G.kinds[id] || (IDX.byId[id] ? "county" : /-D\d+$/.test(id) ? "district" : /^[A-Z]{3}-\d+$/.test(id) ? "hood" : "muni"));
 const feature = (id) => { const sourceLayer = layerOf(id); return { source: "fl", sourceLayer, id: FAR.has(sourceLayer) ? +id.split("-")[1] : id }; };
+const mixHex = (a, b, k) => "#" + [1, 3, 5].map((i) => Math.round(parseInt(a.slice(i, i + 2), 16) * (1 - k) + parseInt(b.slice(i, i + 2), 16) * k).toString(16).padStart(2, "0")).join("");
+/* which group leads a place and by how much: [index, lead share, margin over the runner-up] */
+function leadOf(id, mode) {
+  let vals;
+  if (mode.startsWith("g_")) { const row = SH.places[id]; if (!row) return null; vals = SH.fields.map((f, i) => (f.group === mode.slice(2) ? [i, row[i + 1] / 1000] : null)).filter(Boolean); }
+  else { const row = CAMP.places[id], side = mode.slice(5); if (!row) return null; const mine = row.map((v, i) => (side === "all" || CAMP.list[i].party === side ? [i, v] : null)).filter(Boolean), total = mine.reduce((a, x) => a + x[1], 0) || 1; vals = mine.map(([i, v]) => [i, v / total]); }
+  const sorted = vals.slice().sort((a, b) => b[1] - a[1]);
+  return sorted.length ? [sorted[0][0], sorted[0][1], sorted[0][1] - (sorted[1] ? sorted[1][1] : 0)] : null;
+}
+function leadState(mode) {
+  if (!map || LEAD.on === mode) return;
+  LEAD.on = mode;
+  for (const id of Object.keys(mode.startsWith("g_") ? SH.places : CAMP.places)) { if (id === "__state") continue; const l = leadOf(id, mode); if (l) map.setFeatureState(feature(id), { cat: l[0], mar: l[2] }); }
+}
+const leadColours = (mode) => (mode.startsWith("g_") ? SH.fields.map((f, i) => (f.group === mode.slice(2) ? [i, GROUP_COL[f.group][f.key] || "#888888", f.label] : null)) : CAMP.list.map((c, i) => (mode === "camp_all" || c.party === mode.slice(5) ? [i, c.colour, c.name] : null))).filter(Boolean);
+const tinted = (mode, span) => ["match", ["coalesce", ["feature-state", "cat"], -1], ...leadColours(mode).flatMap(([i, col]) => [i, ["interpolate", ["linear"], ["coalesce", ["feature-state", "mar"], 0], 0, mixHex(col, "#ffffff", 0.8), span, col]]), "#ffffff"];
 function fieldState(i) {
   if (!map || SH.on === i) return;
   SH.on = i;
@@ -246,9 +268,9 @@ function shadeOf(kind) {
   const by = (ramp, a, b, c, list) => ["interpolate", ["linear"], margin(a, b, c), ...stops(ramp, list)];
   const colour = fi >= 0 ? grey(["coalesce", ["feature-state", "val"], 0], SH.fields[fi].top / 1000) : s === "party" ? ["case", ["all", [">=", n("pr"), n("pi")], [">=", n("pr"), n("pd")]], by("r", "pr", "pi", "pd", [[0, 1], [0.1, 3], [0.25, 5], [0.45, 7]]),
     [">=", n("pd"), n("pi")], by("d", "pd", "pi", "pr", [[0, 1], [0.1, 3], [0.25, 5], [0.45, 7]]), by("g", "pi", "pr", "pd", [[0, 1], [0.1, 2], [0.25, 3], [0.45, 4]])]
-    : s.startsWith("camp_") ? ["match", ["coalesce", ["feature-state", "camp"], -1], ...CAMP.list.flatMap((c, i) => [i, c.colour]), "#ffffff"]
+    : s.startsWith("camp_") || s.startsWith("g_") ? tinted(s, s.startsWith("camp_") ? 0.3 : 0.5)
     : s.startsWith("iss_") ? ["case", ["==", ["feature-state", "iss"], null], "#ffffff", split(["feature-state", "iss"], 60)]
-    : s === "r2024" ? ["case", ["==", ["feature-state", "s24"], null], "#ffffff", diverge(["-", ["feature-state", "s24"], 0.5], 0.3)] : s === "real" ? diverge(["-", n("r24"), 0.5], 0.3) : s === "local" ? diverge(n("local"), 15) : s === "race" ? ["match", n("race"), ...Object.entries(RACE_COL).flat(), "#ffffff"] : s === "area" ? ["match", n("area"), ...Object.entries(AREA_COL).flat(), "#ffffff"]
+    : s === "r2024" ? ["case", ["==", ["feature-state", "s24"], null], "#ffffff", diverge(["-", ["feature-state", "s24"], 0.5], 0.3)] : s === "real" ? diverge(["-", n("r24"), 0.5], 0.3) : s === "local" ? diverge(n("local"), 15)
     : grey(n("pops"), MOST[kind]);
   return ["case", ["==", n("pops"), 0], "#ffffff", colour];
 }
@@ -259,8 +281,9 @@ function shown(p) {
   const cs = s.startsWith("camp_") ? s.slice(5) : "", crow = cs && CAMP.places[p.id], ci = crow ? campLead(crow, cs === "all" ? "" : cs) : -1;
   const ctotal = crow ? crow.reduce((a, v, i) => a + (cs === "all" || CAMP.list[i].party === cs ? v : 0), 0) : 0;
   const fx = s.startsWith("f_") ? +s.slice(2) : -1;
-  const text = fx >= 0 ? (shVal(p.id, fx) === null ? "" : `${esc(SH.fields[fx].label)} ${pct(shVal(p.id, fx))}`) : cs ? (ci < 0 ? "" : `${esc(CAMP.list[ci].name)} ${pct(crow[ci] / ctotal)}`) : k >= 0 ? (iv === null ? "" : `${esc(ISS.list[k].name)} <span style="color:${issueColour(iv)}">${signed(iv)}</span> · ${esc(nearest(ISS.list[k], iv)[1])}`) : s === "party" ? "Party ID " + lead([p.pr, p.pi, p.pd]) : s === "r2024" ? (v && v[0] !== null ? "President, 2024 " + rd(v[0]) : "") : s === "real" ? "Real 2024 " + rd(p.r24) : s === "local" ? "Local lean " + lean(p.local)
-    : s === "race" ? "Largest group " + esc(p.race) : s === "area" ? "Area type " + esc(p.area) : s === "pops" ? ""  : "";
+  const lm = s.startsWith("g_") || cs ? leadOf(p.id, s) : null, ln = lm && (leadColours(s).find((x) => x[0] === lm[0]) || [])[2];
+  const text = lm && ln ? `${esc(ln)} ${pct(lm[1])} · ahead by ${Math.round(lm[2] * 100)}` : fx >= 0 ? (shVal(p.id, fx) === null ? "" : `${esc(SH.fields[fx].label)} ${pct(shVal(p.id, fx))}`) : k >= 0 ? (iv === null ? "" : `${esc(ISS.list[k].name)} <span style="color:${issueColour(iv)}">${signed(iv)}</span> · ${esc(nearest(ISS.list[k], iv)[1])}`) : s === "party" ? "Party ID " + lead([p.pr, p.pi, p.pd]) : s === "r2024" ? (v && v[0] !== null ? "President, 2024 " + rd(v[0]) : "") : s === "real" ? "Real 2024 " + rd(p.r24) : s === "local" ? "Local lean " + lean(p.local)
+    : "";
   return p.pops && text ? "<br>" + text : "";
 }
 function legend() {
@@ -270,15 +293,16 @@ function legend() {
   const ik = s.startsWith("iss_") ? ISS.list[+s.slice(4)] : null;
   const cside = s.startsWith("camp_") ? s.slice(5) : "";
   const lf = s.startsWith("f_") ? SH.fields[+s.slice(2)] : null;
-  const title = lf ? lf.label : cside ? { all: "Largest camp", dem: "Largest camp among Democrats", rep: "Largest camp among Republicans", ind: "Largest camp among independents" }[cside] : ik ? ik.name : { party: "Party ID", r2024: "President, 2024", real: "Real 2024", local: "Local lean", race: "Largest group", area: "Area type", pops: "Pops", ba: "Bachelor's degree", old: "Age 65 and over", income: "Income under $35,000" }[s] || "Share " + s.slice(5);
+  const narrow = `<div class="ends"><span>Narrow lead</span><span>Wide lead</span></div>`;
+  const title = s.startsWith("g_") ? GROUP_NAME[s.slice(2)] : lf ? lf.label : cside ? { all: "Largest camp", dem: "Largest camp among Democrats", rep: "Largest camp among Republicans", ind: "Largest camp among independents" }[cside] : ik ? ik.name : { party: "Party ID", r2024: "President, 2024", real: "Real 2024", local: "Local lean", race: "Largest group", area: "Area type", pops: "Pops", ba: "Bachelor's degree", old: "Age 65 and over", income: "Income under $35,000" }[s] || "Share " + s.slice(5);
   const party = () => ORDER.map((k) => `<div class="prow"><span>${PARTIES[k].letter}</span><div class="bar">${(k === "ind" ? [1, 2, 3, 4] : [1, 3, 5, 7]).map((i) => `<span style="background:${css("--" + PARTIES[k].ramp + i)}"></span>`).join("")}</div></div>`).join("") + `<div class="ends"><span>Narrow lead</span><span>Wide lead</span></div>`;
-  const body = cside ? cat(Object.fromEntries(CAMP.list.filter((c) => cside === "all" || c.party === cside).map((c) => [c.name, c.colour]))) : ik ? bar([7, 5, 3, 1].map((i) => css("--c" + i)).concat([1, 3, 5, 7].map((i) => css("--o" + i))), esc(ik.stops[0][1]), esc(ik.stops[ik.stops.length - 1][1])) : s === "party" ? party() : s === "r2024" || s === "real" || s === "local" ? bar(dv, "Democratic", "Republican") : s === "race" ? cat(RACE_COL) : s === "area" ? cat(AREA_COL) : bar(gr, "Fewer", "More");
+  const body = cside || s.startsWith("g_") ? cat(Object.fromEntries(leadColours(s).map((x) => [x[2], x[1]]))) + narrow : ik ? bar([7, 5, 3, 1].map((i) => css("--c" + i)).concat([1, 3, 5, 7].map((i) => css("--o" + i))), esc(ik.stops[0][1]), esc(ik.stops[ik.stops.length - 1][1])) : s === "party" ? party() : s === "r2024" || s === "real" || s === "local" ? bar(dv, "Democratic", "Republican") : bar(gr, "Fewer", "More");
   $("legend").innerHTML = `<div class="t">${title}</div>${body}`;
 }
 function paint() {
   if (!map || !map.getLayer("fill-hood")) return;
   if (state.shade.startsWith("iss_")) issueState(+state.shade.slice(4));
-  if (state.shade.startsWith("camp_")) campState(state.shade.slice(5));
+  if (state.shade.startsWith("camp_") || state.shade.startsWith("g_")) leadState(state.shade);
   if (state.shade.startsWith("f_")) fieldState(+state.shade.slice(2));
   for (const [kind] of LAYERS) {
     const on = kind === state.layer ? "visible" : "none";
@@ -498,12 +522,14 @@ Promise.all([get("data/game/fl-index.json"), get(`data/seeds/${SEED}/fl-state.js
   get("data/names.json").catch(() => ({ first: {} }))]).then(async ([index, top, shares, wide, book, issues, camps, shades, names]) => {
   for (const [key, list] of Object.entries(names.first)) for (const [n] of list) NAMESEX[n] = NAMESEX[n] && NAMESEX[n] !== key[0] ? "?" : key[0];
   Object.assign(SH, shades, { on: -1 });
-  const menuOf = (groups) => SH.fields.flatMap((f, i) => (groups.includes(f.group) ? [[f, i]] : [])).flatMap(([f, i], n, all) => (n === 0 || all[n - 1][0].group !== f.group ? (n ? [null] : []).concat([["", f.heading]]) : []).concat([["f_" + i, f.label]]));
+  const family = (group, heading) => [["", heading], ["g_" + group, GROUP_NAME[group]]].concat(SH.fields.flatMap((f, i) => (f.group === group ? [["f_" + i, f.label]] : [])));
+  const single = (group) => SH.fields.flatMap((f, i) => (f.group === group ? [["f_" + i, f.label]] : []));
   if (SH.fields.length) {
-    SHADES.find((x) => x.id === "race").menu = [["race", "Largest group"], null].concat(menuOf(["race"]).slice(1));
-    SHADES.find((x) => x.id === "demo").menu = [["pops", "Pops"], ["area", "Area type"], null].concat(menuOf(["age", "education", "income", "area", "home", "vote"]));
-    SHADES.find((x) => x.id === "work").menu = menuOf(["work"]).slice(1);
+    SHADES.find((x) => x.id === "people").menu = family("race", "Race").concat([null], family("age", "Age"), [null], family("education", "Education"), [null], family("income", "Household income"), [null], [["", "Homes and voting"]], single("home"), single("vote"));
+    SHADES.find((x) => x.id === "work").menu = family("work", "Work").slice(1);
+    SHADES.find((x) => x.id === "density").menu = family("area", "Area type").slice(1).concat([null, ["pops", "Pops"]]);
   }
+
   CAMP.list = camps.camps; CAMP.places = camps.places;
   ISS.list = issues.issues; ISS.usual = issues.usual; ISS.places = issues.places;
   if (ISS.list.length) { let last = ""; SHADES.find((x) => x.id === "issues").menu = ISS.list.flatMap((x, k) => { const head = x.category === last ? [] : (last ? [null] : []).concat([["", x.category]]); last = x.category; return head.concat([["iss_" + k, x.name]]); }); }

@@ -32,7 +32,7 @@ def rates(p):
 
     race, age, edu, area, work = p["race"], p["age"], p["education"], p["area"], p["work"]
     inc, own, rep, dem = INCOME[p["income"]], p.get("owners", 0.6), p["pie"]["R"], p["pie"]["D"]
-    old, mid, college, country = age == "65 and over", age == "45 to 64", edu == "Bachelor's or more", area in ("rural", "small town")
+    old, mid, college, country = age == "65 and over", age == "45 to 64", edu == "Bachelor's or more", area in ("rural", "small town", "exurban")
     # ---- churches: who attends at all, then where
     attends = {"White": 30, "Black": 45, "Hispanic": 35}.get(race, 20) + {"18 to 29": -12, "30 to 44": -5, "45 to 64": 0, "65 and over": 8}[age] + {"rural": 8, "small town": 5, "exurban": 5, "suburban": 0, "urban": -6}[area]
     if race == "White":
@@ -78,8 +78,8 @@ def rates(p):
         add("hispanic_civic_alliance", 6)
     add("veterans_post", {"18 to 29": 0, "30 to 44": 2, "45 to 64": 5, "65 and over": 8}[age] * (1.3 if country else 1) + (4 if work == "Government and military" else 0))
     add("seniors_association", 12 if old else 0)
-    add("sportsmens_association", {"rural": 10, "small town": 6, "exurban": 7, "suburban": 3, "urban": 1}[area] * 2 * rep)
-    add("homeowners_federation", {"rural": 0, "small town": 2, "exurban": 6, "suburban": 10, "urban": 4}[area] * own)
+    add("sportsmens_association", {"rural": 10, "small town": 6, "exurban": 8, "suburban": 3.8, "urban": 1.2}[area] * 2 * rep)
+    add("homeowners_federation", {"rural": 0, "small town": 2, "exurban": 5, "suburban": 7.2, "urban": 4}[area] * own)
     add("conservation_society", {"Bachelor's or more": 6, "Some college": 2, "No college": 0}[edu] * 2 * dem)
     add("womens_league", (4 if college else 0) + (2 if old or mid else 0))
     add("taxpayers_association", 8 * rep if inc >= 2 else 0)

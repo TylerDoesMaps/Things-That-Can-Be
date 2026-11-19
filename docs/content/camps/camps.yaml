@@ -391,12 +391,14 @@ camps:
   - area:
     - rural
     - small town
+    - exurban
     age:
     - 18 to 29
     - 30 to 44
     by: 0.75
   - area:
     - rural
+    - exurban
     by: 0.85
   - race:
     - Hispanic

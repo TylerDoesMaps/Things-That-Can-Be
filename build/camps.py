@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Sorts each pop's Democrats, Republicans and independents into the camp of their party whose positions are nearest.
+"""Sorts each pop's Democrats and Republicans into the camp of their party whose positions are nearest.
 
 A party's people inside a pop stand where the pop stands with its party pulls taken out and that party's own pull put in.
 Nearness compares how the camp differs from its party with how those people differ from their party. Writes docs/data/camps/fl-<fips>.json (one row per pop) and docs/data/camps.json (every place's share of people in each camp, in
@@ -25,7 +25,7 @@ for c in CAMPS:
 base = {i["id"]: i["base"] for i in json.loads((DATA / "issues.json").read_text())["issues"]}
 WORK = {"Government and military": "government work", "Schools and health": "schools and health", "Shops and service": "service work", "Building and transport": "blue-collar",
         "Factory and plant": "blue-collar", "Farm and ranch": "farm", "Oil, gas and mining": "oil and mining"}
-PARTY = {"dem": ("D", "Democrat"), "rep": ("R", "Republican"), "ind": ("I", "")}
+PARTY = {"dem": ("D", "Democrat"), "rep": ("R", "Republican")}   # independents have no camps
 
 
 def draw(camp, pop):
@@ -82,7 +82,7 @@ for party in PARTY:
 (DATA / "camps").mkdir(exist_ok=True)
 hood = {}
 for fips, pops in order:   # one row per pop: the camp of its Democrats, its independents and its Republicans
-    (DATA / "camps" / f"fl-{fips}.json").write_text(json.dumps({"pops": [[p["camps"]["dem"], p["camps"]["ind"], p["camps"]["rep"]] for p in pops]}, separators=(",", ":")))
+    (DATA / "camps" / f"fl-{fips}.json").write_text(json.dumps({"pops": [[p["camps"]["dem"], -1, p["camps"]["rep"]] for p in pops]}, separators=(",", ":")))
     for p in pops:
         row = hood.setdefault(p["hood"], [0.0] * len(CAMPS))
         for party, (letter, _) in PARTY.items():

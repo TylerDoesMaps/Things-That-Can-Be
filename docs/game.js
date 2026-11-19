@@ -26,7 +26,7 @@ const SOON = {
 };
 const SHADES = [
   { id: "politics", label: "Politics", menu: [["party", "Party ID"], null, ["", "Results"], ["r2024", "President, 2024"], ["real", "Real 2024"], ["local", "Local lean"]] },
-  { id: "camps", label: "Camps", menu: [["camp_all", "Largest camp"], null, ["camp_dem", "Among Democrats"], ["camp_rep", "Among Republicans"], ["camp_ind", "Among independents"]] },
+  { id: "camps", label: "Camps", menu: [["camp_all", "Largest camp"], null, ["camp_dem", "Among Democrats"], ["camp_rep", "Among Republicans"]] },
   { id: "issues", label: "Issues", menu: [] },
   { id: "people", label: "People", menu: [] },
   { id: "work", label: "Work", menu: [] },
@@ -70,8 +70,8 @@ function issueTable(nums) {
   return `<table class="wt iss"><tr><th>Issue</th><th class="n">Stands at</th><th>Nearest position</th></tr>${ISS.list.map((x, k) => { const head = x.category === last ? "" : `<tr class="cat"><td colspan="3">${esc(x.category)}</td></tr>`; last = x.category;
     return `${head}<tr><td>${esc(x.name)}</td><td class="n" style="color:${issueColour(nums[k])}">${signed(nums[k])}</td><td>${esc(nearest(x, nums[k])[1])}</td></tr>`; }).join("")}</table>`;
 }
-/* camps: a pop's Democrats, independents and Republicans each sit in one camp; p.camps is [dem, ind, rep], p.pie is [rep, ind, dem] */
-const popCamp = (p) => { if (!p.camps) return null; const share = [p.pie[2], p.pie[1], p.pie[0]], top = share.indexOf(Math.max(...share)); return CAMP.list[p.camps[top]]; };
+/* camps: a pop's Democrats and its Republicans each sit in one camp; p.camps is [dem, -1, rep], p.pie is [rep, ind, dem] */
+const popCamp = (p) => (p.camps ? CAMP.list[p.camps[p.pie[2] > p.pie[0] ? 0 : 2]] || null : null);   /* the camp of its larger party; independents have none */
 const popWords = (p) => p.words.concat(popCamp(p) ? [popCamp(p).name] : []).join(", ");
 const campLead = (row, side) => { let best = -1; row.forEach((v, i) => { if ((!side || CAMP.list[i].party === side) && (best < 0 || v > row[best])) best = i; }); return best; };
 const campBars = (row, total) => SIDES.map((side) => { const mine = CAMP.list.map((c, i) => [c, row[i]]).filter(([c, v]) => c.party === side && v > 0).sort((a, b) => b[1] - a[1]);

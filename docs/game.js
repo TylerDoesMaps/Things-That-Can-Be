@@ -75,7 +75,8 @@ const popCamp = (p) => (p.camps ? CAMP.list[p.camps[p.pie[2] > p.pie[0] ? 0 : 2]
 const popWords = (p) => p.words.concat(popCamp(p) ? [popCamp(p).name] : []).join(", ");
 const campLead = (row, side) => { let best = -1; row.forEach((v, i) => { if ((!side || CAMP.list[i].party === side) && (best < 0 || v > row[best])) best = i; }); return best; };
 const campBars = (row, total) => SIDES.map((side) => { const mine = CAMP.list.map((c, i) => [c, row[i]]).filter(([c, v]) => c.party === side && v > 0).sort((a, b) => b[1] - a[1]);
-  return mine.length ? `<div><div class="ib-h">${PARTIES[side].name}s</div>${mine.map(([c, v]) => mbar(c.name, v / total, c.colour)).join("")}</div>` : ""; }).join("");
+  const of = total || mine.reduce((n, [, v]) => n + v, 0);
+  return mine.length ? `<div><div class="ib-h">${PARTIES[side].name}s</div>${mine.map(([c, v]) => mbar(c.name, v / of, c.colour)).join("")}</div>` : ""; }).join("");
 function campState(side) {
   if (!map || CAMP.on === side) return;
   CAMP.on = side;
@@ -351,7 +352,7 @@ function placeTab(q, tab, wide) {
     return h;
   }
   if (tab === "party") {
-    const camps = CAMP.places[q.id] ? `<div class="ib-h">Camps</div><div class="cols">${campBars(CAMP.places[q.id], 1000)}</div>` : "";
+    const camps = CAMP.places[q.id] ? `<div class="ib-h">Camps</div><div class="cols">${campBars(CAMP.places[q.id])}</div>` : "";
     const heads = { rep: 0, ind: 0, dem: 0 }, n = ps.length || 1;
     ps.forEach((p) => heads[S.people[S.leaders[p.id]].party]++);
     return `<table><tr><th>Party ID</th><td>${lead(q.party)}</td></tr><tr><th>President, 2024</th><td>${result(q.id)}</td></tr><tr><th>Expected turnout</th><td>${pct(q.turnout)}</td></tr></table>${camps}

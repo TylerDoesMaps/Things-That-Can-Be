@@ -99,6 +99,13 @@ camps:
   colour: '#1b9e9e'
   club: Blue Dog Coalition
   folds: mainstream_liberals
+  draws:
+  - area:
+    - urban
+    by: 1.08
+  - area:
+    - suburban
+    by: 1.04
   positions:
     income_tax: Raise on high earners
     property_tax: Keep
@@ -187,6 +194,10 @@ camps:
   colour: '#2e8b4f'
   club: Community Democratic League
   folds: blue_dogs
+  draws:
+  - race:
+    - Black
+    by: 1.1
   positions:
     income_tax: Raise on high earners
     property_tax: Keep

@@ -55,6 +55,13 @@ camps:
   colour: '#3a78c9'
   club: Liberal Forum
   folds: blue_dogs
+  draws:
+  - race:
+    - Black
+    income:
+    - $75,000 to $150,000
+    - Over $150,000
+    by: 0.9
   positions:
     income_tax: Raise on high earners
     property_tax: Keep
@@ -102,10 +109,10 @@ camps:
   draws:
   - area:
     - urban
-    by: 1.08
+    by: 1.1
   - area:
     - suburban
-    by: 1.04
+    by: 1.08
   positions:
     income_tax: Raise on high earners
     property_tax: Keep
@@ -150,6 +157,10 @@ camps:
   colour: '#7b3fa0'
   club: Progressive Caucus
   folds: mainstream_liberals
+  draws:
+  - area:
+    - suburban
+    by: 1.09
   positions:
     income_tax: Tax the top far more
     property_tax: Raise for services

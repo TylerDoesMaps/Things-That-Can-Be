@@ -32,7 +32,7 @@ def draw(camp, pop):
     """What a pop's distance to a camp is multiplied by: under 1 where the camp draws pops like this one."""
     by = 1
     for d in camp.get("draws", []):
-        if pop["area"] in d.get("area", [pop["area"]]) and pop["age"] in d.get("age", [pop["age"]]) and pop["race"] in d.get("race", [pop["race"]]) and pop["education"] in d.get("education", [pop["education"]]) and pop["owners"] >= d.get("owners", 0):
+        if pop["area"] in d.get("area", [pop["area"]]) and pop["age"] in d.get("age", [pop["age"]]) and pop["race"] in d.get("race", [pop["race"]]) and pop["education"] in d.get("education", [pop["education"]]) and pop["income"] in d.get("income", [pop["income"]]) and pop["owners"] >= d.get("owners", 0):
             by *= d["by"]
     return by
 

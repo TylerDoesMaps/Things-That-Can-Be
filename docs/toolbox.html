@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Toolbox · Things That Can Be</title>
+<link rel="stylesheet" href="vendor/maplibre-gl.css">
+<link rel="stylesheet" href="game-old.css?v=20261119e">
+<link rel="stylesheet" href="game.css?v=20261119e">
+<link rel="stylesheet" href="toolbox.css?v=20261119e">
+</head>
+<body>
+<div class="app">
+<header class="top">
+  <div class="brand"><div class="mark" aria-hidden="true">T</div><div><div class="name">Things That Can Be</div><div class="tag">Election toolbox</div></div></div>
+  <nav class="vtabs" aria-label="Pages"><a class="btn" href="game.html">Game</a></nav>
+</header>
+<main class="bench">
+  <aside class="side left" aria-label="Race and candidates">
+    <h2 class="sec">Race</h2>
+    <div class="race">
+      <select id="kind" aria-label="Election"></select>
+      <select id="office" aria-label="Office"></select>
+      <select id="place" aria-label="Place"></select>
+      <select id="closed" aria-label="Primary voters"><option value="1">Closed primary</option><option value="0">Open primary</option></select>
+    </div>
+    <h2 class="sec">Candidates</h2>
+    <div id="cands"></div>
+    <div class="btns acts"><button class="btn" id="add">Add candidate</button><button class="btn" id="slate">Reset slate</button></div>
+    <details class="wbox"><summary class="sec">Weights</summary><div id="weights"></div><button class="btn" id="reset">Reset weights</button></details>
+  </aside>
+  <section class="center">
+    <div class="toolbar"><div class="tgroup"><span class="tlabel">Show</span><select id="show" aria-label="Map shading"></select></div>
+      <div class="tgroup"><div class="btns"><button class="btn" id="run">Run</button><button class="btn" id="many">Run 200</button></div></div></div>
+    <div class="mapwrap"><div id="map"></div><div class="legend" id="legend"></div></div>
+  </section>
+  <aside class="side right" aria-label="Results">
+    <div class="tabs2" id="tabs" role="tablist"><button role="tab" data-tab="result">Result</button><button role="tab" data-tab="groups">By group</button><button role="tab" data-tab="ledger">Ledger</button></div>
+    <div id="out" aria-live="polite"></div>
+  </aside>
+</main>
+</div>
+<script src="vendor/maplibre-gl.js"></script>
+<script src="vendor/pmtiles.js"></script>
+<script src="toolbox.js?v=20261119e"></script>
+</body>
+</html>

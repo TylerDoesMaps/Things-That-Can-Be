@@ -1,0 +1,35 @@
+/* The election toolbox. Builds on the game's stylesheets. */
+.bench { display: grid; grid-template-columns: 330px minmax(0, 1fr) 460px; min-height: 0; overflow: hidden; }
+.bench .side { overflow-y: auto; padding: 10px 12px; background: var(--paper); }
+.bench .side.left { border-right: 1px solid var(--border); } .bench .side.right { border-left: 1px solid var(--border); }
+.bench .center { display: grid; grid-template-rows: auto 1fr; min-height: 0; }
+.bench .mapwrap { position: relative; min-height: 0; } .bench #map { position: absolute; inset: 0; }
+.vtabs a.btn { text-decoration: none; color: var(--text); }
+.bench select, .bench input[type=number], .bench input:not([type]) { font: inherit; padding: 3px 5px; box-sizing: border-box; min-width: 0; }
+.race { display: grid; gap: 4px; margin-bottom: 12px; }
+.cand { border: 1px solid var(--border-soft); border-left: 5px solid var(--g3); background: var(--subtle); padding: 6px 8px; margin-bottom: 6px; display: grid; gap: 4px; }
+.cand .row { display: flex; gap: 4px; align-items: center; } .cand .row > input:not([type=checkbox]), .cand .row > select { flex: 1; }
+.cand input[data-f=name] { font-weight: 600; } .cand .btn.x { margin: 0; padding: 1px 8px; }
+.cand > select { width: 100%; }
+.chips { display: flex; flex-wrap: wrap; gap: 2px; align-items: center; } .chips .trait { cursor: pointer; font: inherit; font-size: 12.5px; } .chips select { flex: 1; min-width: 7em; }
+.sl { display: grid; grid-template-columns: 4.5em 1fr 2.2em; gap: 6px; align-items: center; font-size: 12.5px; } .sl output { text-align: right; font-variant-numeric: tabular-nums; }
+.ck { display: flex; align-items: center; gap: 4px; flex: 1; font-size: 12.5px; } .ex { font-size: 12.5px; } .ex input { width: 4.5em; }
+.cand details summary { cursor: pointer; font-size: 12.5px; color: var(--link); }
+.cand .cat { font-weight: 700; font-size: 12px; margin: 6px 0 2px; background: var(--head); padding: 1px 5px; }
+.iss { display: grid; grid-template-columns: minmax(0, 9em) 1fr; gap: 4px; align-items: center; font-size: 12px; margin: 1px 0; } .iss.off { opacity: .45; } .iss select { width: 100%; }
+.acts { margin: 6px 0 14px; }
+.wbox summary { cursor: pointer; } .wrow { display: grid; grid-template-columns: 1fr 5em; gap: 6px; align-items: center; font-size: 12.5px; margin: 3px 0; } .wrow input { width: 100%; text-align: right; }
+.wbox .btn { margin: 6px 0 0; }
+.bench .legend { position: absolute; left: 10px; bottom: 10px; background: var(--paper); border: 1px solid var(--border); padding: 5px 8px; font-size: 12.5px; }
+.bench .legend i, .sw { display: inline-block; width: 10px; height: 10px; margin-right: 6px; }
+.bench .tabs2 { display: flex; gap: 2px; border-bottom: 1px solid var(--border); margin-bottom: 10px; }
+.bench .tabs2 button { background: none; border: 0; border-bottom: 3px solid transparent; padding: 5px 10px 6px; color: var(--link); cursor: pointer; font: inherit; }
+.bench .tabs2 button[aria-selected="true"] { color: var(--text); border-bottom-color: var(--text); font-weight: 600; }
+#out table.wt { margin-bottom: 12px; font-size: 13px; } #out table.wt td.n, #out table.wt th.n { text-align: right; width: auto; white-space: nowrap; }
+#out .pt { color: var(--muted); font-size: 12px; font-weight: 400; } #out tr.won td { font-weight: 600; } #out td.bar { width: 30%; }
+#out .tr { display: block; height: 10px; background: #fff; border: 1px solid var(--border-soft); } #out .fl { display: block; height: 100%; }
+#out .mbar .tr { display: block; } #out .foot { color: var(--muted); font-size: 12.5px; }
+#out td.top { font-weight: 700; } #out td.pos { color: #1c6b3c; } #out td.neg { color: #9a3b39; } #out tr.sum td { font-weight: 700; background: var(--head); }
+#out h3 { margin: 0 0 6px; font-size: 15px; } #out .mb { margin-bottom: 8px; } #poppick { width: 100%; margin-bottom: 8px; }
+#out table.led th { vertical-align: bottom; } #out table.grp th.n, #out table.led th.n { font-size: 12px; white-space: normal; }
+@media (max-width: 1100px) { body { overflow: auto; } .app { height: auto; } .bench { grid-template-columns: 1fr; overflow: visible; } .bench .side { border: 0 !important; overflow: visible; } .bench .mapwrap { min-height: 60vh; } }

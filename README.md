@@ -116,3 +116,9 @@ Units where the precinct file covers less than 98% of adults show the share cove
 - Lines: US Census Bureau, 2024 cartographic boundary files and TIGER/Line.
 - Blocks: US Census Bureau, 2020 redistricting file (PL 94-171).
 - Maine and Nebraska district margins for 2016 and 2020 are entered by hand in `docs/data/districts.json`.
+
+## Election toolbox
+
+`docs/toolbox.html` pits made-up candidates against each other on the game's pops, in a party primary or a general election, with no campaign. Nothing it does is saved to the seed. `build/toolbox.py` packs what it needs about every pop into `docs/data/toolbox.json` and `docs/data/toolbox.bin`; run it after `camps.py` whenever pops, issues or camps change.
+
+A pop's Democrats, independents and Republicans each keep a ledger of points for every candidate. The gap between ledgers decides how their votes split: a lead of 5 points takes two votes in three. The lines are the policy areas (each the net of its issues, weighted by the office's level of government; positive inside a set distance, with a boost for the closest candidate and a malus for the furthest), their party and the local lean (general elections only; the local lean is whatever makes two plain candidates give the pop its real vote), same or partner camp, traits (the `likes` in `traits.yaml`), name ID, incumbent, home county, a free number and luck. Every weight can be changed on the page. Votes are the pop's turnout times a level for primaries or generals. Who may vote in a primary is a switch; Florida is closed.

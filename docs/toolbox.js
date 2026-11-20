@@ -9,10 +9,12 @@ const signed = (v) => (v > 0 ? "+" : v < 0 ? "−" : "") + Math.abs(v).toFixed(1
 const WEIGHTS = [
   ["steep", "Lead that takes two votes in three", 5, 0.5], ["party", "Their party", 20, 1], ["issues", "Issues, standing exactly with them", 10, 1],
   ["reach", "Distance where an issue turns against", 40, 5], ["closest", "Closest on an issue", 0.25, 0.05], ["furthest", "Furthest on an issue", 0.25, 0.05],
-  ["camp", "Same camp", 3, 0.5], ["partner", "Partner camp", 1, 0.5], ["traits", "Traits, multiplied by", 1, 0.25], ["name", "Name ID, fully known", 4, 0.5],
-  ["incumbent", "Incumbent", 2, 0.5], ["block", "Home neighbourhood", 3, 0.5], ["blockNear", "Miles at which home neighbourhood counts half", 4, 0.5], ["city", "Home city", 2, 0.5], ["district", "Home district", 2, 0.5], ["home", "Home county", 3, 0.5], ["near", "Miles at which home county counts half", 75, 5], ["state", "Home state", 2, 0.5], ["race", "Same race, at full strength", 16, 1], ["raceW", "Same race, share felt by White pops", 0.15, 0.05], ["raceB", "Same race, share felt by Black pops", 0.5, 0.05], ["raceH", "Same race, share felt by Hispanic pops", 0.5, 0.05], ["raceO", "Same race, share felt by Asian and other pops", 0.5, 0.05], ["luck", "Luck", 1, 0.25], ["general", "General turnout, multiplied by", 1, 0.05], ["primary", "Primary turnout, multiplied by", 0.35, 0.05]];
+  ["endorse", "Endorsement, at sway 100", 10, 1], ["partner", "Partner camp, share of the camp line", 0.33, 0.05], ["fade", "Turnout below which sway fades", 0.1, 0.01], ["campShare", "Share of a camp's people its sway can bring out", 0.2, 0.05], ["traits", "Traits, multiplied by", 1, 0.25], ["name", "Name ID, fully known", 4, 0.5],
+  ["incumbent", "Incumbent", 2, 0.5], ["block", "Home neighbourhood", 3, 0.5], ["blockNear", "Miles at which home neighbourhood counts half", 4, 0.5], ["city", "Home city", 2, 0.5], ["district", "Home district", 2, 0.5], ["home", "Home county", 3, 0.5], ["near", "Miles at which home county counts half", 75, 5], ["state", "Home state", 2, 0.5], ["race", "Same race, at full strength", 16, 1], ["raceW", "Same race, share felt by White pops", 0.15, 0.05], ["raceB", "Same race, share felt by Black pops", 0.5, 0.05], ["raceH", "Same race, share felt by Hispanic pops", 0.5, 0.05], ["raceO", "Same race, share felt by Asian and other pops", 0.5, 0.05], ["luck", "Luck", 1, 0.25]];
 const OFFICES = [["Governor", "state", 1], ["US Senate", "state", 2], ["US House", "congress", 2], ["State Senate", "senate", 1], ["State House", "house", 1],
   ["County office", "county", 0], ["County commission", "district", 0], ["City office", "muni", 0]];
+/* how many of a pop's usual voters turn out, by kind of year: [name, general, primary] */
+const WHEN = { pres: ["Presidential year", 1, 0.35], mid: ["Midterm", 0.78, 0.3], local: ["Off-year local", 0.35, 0.18], special: ["Special election", 0.25, 0.08] };
 const KINDS = [["dem", "Democratic primary"], ["rep", "Republican primary"], ["general", "General election"]];
 const PARTY = { dem: ["Democrat", "#2f558e"], rep: ["Republican", "#a95450"], ind: ["Independent", "#8a8f94"] };
 const SLICES = ["dem", "ind", "rep"], SLICE_NAME = { dem: "Democrats", ind: "Independents", rep: "Republicans" };
@@ -26,11 +28,11 @@ const LAYERS = [["county", "Counties", (h) => T.counties[h[1]][0], (h) => T.coun
   ["muni", "Municipal", (h) => (h[6] < 0 ? null : T.munis[h[6]][0]), (h) => T.munis[h[6]][1]], ["hood", "Neighbourhoods", (h) => h[0], (h) => h[0]],
   ["house", "State House", (h) => h[3] || null, (h) => "State House District " + h[3]], ["senate", "State Senate", (h) => h[4] || null, (h) => "State Senate District " + h[4]], ["congress", "Congress", (h) => h[5] || null, (h) => "Congressional District " + h[5]]];
 const layer = () => LAYERS.find((l) => l[0] === S.layer);
-let T, BOOK, COL = {}, REST, N, NI, map, mapReady = false, LAST = null, PICK = null;
-const S = { kind: "dem", office: 0, place: "", closed: true, w: {}, cands: [], show: "win", layer: "county", lines: ["county"], tab: "result", many: null };
+let T, BOOK, COL = {}, REST, MEMB, N, NI, NO, map, mapReady = false, LAST = null, PICK = null;
+const S = { kind: "dem", office: 0, place: "", closed: true, w: {}, cands: [], when: "pres", level: 0.35, left: "race", orgs: {}, camps: {}, show: "win", layer: "county", lines: ["county"], tab: "result", many: null };
 for (const [k, , v] of WEIGHTS) S.w[k] = v;
-try { const saved = JSON.parse(localStorage.getItem("ttcb-toolbox-4") || "null"); if (saved) { Object.assign(S.w, saved.w || {}); if (typeof saved.closed === "boolean") S.closed = saved.closed; } } catch (e) { /* storage is a convenience only */ }
-const keep = () => { try { localStorage.setItem("ttcb-toolbox-4", JSON.stringify({ w: S.w, closed: S.closed })); } catch (e) { /* ignore */ } };
+try { const saved = JSON.parse(localStorage.getItem("ttcb-toolbox-5") || "null"); if (saved) { Object.assign(S.w, saved.w || {}); if (typeof saved.closed === "boolean") S.closed = saved.closed; } } catch (e) { /* storage is a convenience only */ }
+const keep = () => { try { localStorage.setItem("ttcb-toolbox-5", JSON.stringify({ w: S.w, closed: S.closed })); } catch (e) { /* ignore */ } };
 
 /* ---------- the race ---------- */
 function places(kind) {
@@ -55,6 +57,7 @@ function blank(party, camp) {
   return { name: "", party, camp: camp || "", stops: stopsOf(c) || T.usual[party].slice(), traits: [], known: 50, incumbent: false, home: "", block: "", dk: "", dn: "", state: "in", race: "", extra: 0 };
 }
 function slate() {   // one candidate per camp for a primary; one plain candidate per party for a general
+  for (const k in S.orgs) S.orgs[k].to = "";
   S.cands = S.kind === "general" ? [blank("dem"), blank("rep")] : T.camps.filter((c) => c.party === S.kind).map((c) => blank(S.kind, c.id));
 }
 function label(c, i) {   // a typed name, else the camp or party if no other candidate shares it, else a letter
@@ -106,7 +109,9 @@ function setup() {
       near: c.state !== "in" || c.home === "" ? null : T.counties.map((x, k) => S.w.home * Math.pow(0.5, miles(+c.home, k) / Math.max(1, S.w.near))) };
   });
   const plain = general ? ["dem", "rep"].map((p) => active.map((k) => T.issues[k].stops[T.usual[p][k]][0])) : null;
-  return { kind, level, general, hoodIn, active, w, sumW, slices, pull, cands, plain, K: Math.log(2) / Math.max(0.1, S.w.steep), turnout: general ? S.w.general : S.w.primary };
+  const ends = []; T.orgs.forEach((o, k) => { const e = S.orgs[o[0]]; if (e && e.to !== "" && +e.to < cands.length) ends.push([k, +e.to, Math.max(0, Math.min(100, e.sway)) / 100]); });
+  const campSway = T.camps.map((c) => Math.max(0, Math.min(100, S.camps[c.id])) / 100);
+  return { kind, level, general, hoodIn, active, w, sumW, slices, pull, cands, plain, ends, campSway, K: Math.log(2) / Math.max(0.1, S.w.steep), turnout: S.level };
 }
 /* Points on the issues for each candidate with one set of voters. v: the voters' numbers on the active issues. Fills out[j]; cat, if given, gets each policy area's net. */
 function issuePoints(R, v, pos, out, cat) {
@@ -138,7 +143,8 @@ function points(R, i, slice, b, out, lines) {
   for (let j = 0; j < n; j++) { const c = R.cands[j], add = (name, v) => { if (v) { out[j] += v; if (lines) lines[j].push([name, v]); } };
     if (lines) { lines[j] = []; for (const [name, v] of Object.entries(cat[j])) if (Math.abs(v[0]) >= 0.05) lines[j].push([name, v[0]]); }
     if (R.general) { add("Their party", c.party === slice && slice !== "ind" ? S.w.party : 0); add("Local lean", c.party === "rep" ? b / 2 : c.party === "dem" ? -b / 2 : 0); }
-    if (camp && c.campRec && c.party === slice) add(c.campRec === camp ? "Same camp" : "Partner camp", c.campRec === camp ? S.w.camp : c.campRec.folds === camp.id || camp.folds === c.campRec.id ? S.w.partner : 0);
+    if (camp && c.campRec && c.party === slice) add(c.campRec === camp ? "Their camp" : "Partner camp", S.w.endorse * R.campSway[mine] * (c.campRec === camp ? 1 : c.campRec.folds === camp.id || camp.folds === c.campRec.id ? S.w.partner : 0));
+    { let v = 0; for (const [o, to, sw] of R.ends) if (to === j) v += S.w.endorse * MEMB[i * NO + o] / 100 * sw; add("Endorsements", v); }
     if (lines) for (const t of c.per) add(t.name, t.flat + (c.raceAt === COL.race[i] ? t.same : 0) + (c.party === slice ? t.base : 0) + (slice === "ind" ? t.ind : 0) + t.by.education[COL.education[i]] + t.by.income[COL.income[i]] + t.by.area[COL.area[i]] + t.by.age[COL.age[i]] + t.by.work[COL.work[i]]);
     else out[j] += c.flat + (c.raceAt === COL.race[i] ? c.same : 0) + (c.party === slice ? c.base : 0) + (slice === "ind" ? c.ind : 0) + c.by.education[COL.education[i]] + c.by.income[COL.income[i]] + c.by.area[COL.area[i]] + c.by.age[COL.age[i]] + c.by.work[COL.work[i]];
     if (lines) { add("Name ID", S.w.name * c.known / 100); add("Incumbent", c.incumbent ? S.w.incumbent : 0); add("Other", +c.extra || 0); } else out[j] += c.fixed;
@@ -149,14 +155,23 @@ function points(R, i, slice, b, out, lines) {
     add("Home state", c.state === "in" ? S.w.state : 0); add("Same race", c.raceAt === COL.race[i] ? S.w.race * [S.w.raceW, S.w.raceB, S.w.raceH, S.w.raceO, S.w.raceO][COL.race[i]] : 0);
   }
 }
+/* Turnout of one set of voters: the pop's own, times the election's level, lifted by sway. Each endorsing body adds its sway times its share of the pop, and a camp with a
+   candidate in the race adds its sway times the share of its people it can reach. The lift only counts people not already voting, and fades in very small elections. Returns [before, after]. */
+function turnout(R, i, slice) {
+  const t = Math.min(1, COL.turnout[i] / 1000 * R.turnout); let lift = 0;
+  for (const [o, , sw] of R.ends) lift += MEMB[i * NO + o] / 100 * sw;
+  const mine = slice === "dem" ? COL.camp_dem[i] : slice === "rep" ? COL.camp_rep[i] : -1;
+  if (mine >= 0 && R.cands.some((c) => c.campRec === T.camps[mine] && c.party === slice)) lift += R.campSway[mine] * S.w.campShare;
+  return [t, Math.min(1, t + lift * (1 - t) * t / (t + Math.max(0.001, S.w.fade)))];
+}
 /* Every set of voters in the race, with its points for each candidate before luck. */
 function build() {
-  const R = setup(), n = R.cands.length, rows = [], who = [], weight = [], out = new Float64Array(n), lean_ = {};
+  const R = setup(), n = R.cands.length, rows = [], who = [], weight = [], out = new Float64Array(n), lean_ = {}; let could = 0, usual = 0;
   for (let i = 0; i < N; i++) { if (!R.hoodIn[COL.hood[i]]) continue;
     const b = R.general ? lean(R, i) : 0; if (R.general) lean_[i] = b;
-    for (let s = 0; s < R.slices.length; s++) { const slice = R.slices[s], people = 100 * pie(i, slice) * Math.min(1, COL.turnout[i] / 1000 * R.turnout); if (people <= 0) continue;
+    for (let s = 0; s < R.slices.length; s++) { const slice = R.slices[s], tt = turnout(R, i, slice), people = 100 * pie(i, slice) * tt[1]; could += 100 * pie(i, slice); usual += 100 * pie(i, slice) * tt[0]; if (people <= 0) continue;
       points(R, i, slice, b, out); for (let j = 0; j < n; j++) rows.push(out[j]); who.push(i, SLICES.indexOf(slice)); weight.push(people); } }
-  return { R, n, rows: Float32Array.from(rows), who: Int32Array.from(who), weight: Float32Array.from(weight), lean: lean_ };
+  return { R, n, rows: Float32Array.from(rows), who: Int32Array.from(who), weight: Float32Array.from(weight), lean: lean_, could, usual };
 }
 const GROUPS = [["Party", (i, s) => s, () => SLICES.map((s) => SLICE_NAME[s])], ["Camp", (i, s) => (s === 0 ? COL.camp_dem[i] : s === 2 ? COL.camp_rep[i] : -1), () => T.camps.map((c) => c.name)],
   ...["race", "age", "education", "income", "area"].map((key) => [key[0].toUpperCase() + key.slice(1), (i) => COL[key][i], () => T.lists[key]])];
@@ -218,7 +233,7 @@ function results() {
     h = `<table class="wt res"><tr><th>Candidate</th><th>Votes</th><th colspan="2">Share</th>${S.many ? "<th>Wins</th><th>Low</th><th>High</th>" : ""}</tr>${o.map((j) => `<tr${j === o[0] ? ' class="won"' : ""}><td><i class="sw" style="background:${cols[j]}"></i>${esc(label(S.cands[j], j))}<div class="pt">${esc(sub(S.cands[j], j))}</div></td>
       <td class="n">${Math.round(res.total[j]).toLocaleString()}</td><td class="n">${pct(res.total[j] / sum)}</td><td class="bar">${bar(res.total[j] / sum, cols[j])}</td>
       ${S.many ? `<td class="n">${pct(S.many.wins[j] / S.many.runs)}</td><td class="n">${pct(S.many.low[j])}</td><td class="n">${pct(S.many.high[j])}</td>` : ""}</tr>`).join("")}</table>
-      <div class="foot">${Math.round(sum).toLocaleString()} votes${S.many ? ` · ${S.many.runs} runs` : ""}</div>`;
+      <div class="foot">${Math.round(sum).toLocaleString()} votes · turnout ${pct(sum / LAST.B.could)}${sum > LAST.B.usual * 1.0005 ? ` (${pct(LAST.B.usual / LAST.B.could)} without sway)` : ""}${S.many ? ` · ${S.many.runs} runs` : ""}</div>`;
   } else if (S.tab === "groups") {
     h = GROUPS.map(([title, , names], g) => { const rows = names().map((name, at) => [name, res.groups[g][at]]).filter(([, row]) => row.reduce((a, b) => a + b, 0) > 0.5);
       return rows.length ? `<table class="wt grp"><tr><th>${title}</th>${S.cands.map((c, j) => `<th class="n" style="box-shadow:inset 0 -3px 0 ${cols[j]}">${esc(label(c, j))}</th>`).join("")}<th class="n">Votes</th></tr>
@@ -247,7 +262,7 @@ function ledger() {
     if (luck.some(Boolean)) names.push("Luck");
     const total = [...out].map((v, j) => v + luck[j]), top = Math.max(...total), e = total.map((v) => Math.exp(R.K * (v - top))), es = e.reduce((a, b) => a + b, 0);
     const mine = slice === "dem" ? COL.camp_dem[i] : slice === "rep" ? COL.camp_rep[i] : -1;
-    h += `<table class="wt led"><tr><th>${SLICE_NAME[slice]} · ${pct(share)}${mine >= 0 ? `<div class="pt">${esc(T.camps[mine].name)}</div>` : ""}</th>${S.cands.map((c, j) => `<th class="n" style="box-shadow:inset 0 -3px 0 ${cols[j]}">${esc(label(c, j))}</th>`).join("")}</tr>
+    h += `<table class="wt led"><tr><th>${SLICE_NAME[slice]} · ${pct(share)}<div class="pt">${(() => { const tt = turnout(R, i, slice); return "Turnout " + pct(tt[0]) + (tt[1] > tt[0] + 0.0005 ? " → " + pct(tt[1]) : ""); })()}</div>${mine >= 0 ? `<div class="pt">${esc(T.camps[mine].name)}</div>` : ""}</th>${S.cands.map((c, j) => `<th class="n" style="box-shadow:inset 0 -3px 0 ${cols[j]}">${esc(label(c, j))}</th>`).join("")}</tr>
       ${names.map((name) => `<tr><td>${esc(name)}</td>${S.cands.map((c, j) => { const v = name === "Luck" ? luck[j] : (lines[j].find((l) => l[0] === name) || [0, 0])[1]; return `<td class="n ${v > 0.049 ? "pos" : v < -0.049 ? "neg" : "nil"}">${Math.abs(v) < 0.05 ? "" : signed(v)}</td>`; }).join("")}</tr>`).join("")}
       <tr class="sum"><td>Total</td>${total.map((v) => `<td class="n">${signed(v)}</td>`).join("")}</tr><tr class="sum"><td>Vote</td>${e.map((v) => `<td class="n">${pct(v / es)}</td>`).join("")}</tr></table>`; }
   return h;
@@ -271,7 +286,18 @@ function raceMenu() {
   const list = places(OFFICES[S.office][1]); if (!list.some((p) => p[0] === S.place)) S.place = list[0][0];
   $("place").innerHTML = list.map(([id, name]) => `<option value="${esc(id)}"${id === S.place ? " selected" : ""}>${esc(name)}</option>`).join(""); $("place").disabled = list.length < 2;
   $("closed").value = S.closed ? "1" : "0"; $("closed").disabled = S.kind === "general";
+  $("when").innerHTML = Object.entries(WHEN).map(([k, v]) => `<option value="${k}"${k === S.when ? " selected" : ""}>${v[0]}</option>`).join(""); $("level").value = S.level;
 }
+const levelNow = () => WHEN[S.when][S.kind === "general" ? 1 : 2];
+/* The endorsements tab: every camp's sway, then every organization's sway and the candidate its leader backs. */
+function endMenu() {
+  const names = S.cands.map((c, j) => label(c, j)), kinds = { church: "Churches", union: "Unions", business: "Business groups", civic: "Civic and advocacy groups" };
+  const sides = S.kind === "general" ? ["dem", "rep"] : [S.kind];
+  $("ends").innerHTML = `<table class="wt et"><tr><th>Camp</th><th class="n">Sway</th></tr>${T.camps.filter((c) => sides.includes(c.party)).map((c) => `<tr><td><i class="sw" style="background:${c.colour}"></i>${esc(c.name)}</td><td class="n"><input type="number" min="0" max="100" step="5" data-camp="${c.id}" value="${S.camps[c.id]}" aria-label="${esc(c.name)} sway"></td></tr>`).join("")}</table>` +
+    Object.entries(kinds).map(([k, title]) => `<table class="wt et"><tr><th>${title}</th><th class="n">Sway</th><th>Backs</th></tr>${T.orgs.filter((o) => o[2] === k).map((o) => { const e = S.orgs[o[0]];
+      return `<tr${e.to !== "" ? ' class="on"' : ""}><td>${esc(o[1])}</td><td class="n"><input type="number" min="0" max="100" step="1" data-org="${o[0]}" value="${e.sway}" aria-label="${esc(o[1])} sway"></td><td><select data-back="${o[0]}" aria-label="${esc(o[1])} backs"><option value="">Nobody</option>${names.map((nm, j) => `<option value="${j}"${String(j) === String(e.to) ? " selected" : ""}>${esc(nm)}</option>`).join("")}</select></td></tr>`; }).join("")}</table>`).join("");
+}
+function leftTab() { document.querySelectorAll("#ltabs button").forEach((b) => b.setAttribute("aria-selected", b.dataset.left === S.left)); for (const k of ["race", "ends", "weights"]) $("pane-" + k).hidden = k !== S.left; if (S.left === "ends") endMenu(); }
 function candMenu() {
   const cols = colours(), level = OFFICES[S.office][2], traits = Object.keys(BOOK.likes).sort((a, b) => BOOK.traits[a].localeCompare(BOOK.traits[b]));
   const cats = [...new Set(T.issues.map((x) => x.category))];
@@ -294,7 +320,13 @@ function weightMenu() {
   $("weights").innerHTML = WEIGHTS.map(([k, name, , step]) => `<label class="wrow"><span>${name}</span><input type="number" step="${step}" data-w="${k}" value="${S.w[k]}"></label>`).join("");
 }
 function wire() {
-  $("kind").onchange = (e) => { S.kind = e.target.value; slate(); raceMenu(); candMenu(); run(false); };
+  $("kind").onchange = (e) => { S.kind = e.target.value; S.level = levelNow(); slate(); raceMenu(); candMenu(); run(false); };
+  $("when").onchange = (e) => { S.when = e.target.value; S.level = levelNow(); $("level").value = S.level; run(false); };
+  $("level").oninput = (e) => { const v = parseFloat(e.target.value); if (isFinite(v) && v > 0) { S.level = v; soon(); } };
+  $("ltabs").onclick = (e) => { const b = e.target.closest("button"); if (b) { S.left = b.dataset.left; leftTab(); } };
+  $("ends").oninput = (e) => { const t = e.target, v = parseFloat(t.value); if (!isFinite(v)) return; if (t.dataset.org) S.orgs[t.dataset.org].sway = v; else if (t.dataset.camp) S.camps[t.dataset.camp] = v; else return; soon(); };
+  $("ends").onchange = (e) => { const t = e.target; if (t.dataset.back) { S.orgs[t.dataset.back].to = t.value; t.closest("tr").className = t.value === "" ? "" : "on"; run(false); } };
+  $("swayreset").onclick = () => { for (const o of T.orgs) S.orgs[o[0]] = { sway: o[3], to: "" }; for (const c of T.camps) S.camps[c.id] = c.sway; endMenu(); run(false); };
   $("office").onchange = (e) => { S.office = +e.target.value; S.place = ""; raceMenu(); candMenu(); fit(); PICK = null; run(false); };
   $("place").onchange = (e) => { S.place = e.target.value; fit(); PICK = null; run(false); };
   $("closed").onchange = (e) => { S.closed = e.target.value === "1"; keep(); run(false); };
@@ -313,7 +345,7 @@ function wire() {
   $("out").onchange = (e) => { if (e.target.id === "poppick") { PICK.pop = +e.target.value; results(); } };
   const cands = $("cands");
   cands.onclick = (e) => { const b = e.target.closest("[data-act]"); if (!b) return; const j = +b.closest(".cand").dataset.j;
-    if (b.dataset.act === "drop") S.cands.splice(j, 1); else S.cands[j].traits = S.cands[j].traits.filter((t) => t !== b.dataset.t);
+    if (b.dataset.act === "drop") { S.cands.splice(j, 1); for (const k in S.orgs) { const e = S.orgs[k]; if (e.to !== "") e.to = +e.to === j ? "" : +e.to > j ? String(+e.to - 1) : e.to; } } else S.cands[j].traits = S.cands[j].traits.filter((t) => t !== b.dataset.t);
     candMenu(); showMenu(); run(false); };
   cands.addEventListener("toggle", (e) => { const card = e.target.closest(".cand"); if (card) S.cands[+card.dataset.j].open = e.target.open; }, true);
   cands.oninput = (e) => { const t = e.target, card = t.closest(".cand"); if (!card) return; const c = S.cands[+card.dataset.j], f = t.dataset.f;
@@ -327,7 +359,7 @@ function wire() {
     run(false); };
 }
 function showMenu() { $("show").innerHTML = `<option value="win">Winner</option>` + S.cands.map((c, j) => `<option value="${j}"${String(j) === S.show ? " selected" : ""}>${esc(label(c, j))}</option>`).join(""); if (S.show !== "win" && +S.show >= S.cands.length) S.show = "win"; }
-const run0 = run; run = function (reroll) { showMenu(); run0(reroll); };   // the Show menu follows the candidate list
+const run0 = run; run = function (reroll) { showMenu(); if (S.left === "ends" && document.activeElement && !$("ends").contains(document.activeElement)) endMenu(); run0(reroll); };   // the Show menu follows the candidate list
 
 /* ---------- start ---------- */
 async function start() {
@@ -335,8 +367,9 @@ async function start() {
   T = t; BOOK = book; N = T.pops; NI = T.issues.length; let at = 0;
   for (const k of T.columns.wide) { COL[k] = new Uint16Array(bin, at, N); at += 2 * N; }
   for (const k of T.columns.small) { COL[k] = new Uint8Array(bin, at, N); at += N; }
-  REST = new Int8Array(bin, at, N * NI);
-  slate(); raceMenu(); candMenu(); weightMenu(); wire(); run(false);
+  REST = new Int8Array(bin, at, N * NI); NO = T.orgs.length; MEMB = new Uint8Array(bin, at + N * NI, N * NO);
+  for (const o of T.orgs) S.orgs[o[0]] = { sway: o[3], to: "" }; for (const c of T.camps) S.camps[c.id] = c.sway;
+  slate(); raceMenu(); candMenu(); weightMenu(); wire(); leftTab(); run(false);
   maplibregl.addProtocol("pmtiles", new pmtiles.Protocol().tile);
   map = new maplibregl.Map({ container: "map", style: { version: 8, sources: {}, layers: [{ id: "bg", type: "background", paint: { "background-color": "#f3f1ea" } }] }, dragRotate: false, attributionControl: false, minZoom: 5, maxZoom: 15 });
   map.addControl(new maplibregl.NavigationControl({ showCompass: false }), "top-left");

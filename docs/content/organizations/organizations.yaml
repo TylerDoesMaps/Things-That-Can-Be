@@ -1,46 +1,46 @@
-note: Organizations a pop's people can belong to. Each kind has one fallback, present in every county. Any other needs `bar` members in a county to form a chapter; where it has fewer, `share` of them fold into `into` and the rest are uninvolved. Joining rates are in build/organizations.py. Names are generic. First version.
+note: Organizations a pop's people can belong to. `sway`, 0 to 100, is how well one starts out at bringing its members' votes. Each kind has one fallback, present in every county. Any other needs `bar` members in a county to form a chapter; where it has fewer, `share` of them fold into `into` and the rest are uninvolved. Joining rates are in build/organizations.py. Names are generic. First version.
 kinds: {church: Churches, union: Unions, business: Business groups, civic: Civic and advocacy groups, party: Parties}
 organizations:
-  - {id: ministerial_alliance, name: Ministerial Alliance, kind: church, fallback: true}
-  - {id: baptist_association, name: Baptist Association, kind: church, bar: 150, into: ministerial_alliance, share: 0.5}
-  - {id: black_church_conference, name: Black Church Conference, kind: church, bar: 150, into: ministerial_alliance, share: 0.5}
-  - {id: catholic_diocese, name: Catholic Diocese, kind: church, bar: 300, into: ministerial_alliance, share: 0.5}
-  - {id: mainline_council, name: Mainline Council, kind: church, bar: 300, into: ministerial_alliance, share: 0.5}
-  - {id: pentecostal_fellowship, name: Pentecostal Fellowship, kind: church, bar: 300, into: baptist_association, share: 0.5}
-  - {id: hispanic_evangelical_fellowship, name: Hispanic Evangelical Fellowship, kind: church, bar: 600, into: pentecostal_fellowship, share: 0.5}
-  - {id: jewish_federation, name: Jewish Federation, kind: church, bar: 750, into: ministerial_alliance, share: 0.1}
-  - {id: islamic_society, name: Islamic Society, kind: church, bar: 750, into: ministerial_alliance, share: 0.1}
-  - {id: latter_day_saint_stake, name: Latter-day Saint Stake, kind: church, bar: 750, into: ministerial_alliance, share: 0.1}
-  - {id: labor_council, name: Labor Council, kind: union, fallback: true}
-  - {id: public_employees_union, name: Public Employees Union, kind: union, bar: 200, into: labor_council, share: 0.5}
-  - {id: teachers_union, name: Teachers Union, kind: union, bar: 200, into: public_employees_union, share: 0.5}
-  - {id: police_benevolent_association, name: Police Benevolent Association, kind: union, bar: 600, into: public_employees_union, share: 0.5}
-  - {id: firefighters_union, name: Firefighters Union, kind: union, bar: 600, into: public_employees_union, share: 0.5}
-  - {id: building_trades_council, name: Building Trades Council, kind: union, bar: 200, into: labor_council, share: 0.5}
-  - {id: service_workers_union, name: Service Workers Union, kind: union, bar: 200, into: labor_council, share: 0.5}
-  - {id: health_workers_union, name: Health Workers Union, kind: union, bar: 800, into: service_workers_union, share: 0.5}
-  - {id: transport_workers_union, name: Transport Workers Union, kind: union, bar: 800, into: building_trades_council, share: 0.5}
-  - {id: farmworkers_association, name: Farmworkers Association, kind: union, bar: 200, into: labor_council, share: 0.5}
-  - {id: chamber_of_commerce, name: Chamber of Commerce, kind: business, fallback: true}
-  - {id: growers_association, name: Growers Association, kind: business, bar: 250, into: chamber_of_commerce, share: 0.5}
-  - {id: realtors_association, name: Realtors Association, kind: business, bar: 600, into: chamber_of_commerce, share: 0.5}
-  - {id: home_builders_association, name: Home Builders Association, kind: business, bar: 750, into: realtors_association, share: 0.5}
-  - {id: hospitality_association, name: Hospitality Association, kind: business, bar: 600, into: chamber_of_commerce, share: 0.5}
-  - {id: merchants_association, name: Merchants Association, kind: business, bar: 250, into: chamber_of_commerce, share: 0.5}
-  - {id: industry_council, name: Industry Council, kind: business, bar: 1000, into: chamber_of_commerce, share: 0.5}
-  - {id: bankers_association, name: Bankers Association, kind: business, bar: 1500, into: chamber_of_commerce, share: 0.5}
-  - {id: medical_society, name: Medical Society, kind: business, bar: 1000, into: chamber_of_commerce, share: 0.5}
-  - {id: bar_association, name: Bar Association, kind: business, bar: 1500, into: chamber_of_commerce, share: 0.5}
-  - {id: civic_league, name: Civic League, kind: civic, fallback: true}
-  - {id: civil_rights_league, name: Civil Rights League, kind: civic, bar: 400, into: civic_league, share: 0.5}
-  - {id: veterans_post, name: Veterans Post, kind: civic, bar: 400, into: civic_league, share: 0.5}
-  - {id: seniors_association, name: Seniors Association, kind: civic, bar: 400, into: civic_league, share: 0.5}
-  - {id: sportsmens_association, name: Sportsmen's Association, kind: civic, bar: 400, into: civic_league, share: 0.5}
-  - {id: homeowners_federation, name: Homeowners Federation, kind: civic, bar: 1500, into: civic_league, share: 0.5}
-  - {id: hispanic_civic_alliance, name: Hispanic Civic Alliance, kind: civic, bar: 800, into: civil_rights_league, share: 0.5}
-  - {id: conservation_society, name: Conservation Society, kind: civic, bar: 1200, into: civic_league, share: 0.5}
-  - {id: womens_league, name: Women's League, kind: civic, bar: 1200, into: civic_league, share: 0.5}
-  - {id: taxpayers_association, name: Taxpayers Association, kind: civic, bar: 1000, into: civic_league, share: 0.5}
+  - {id: ministerial_alliance, name: Ministerial Alliance, kind: church, fallback: true, sway: 12}
+  - {id: baptist_association, name: Baptist Association, kind: church, bar: 150, into: ministerial_alliance, share: 0.5, sway: 20}
+  - {id: black_church_conference, name: Black Church Conference, kind: church, bar: 150, into: ministerial_alliance, share: 0.5, sway: 22}
+  - {id: catholic_diocese, name: Catholic Diocese, kind: church, bar: 300, into: ministerial_alliance, share: 0.5, sway: 6}
+  - {id: mainline_council, name: Mainline Council, kind: church, bar: 300, into: ministerial_alliance, share: 0.5, sway: 5}
+  - {id: pentecostal_fellowship, name: Pentecostal Fellowship, kind: church, bar: 300, into: baptist_association, share: 0.5, sway: 14}
+  - {id: hispanic_evangelical_fellowship, name: Hispanic Evangelical Fellowship, kind: church, bar: 600, into: pentecostal_fellowship, share: 0.5, sway: 14}
+  - {id: jewish_federation, name: Jewish Federation, kind: church, bar: 750, into: ministerial_alliance, share: 0.1, sway: 8}
+  - {id: islamic_society, name: Islamic Society, kind: church, bar: 750, into: ministerial_alliance, share: 0.1, sway: 10}
+  - {id: latter_day_saint_stake, name: Latter-day Saint Stake, kind: church, bar: 750, into: ministerial_alliance, share: 0.1, sway: 16}
+  - {id: labor_council, name: Labor Council, kind: union, fallback: true, sway: 12}
+  - {id: public_employees_union, name: Public Employees Union, kind: union, bar: 200, into: labor_council, share: 0.5, sway: 12}
+  - {id: teachers_union, name: Teachers Union, kind: union, bar: 200, into: public_employees_union, share: 0.5, sway: 16}
+  - {id: police_benevolent_association, name: Police Benevolent Association, kind: union, bar: 600, into: public_employees_union, share: 0.5, sway: 14}
+  - {id: firefighters_union, name: Firefighters Union, kind: union, bar: 600, into: public_employees_union, share: 0.5, sway: 14}
+  - {id: building_trades_council, name: Building Trades Council, kind: union, bar: 200, into: labor_council, share: 0.5, sway: 12}
+  - {id: service_workers_union, name: Service Workers Union, kind: union, bar: 200, into: labor_council, share: 0.5, sway: 12}
+  - {id: health_workers_union, name: Health Workers Union, kind: union, bar: 800, into: service_workers_union, share: 0.5, sway: 12}
+  - {id: transport_workers_union, name: Transport Workers Union, kind: union, bar: 800, into: building_trades_council, share: 0.5, sway: 12}
+  - {id: farmworkers_association, name: Farmworkers Association, kind: union, bar: 200, into: labor_council, share: 0.5, sway: 8}
+  - {id: chamber_of_commerce, name: Chamber of Commerce, kind: business, fallback: true, sway: 6}
+  - {id: growers_association, name: Growers Association, kind: business, bar: 250, into: chamber_of_commerce, share: 0.5, sway: 10}
+  - {id: realtors_association, name: Realtors Association, kind: business, bar: 600, into: chamber_of_commerce, share: 0.5, sway: 8}
+  - {id: home_builders_association, name: Home Builders Association, kind: business, bar: 750, into: realtors_association, share: 0.5, sway: 8}
+  - {id: hospitality_association, name: Hospitality Association, kind: business, bar: 600, into: chamber_of_commerce, share: 0.5, sway: 5}
+  - {id: merchants_association, name: Merchants Association, kind: business, bar: 250, into: chamber_of_commerce, share: 0.5, sway: 4}
+  - {id: industry_council, name: Industry Council, kind: business, bar: 1000, into: chamber_of_commerce, share: 0.5, sway: 6}
+  - {id: bankers_association, name: Bankers Association, kind: business, bar: 1500, into: chamber_of_commerce, share: 0.5, sway: 5}
+  - {id: medical_society, name: Medical Society, kind: business, bar: 1000, into: chamber_of_commerce, share: 0.5, sway: 5}
+  - {id: bar_association, name: Bar Association, kind: business, bar: 1500, into: chamber_of_commerce, share: 0.5, sway: 4}
+  - {id: civic_league, name: Civic League, kind: civic, fallback: true, sway: 4}
+  - {id: civil_rights_league, name: Civil Rights League, kind: civic, bar: 400, into: civic_league, share: 0.5, sway: 12}
+  - {id: veterans_post, name: Veterans Post, kind: civic, bar: 400, into: civic_league, share: 0.5, sway: 7}
+  - {id: seniors_association, name: Seniors Association, kind: civic, bar: 400, into: civic_league, share: 0.5, sway: 7}
+  - {id: sportsmens_association, name: Sportsmen's Association, kind: civic, bar: 400, into: civic_league, share: 0.5, sway: 12}
+  - {id: homeowners_federation, name: Homeowners Federation, kind: civic, bar: 1500, into: civic_league, share: 0.5, sway: 5}
+  - {id: hispanic_civic_alliance, name: Hispanic Civic Alliance, kind: civic, bar: 800, into: civil_rights_league, share: 0.5, sway: 10}
+  - {id: conservation_society, name: Conservation Society, kind: civic, bar: 1200, into: civic_league, share: 0.5, sway: 6}
+  - {id: womens_league, name: Women's League, kind: civic, bar: 1200, into: civic_league, share: 0.5, sway: 5}
+  - {id: taxpayers_association, name: Taxpayers Association, kind: civic, bar: 1000, into: civic_league, share: 0.5, sway: 8}
   - {id: republican_party, name: Republican Party, kind: party, fallback: true, party: rep}
   - {id: democratic_party, name: Democratic Party, kind: party, fallback: true, party: dem}
 religion:  # how the county figures in religion-fl.csv (PRRI, 2020 Census of American Religion, share of residents by identity) map onto the churches. Only the mix between churches is fitted.

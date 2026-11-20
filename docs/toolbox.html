@@ -5,9 +5,9 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Toolbox · Things That Can Be</title>
 <link rel="stylesheet" href="vendor/maplibre-gl.css">
-<link rel="stylesheet" href="game-old.css?v=20261119l">
-<link rel="stylesheet" href="game.css?v=20261119l">
-<link rel="stylesheet" href="toolbox.css?v=20261119l">
+<link rel="stylesheet" href="game-old.css?v=20261120a">
+<link rel="stylesheet" href="game.css?v=20261120a">
+<link rel="stylesheet" href="toolbox.css?v=20261120a">
 </head>
 <body>
 <div class="app">
@@ -16,18 +16,22 @@
   <nav class="vtabs" aria-label="Pages"><a class="btn" href="game.html">Game</a></nav>
 </header>
 <main class="bench">
-  <aside class="side left" aria-label="Race and candidates">
-    <h2 class="sec">Race</h2>
-    <div class="race">
-      <select id="kind" aria-label="Election"></select>
-      <select id="office" aria-label="Office"></select>
-      <select id="place" aria-label="Place"></select>
-      <select id="closed" aria-label="Primary voters"><option value="1">Closed primary</option><option value="0">Open primary</option></select>
+  <aside class="side left" aria-label="Race, endorsements and weights">
+    <div class="tabs2" id="ltabs" role="tablist"><button role="tab" data-left="race">Race</button><button role="tab" data-left="ends">Endorsements</button><button role="tab" data-left="weights">Weights</button></div>
+    <div id="pane-race">
+      <div class="race">
+        <select id="kind" aria-label="Election"></select>
+        <select id="office" aria-label="Office"></select>
+        <select id="place" aria-label="Place"></select>
+        <select id="closed" aria-label="Primary voters"><option value="1">Closed primary</option><option value="0">Open primary</option></select>
+        <div class="row2"><select id="when" aria-label="Kind of year"></select><label class="lv">Turnout <input type="number" id="level" min="0.01" max="1.5" step="0.01"></label></div>
+      </div>
+      <h2 class="sec">Candidates</h2>
+      <div id="cands"></div>
+      <div class="btns acts"><button class="btn" id="add">Add candidate</button><button class="btn" id="slate">Reset slate</button></div>
     </div>
-    <h2 class="sec">Candidates</h2>
-    <div id="cands"></div>
-    <div class="btns acts"><button class="btn" id="add">Add candidate</button><button class="btn" id="slate">Reset slate</button></div>
-    <details class="wbox"><summary class="sec">Weights</summary><div id="weights"></div><button class="btn" id="reset">Reset weights</button></details>
+    <div id="pane-ends" hidden><div id="ends"></div><button class="btn" id="swayreset">Reset sway and endorsements</button></div>
+    <div id="pane-weights" hidden><div id="weights"></div><button class="btn" id="reset">Reset weights</button></div>
   </aside>
   <section class="center">
     <div class="toolbar"><div class="tgroup"><span class="tlabel">Layer</span><select id="layer" aria-label="Map layer"></select></div><div class="tgroup"><span class="tlabel">Show</span><select id="show" aria-label="Map shading"></select></div>
@@ -43,6 +47,6 @@
 </div>
 <script src="vendor/maplibre-gl.js"></script>
 <script src="vendor/pmtiles.js"></script>
-<script src="toolbox.js?v=20261119l"></script>
+<script src="toolbox.js?v=20261120a"></script>
 </body>
 </html>

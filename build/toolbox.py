@@ -3,7 +3,7 @@
 
 docs/data/toolbox.json holds the lists: issues (with each party's pull and usual stop), camps (with the stop each holds on every issue and the camp it folds
 into), neighbourhoods and the places they sit in, counties, and the labels for what a pop is. docs/data/toolbox.bin holds one value per pop for each
-column named in the json's 'columns', then each pop's number on every issue with its party pulls taken out. A party's people inside a pop stand at that
+column named in the json's 'columns', then each pop's number on every issue with its party pulls taken out, then the percent of each pop's people in every organization. A party's people inside a pop stand at that
 number plus the party's pull, as in camps.py. Each neighbourhood also gets a centre point, read from the game shapes in the work folder (work/game/<fips>.gpkg) when that folder is given.
 Run after camps.py. Usage: toolbox.py DATA_DIR [WORK_DIR]
 """
@@ -21,6 +21,8 @@ content = DATA.parent / "content"
 book = yaml.safe_load((content / "issues" / "issues.yaml").read_text())
 ISSUES, SPREAD = book["issues"], book.get("spread", 1)
 CAMPS = yaml.safe_load((content / "camps" / "camps.yaml").read_text())["camps"]
+ORGS = [o for o in yaml.safe_load((content / "organizations" / "organizations.yaml").read_text())["organizations"] if o["kind"] != "party"]
+org_at = {o["id"]: n for n, o in enumerate(ORGS)}
 built = json.loads((DATA / "issues.json").read_text())
 base = [i["base"] for i in built["issues"]]
 WORK = {"Government and military": "government work", "Schools and health": "schools and health", "Shops and service": "service work", "Building and transport": "blue-collar",
@@ -63,6 +65,7 @@ else:   # without shapes, fall back on the county's centre
 cols = {k: array("H") for k in ("hood", "dem", "rep", "vote", "turnout")}
 small = {k: array("B") for k in ("camp_dem", "camp_rep", *LISTS)}
 rest = array("b")
+members = array("B")   # for every pop, the percent of its people in each organization
 for c in index:
     pops = json.loads((DATA / "pops" / f"fl-{c['fips']}.json").read_text())["pops"]
     orgs = json.loads((DATA / "orgs" / f"fl-{c['fips']}.json").read_text())
@@ -80,6 +83,11 @@ for c in index:
         t[WORK.get(p["work"], "")] = 1
         for k, i in enumerate(ISSUES):
             rest.append(max(-127, min(127, round(base[k] + SPREAD * sum(v * t.get(g, 0) for g, v in i["pulls"].items() if g not in ("Democrat", "Republican"))))))
+        row = [0] * len(ORGS)
+        for j in range(0, len(pie), 2):
+            if orgs["organizations"][pie[j]][0] in org_at:
+                row[org_at[orgs["organizations"][pie[j]][0]]] = min(255, pie[j + 1])
+        members.extend(row)
         cols["hood"].append(hood_at[p["hood"]])
         cols["dem"].append(round(1000 * p["pie"]["D"]))
         cols["rep"].append(round(1000 * p["pie"]["R"]))
@@ -91,13 +99,14 @@ for c in index:
             small[key].append(names.index(p[key]))
 n = len(cols["hood"])
 with open(DATA / "toolbox.bin", "wb") as f:
-    for a in (*cols.values(), *small.values(), rest):
+    for a in (*cols.values(), *small.values(), rest, members):
         f.write(a.tobytes())
 stop_at = [{s[1]: j for j, s in enumerate(i["stops"])} for i in ISSUES]
 out = {"pops": n, "columns": {"wide": list(cols), "small": list(small)}, "lists": LISTS,
        "issues": [{"id": i["id"], "name": i["name"], "category": i["category"], "weights": i["weights"], "stops": i["stops"], "dem": i["pulls"].get("Democrat", 0), "rep": i["pulls"].get("Republican", 0)} for i in ISSUES],
        "usual": built["usual"],
-       "camps": [{"id": c["id"], "name": c["name"], "party": c["party"], "colour": c["colour"], "folds": c.get("folds"), "stops": [stop_at[k][c["positions"][i["id"]]] for k, i in enumerate(ISSUES)]} for c in CAMPS],
+       "camps": [{"id": c["id"], "name": c["name"], "party": c["party"], "colour": c["colour"], "folds": c.get("folds"), "sway": c.get("sway", 20), "stops": [stop_at[k][c["positions"][i["id"]]] for k, i in enumerate(ISSUES)]} for c in CAMPS],
+       "orgs": [[o["id"], o["name"], o["kind"], o.get("sway", 5)] for o in ORGS],
        "counties": [[c["id"], c["name"], c["code"], c["bounds"]] for c in index], "hoods": hoods, "munis": muni_list}
 (DATA / "toolbox.json").write_text(json.dumps(out, separators=(",", ":")))
 print(n, "pops,", len(hoods), "neighbourhoods,", len(muni_list), "cities;", round((DATA / "toolbox.bin").stat().st_size / 1e6, 1), "MB")

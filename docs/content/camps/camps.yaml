@@ -2,7 +2,8 @@ note: 'Camps: factions inside each party, each with a fixed position on every is
   party whose positions are nearest. Independents have no camps. First draft. ''draws'' makes a camp nearer for some pops: where every listed thing is true of the pop, its distance to the camp is multiplied
   by ''by''. Hand-set. Party camps are also organizations: ''club'' is a camp''s name as one, and ''bar'' is what it needs in a county to stand alone (people, and share of its party there). A camp under
   the bar joins the camp in ''folds''. ''umbrellas'' names the mixes that result; any other mix takes the ''united'' name. Where a party would have a single organization in a county it has none. An umbrella''s
-  position on an issue is the stop nearest the middle of its camps'' positions. A camp can carry its own ''bar'' to stand alone on a smaller share.'
+  position on an issue is the stop nearest the middle of its camps'' positions. A camp can carry its own ''bar'' to stand alone on a smaller share. `sway`, 0 to 100, is how well a camp starts out at bringing
+  its own people''s votes.'
 bar:
   people: 4000
   share: 0.08
@@ -62,6 +63,7 @@ camps:
     - $75,000 to $150,000
     - Over $150,000
     by: 0.9
+  sway: 20
   positions:
     income_tax: Raise on high earners
     property_tax: Keep
@@ -113,6 +115,7 @@ camps:
   - area:
     - suburban
     by: 1.08
+  sway: 20
   positions:
     income_tax: Raise on high earners
     property_tax: Keep
@@ -161,6 +164,7 @@ camps:
   - area:
     - suburban
     by: 1.09
+  sway: 35
   positions:
     income_tax: Tax the top far more
     property_tax: Raise for services
@@ -209,6 +213,7 @@ camps:
   - race:
     - Black
     by: 1.1
+  sway: 20
   positions:
     income_tax: Raise on high earners
     property_tax: Keep
@@ -253,6 +258,7 @@ camps:
   colour: '#8a1f22'
   club: Faith and Family Council
   folds: business_republicans
+  sway: 20
   positions:
     income_tax: Cut
     property_tax: Cap growth
@@ -297,6 +303,7 @@ camps:
   colour: '#d46c1e'
   club: Main Street Republican Club
   folds: flag_and_faith
+  sway: 20
   positions:
     income_tax: Cut
     property_tax: Cap growth
@@ -347,6 +354,7 @@ camps:
   - age:
     - 18 to 29
     by: 0.85
+  sway: 35
   positions:
     income_tax: Flat or none
     property_tax: Cut deeply
@@ -410,6 +418,7 @@ camps:
     - No college
     - Some college
     by: 0.85
+  sway: 20
   positions:
     income_tax: Keep
     property_tax: Cap growth

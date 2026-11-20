@@ -154,9 +154,9 @@ const order = (row) => [...row.keys()].sort((a, b) => row[b] - row[a]);
 const mix = (hex, t) => { const c = [1, 3, 5].map((k) => parseInt(hex.slice(k, k + 2), 16)); return "#" + c.map((v) => Math.round(255 + (v - 255) * t).toString(16).padStart(2, "0")).join(""); };
 function run(reroll) {
   if (!T || S.cands.length < 1) return;
-  const B = build(), luck = S.cands.map(() => (S.w.luck ? gauss() * S.w.luck : 0));
-  if (!reroll && LAST && LAST.luck.length === luck.length) luck.splice(0, luck.length, ...LAST.luck);   // changing a weight keeps the same luck; Run draws new
-  LAST = { B, luck, res: tally(B, luck, true), cols: colours() };
+  const B = build(), roll = !reroll && LAST && LAST.roll.length === S.cands.length ? LAST.roll : S.cands.map(gauss);   // changing a weight keeps the same roll; Run draws a new one
+  const luck = roll.map((v) => v * S.w.luck);
+  LAST = { B, roll, luck, res: tally(B, luck, true), cols: colours() };
   S.many = null; paint(); results();
 }
 function paint() {

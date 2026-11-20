@@ -10,7 +10,7 @@ const WEIGHTS = [
   ["steep", "Lead that takes two votes in three", 5, 0.5], ["party", "Their party", 20, 1], ["issues", "Issues, standing exactly with them", 10, 1],
   ["reach", "Distance where an issue turns against", 40, 5], ["closest", "Closest on an issue", 0.25, 0.05], ["furthest", "Furthest on an issue", 0.25, 0.05],
   ["camp", "Same camp", 3, 0.5], ["partner", "Partner camp", 1, 0.5], ["traits", "Traits, multiplied by", 1, 0.25], ["name", "Name ID, fully known", 4, 0.5],
-  ["incumbent", "Incumbent", 2, 0.5], ["home", "Home county", 1, 0.5], ["luck", "Luck", 1, 0.25], ["general", "General turnout, multiplied by", 1, 0.05], ["primary", "Primary turnout, multiplied by", 0.35, 0.05]];
+  ["incumbent", "Incumbent", 2, 0.5], ["home", "Home county", 3, 0.5], ["near", "Miles at which home county counts half", 75, 5], ["state", "Home state", 2, 0.5], ["race", "Same race", 2, 0.5], ["luck", "Luck", 1, 0.25], ["general", "General turnout, multiplied by", 1, 0.05], ["primary", "Primary turnout, multiplied by", 0.35, 0.05]];
 const OFFICES = [["Governor", "state", 1], ["US Senate", "state", 2], ["US House", "congress", 2], ["State Senate", "senate", 1], ["State House", "house", 1],
   ["County office", "county", 0], ["County commission", "district", 0], ["City office", "muni", 0]];
 const KINDS = [["dem", "Democratic primary"], ["rep", "Republican primary"], ["general", "General election"]];
@@ -29,8 +29,8 @@ const layer = () => LAYERS.find((l) => l[0] === S.layer);
 let T, BOOK, COL = {}, REST, N, NI, map, mapReady = false, LAST = null, PICK = null;
 const S = { kind: "dem", office: 0, place: "", closed: true, w: {}, cands: [], show: "win", layer: "county", lines: ["county"], tab: "result", many: null };
 for (const [k, , v] of WEIGHTS) S.w[k] = v;
-try { const saved = JSON.parse(localStorage.getItem("ttcb-toolbox") || "null"); if (saved) { Object.assign(S.w, saved.w || {}); if (typeof saved.closed === "boolean") S.closed = saved.closed; } } catch (e) { /* storage is a convenience only */ }
-const keep = () => { try { localStorage.setItem("ttcb-toolbox", JSON.stringify({ w: S.w, closed: S.closed })); } catch (e) { /* ignore */ } };
+try { const saved = JSON.parse(localStorage.getItem("ttcb-toolbox-2") || "null"); if (saved) { Object.assign(S.w, saved.w || {}); if (typeof saved.closed === "boolean") S.closed = saved.closed; } } catch (e) { /* storage is a convenience only */ }
+const keep = () => { try { localStorage.setItem("ttcb-toolbox-2", JSON.stringify({ w: S.w, closed: S.closed })); } catch (e) { /* ignore */ } };
 
 /* ---------- the race ---------- */
 function places(kind) {
@@ -52,7 +52,7 @@ function inPlace(kind, id) {   // which neighbourhoods are in the race
 const stopsOf = (camp) => (camp ? camp.stops.slice() : null);
 function blank(party, camp) {
   const c = T.camps.find((x) => x.id === camp);
-  return { name: "", party, camp: camp || "", stops: stopsOf(c) || T.usual[party].slice(), traits: [], known: 50, incumbent: false, home: "", extra: 0 };
+  return { name: "", party, camp: camp || "", stops: stopsOf(c) || T.usual[party].slice(), traits: [], known: 50, incumbent: false, home: "", state: "in", race: "", extra: 0 };
 }
 function slate() {   // one candidate per camp for a primary; one plain candidate per party for a general
   S.cands = S.kind === "general" ? [blank("dem"), blank("rep")] : T.camps.filter((c) => c.party === S.kind).map((c) => blank(S.kind, c.id));
@@ -68,6 +68,12 @@ function colours() {
     while (!col || used.has(col)) col = SPARE[spare++ % SPARE.length] + (spare > SPARE.length ? "cc" : ""); used.add(col); return col; });
 }
 
+/* miles between two counties, centre to centre */
+function miles(a, b) {
+  if (a === b) return 0; const A = T.counties[a][3], B = T.counties[b][3], rad = Math.PI / 180;
+  const la = (A[1] + A[3]) / 2 * rad, lb = (B[1] + B[3]) / 2 * rad, dl = ((B[0] + B[2]) - (A[0] + A[2])) / 2 * rad;
+  return 3959 * Math.acos(Math.min(1, Math.sin(la) * Math.sin(lb) + Math.cos(la) * Math.cos(lb) * Math.cos(dl)));
+}
 /* ---------- the ledger ---------- */
 function setup() {
   const [, kind, level] = OFFICES[S.office], test = inPlace(kind, S.place), general = S.kind === "general";
@@ -79,14 +85,15 @@ function setup() {
   const anyIncumbent = S.cands.some((c) => c.incumbent);
   const cands = S.cands.map((c) => {
     const camp = T.camps.find((x) => x.id === c.camp), by = { education: [0, 0, 0], income: [0, 0, 0, 0], area: [0, 0, 0, 0, 0], age: [0, 0, 0, 0], work: new Array(10).fill(0) };
-    let flat = 0, base = 0, ind = 0; const per = [];   // per: each trait's own table, kept for the ledger
-    for (const t of c.traits) { const likes = BOOK.likes[t] || {}, row = { name: BOOK.traits[t], flat: 0, base: 0, ind: 0, by: { education: [0, 0, 0], income: [0, 0, 0, 0], area: [0, 0, 0, 0, 0], age: [0, 0, 0, 0], work: new Array(10).fill(0) } };
+    let flat = 0, base = 0, ind = 0, same = 0; const per = [];   // per: each trait's own table, kept for the ledger
+    for (const t of c.traits) { const likes = BOOK.likes[t] || {}, row = { name: BOOK.traits[t], flat: 0, base: 0, ind: 0, same: 0, by: { education: [0, 0, 0], income: [0, 0, 0, 0], area: [0, 0, 0, 0, 0], age: [0, 0, 0, 0], work: new Array(10).fill(0) } };
       for (const [aud, v0] of Object.entries(likes)) { const v = v0 * S.w.traits;
-        if (aud === "everyone") row.flat += v; else if (aud === "base") row.base += v; else if (aud === "independents") row.ind += v;
+        if (aud === "everyone") row.flat += v; else if (aud === "same_race") row.same += v; else if (aud === "base") row.base += v; else if (aud === "independents") row.ind += v;
         else if (aud === "against_incumbent") { if (anyIncumbent && !c.incumbent) row.flat += v; }
         else if (AUDIENCE[aud]) for (const i of AUDIENCE[aud][1]) row.by[AUDIENCE[aud][0]][i] += v; }
-      flat += row.flat; base += row.base; ind += row.ind; for (const key in by) row.by[key].forEach((v, i) => { by[key][i] += v; }); per.push(row); }
-    return { ...c, campRec: camp, pos: active.map((k) => T.issues[k].stops[c.stops[k]][0]), flat, base, ind, by, per, fixed: S.w.name * c.known / 100 + (c.incumbent ? S.w.incumbent : 0) + (+c.extra || 0), homeAt: c.home === "" ? -1 : +c.home };
+      flat += row.flat; base += row.base; ind += row.ind; same += row.same; for (const key in by) row.by[key].forEach((v, i) => { by[key][i] += v; }); per.push(row); }
+    return { ...c, campRec: camp, pos: active.map((k) => T.issues[k].stops[c.stops[k]][0]), flat, base, ind, same, by, per, fixed: S.w.name * c.known / 100 + (c.incumbent ? S.w.incumbent : 0) + (+c.extra || 0), homeAt: c.state !== "in" || c.home === "" ? -1 : +c.home, raceAt: c.race === "" ? -1 : +c.race,
+      near: c.state !== "in" || c.home === "" ? null : T.counties.map((x, k) => S.w.home * Math.pow(0.5, miles(+c.home, k) / Math.max(1, S.w.near))) };
   });
   const plain = general ? ["dem", "rep"].map((p) => active.map((k) => T.issues[k].stops[T.usual[p][k]][0])) : null;
   return { kind, level, general, hoodIn, active, w, sumW, slices, pull, cands, plain, K: Math.log(2) / Math.max(0.1, S.w.steep), turnout: general ? S.w.general : S.w.primary };
@@ -122,10 +129,11 @@ function points(R, i, slice, b, out, lines) {
     if (lines) { lines[j] = []; for (const [name, v] of Object.entries(cat[j])) if (Math.abs(v[0]) >= 0.05) lines[j].push([name, v[0]]); }
     if (R.general) { add("Their party", c.party === slice && slice !== "ind" ? S.w.party : 0); add("Local lean", c.party === "rep" ? b / 2 : c.party === "dem" ? -b / 2 : 0); }
     if (camp && c.campRec && c.party === slice) add(c.campRec === camp ? "Same camp" : "Partner camp", c.campRec === camp ? S.w.camp : c.campRec.folds === camp.id || camp.folds === c.campRec.id ? S.w.partner : 0);
-    if (lines) for (const t of c.per) add(t.name, t.flat + (c.party === slice ? t.base : 0) + (slice === "ind" ? t.ind : 0) + t.by.education[COL.education[i]] + t.by.income[COL.income[i]] + t.by.area[COL.area[i]] + t.by.age[COL.age[i]] + t.by.work[COL.work[i]]);
-    else out[j] += c.flat + (c.party === slice ? c.base : 0) + (slice === "ind" ? c.ind : 0) + c.by.education[COL.education[i]] + c.by.income[COL.income[i]] + c.by.area[COL.area[i]] + c.by.age[COL.age[i]] + c.by.work[COL.work[i]];
+    if (lines) for (const t of c.per) add(t.name, t.flat + (c.raceAt === COL.race[i] ? t.same : 0) + (c.party === slice ? t.base : 0) + (slice === "ind" ? t.ind : 0) + t.by.education[COL.education[i]] + t.by.income[COL.income[i]] + t.by.area[COL.area[i]] + t.by.age[COL.age[i]] + t.by.work[COL.work[i]]);
+    else out[j] += c.flat + (c.raceAt === COL.race[i] ? c.same : 0) + (c.party === slice ? c.base : 0) + (slice === "ind" ? c.ind : 0) + c.by.education[COL.education[i]] + c.by.income[COL.income[i]] + c.by.area[COL.area[i]] + c.by.age[COL.age[i]] + c.by.work[COL.work[i]];
     if (lines) { add("Name ID", S.w.name * c.known / 100); add("Incumbent", c.incumbent ? S.w.incumbent : 0); add("Other", +c.extra || 0); } else out[j] += c.fixed;
-    add("Home county", c.homeAt === county ? S.w.home : 0);
+    add(c.homeAt === county ? "Home county" : "Near home", c.near ? c.near[county] : 0);
+    add("Home state", c.state === "in" ? S.w.state : 0); add("Same race", c.raceAt === COL.race[i] ? S.w.race : 0);
   }
 }
 /* Every set of voters in the race, with its points for each candidate before luck. */
@@ -261,7 +269,9 @@ function candMenu() {
       <div class="chips">${c.traits.map((t) => `<button class="trait" data-act="untrait" data-t="${t}">${esc(BOOK.traits[t])} ×</button>`).join("")}<select data-f="trait" aria-label="Add trait"><option value="">Trait</option>${traits.filter((t) => !c.traits.includes(t)).map((t) => `<option value="${t}">${esc(BOOK.traits[t])}</option>`).join("")}</select></div>
       <label class="sl"><span>Name ID</span><input type="range" min="0" max="100" step="5" data-f="known" value="${c.known}"><output>${c.known}</output></label>
       <div class="row"><label class="ck"><input type="checkbox" data-f="incumbent"${c.incumbent ? " checked" : ""}>Incumbent</label><label class="ex">Other <input type="number" step="0.5" data-f="extra" value="${c.extra}"></label></div>
-      <select data-f="home" aria-label="Home county"><option value="">Home county</option>${T.counties.map((x, i) => `<option value="${i}"${String(i) === c.home ? " selected" : ""}>${esc(x[1])}</option>`).join("")}</select>
+      <div class="row"><select data-f="state" aria-label="Home state"><option value="in"${c.state === "in" ? " selected" : ""}>From Florida</option><option value="out"${c.state === "out" ? " selected" : ""}>Not from Florida</option></select>
+        <select data-f="race" aria-label="Race"><option value="">Race</option>${T.lists.race.map((x, i) => `<option value="${i}"${String(i) === c.race ? " selected" : ""}>${esc(x)}</option>`).join("")}</select></div>
+      <select data-f="home" aria-label="Home county"${c.state === "in" ? "" : " disabled"}><option value="">Home county</option>${T.counties.map((x, i) => `<option value="${i}"${String(i) === c.home ? " selected" : ""}>${esc(x[1])}</option>`).join("")}</select>
       <details${c.open ? " open" : ""}><summary>Positions</summary>${cats.map((cat) => `<div class="cat">${esc(cat)}</div>${T.issues.map((x, k) => (x.category !== cat ? "" : `<label class="iss${x.weights[level] ? "" : " off"}"><span>${esc(x.name)}</span><select data-k="${k}">${x.stops.map((s, n) => `<option value="${n}"${n === c.stops[k] ? " selected" : ""}>${esc(s[1])}</option>`).join("")}</select></label>`)).join("")}`).join("")}</details></div>`; }).join("");
 }
 function weightMenu() {
@@ -297,7 +307,7 @@ function wire() {
     else if (f === "party") { c.party = t.value; c.camp = ""; c.stops = T.usual[c.party].slice(); candMenu(); }
     else if (f === "camp") { c.camp = t.value; const camp = T.camps.find((x) => x.id === c.camp); c.stops = stopsOf(camp) || T.usual[c.party].slice(); candMenu(); }
     else if (f === "trait") { if (t.value) c.traits.push(t.value); candMenu(); }
-    else if (f === "incumbent") c.incumbent = t.checked; else if (f === "home") c.home = t.value; else return;
+    else if (f === "incumbent") c.incumbent = t.checked; else if (f === "home") c.home = t.value; else if (f === "race") c.race = t.value; else if (f === "state") { c.state = t.value; candMenu(); } else return;
     run(false); };
 }
 function showMenu() { $("show").innerHTML = `<option value="win">Winner</option>` + S.cands.map((c, j) => `<option value="${j}"${String(j) === S.show ? " selected" : ""}>${esc(label(c, j))}</option>`).join(""); if (S.show !== "win" && +S.show >= S.cands.length) S.show = "win"; }

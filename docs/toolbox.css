@@ -33,3 +33,4 @@
 #out h3 { margin: 0 0 6px; font-size: 15px; } #out .mb { margin-bottom: 8px; } #poppick { width: 100%; margin-bottom: 8px; }
 #out table.led th { vertical-align: bottom; } #out table.grp th.n, #out table.led th.n { font-size: 12px; white-space: normal; }
 @media (max-width: 1100px) { body { overflow: auto; } .app { height: auto; } .bench { grid-template-columns: 1fr; overflow: visible; } .bench .side { border: 0 !important; overflow: visible; } .bench .mapwrap { min-height: 60vh; } }
+.bench .center { min-width: 0; overflow: hidden; } .bench .toolbar .tgroup { flex-wrap: wrap; } #linebar { flex-wrap: wrap; row-gap: 2px; } #linebar .btn { padding: 3px 8px; font-size: 12.5px; }

@@ -21,8 +21,13 @@ const AUDIENCE = { no_college: ["education", [0]], college: ["education", [2]], 
   urban: ["area", [0]], suburban: ["area", [1]], young: ["age", [0]], old: ["age", [3]], farm: ["work", [6]], blue_collar: ["work", [3, 4, 7]], service: ["work", [2]], government: ["work", [5]] };
 const LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
+/* map layers: what a neighbourhood belongs to in each, as that layer's feature id in the tiles */
+const LAYERS = [["county", "Counties", (h) => T.counties[h[1]][0], (h) => T.counties[h[1]][1]], ["district", "Commission districts", (h) => (h[2] ? T.counties[h[1]][2] + "-D" + h[2] : null), (h) => `${T.counties[h[1]][1]}, District ${h[2]}`],
+  ["muni", "Municipal", (h) => (h[6] < 0 ? null : T.munis[h[6]][0]), (h) => T.munis[h[6]][1]], ["hood", "Neighbourhoods", (h) => h[0], (h) => h[0]],
+  ["house", "State House", (h) => h[3] || null, (h) => "State House District " + h[3]], ["senate", "State Senate", (h) => h[4] || null, (h) => "State Senate District " + h[4]], ["congress", "Congress", (h) => h[5] || null, (h) => "Congressional District " + h[5]]];
+const layer = () => LAYERS.find((l) => l[0] === S.layer);
 let T, BOOK, COL = {}, REST, N, NI, map, mapReady = false, LAST = null, PICK = null;
-const S = { kind: "dem", office: 0, place: "", closed: true, w: {}, cands: [], show: "win", tab: "result", many: null };
+const S = { kind: "dem", office: 0, place: "", closed: true, w: {}, cands: [], show: "win", layer: "county", lines: ["county"], tab: "result", many: null };
 for (const [k, , v] of WEIGHTS) S.w[k] = v;
 try { const saved = JSON.parse(localStorage.getItem("ttcb-toolbox") || "null"); if (saved) { Object.assign(S.w, saved.w || {}); if (typeof saved.closed === "boolean") S.closed = saved.closed; } } catch (e) { /* storage is a convenience only */ }
 const keep = () => { try { localStorage.setItem("ttcb-toolbox", JSON.stringify({ w: S.w, closed: S.closed })); } catch (e) { /* ignore */ } };
@@ -159,15 +164,24 @@ function run(reroll) {
   LAST = { B, roll, luck, res: tally(B, luck, true), cols: colours() };
   S.many = null; paint(); results();
 }
+function units() {   // the result added up into the chosen layer's units
+  const key = layer()[2], out = new Map();
+  for (const [h, row] of LAST.res.hood) { const id = key(T.hoods[h]); if (id === null) continue; let to = out.get(id); if (!to) out.set(id, to = new Float64Array(row.length)); for (let j = 0; j < row.length; j++) to[j] += row[j]; }
+  return out;
+}
 function paint() {
   if (!mapReady || !LAST) return;
-  const { res, cols, B } = LAST;
-  map.removeFeatureState({ source: "fl", sourceLayer: "hood" });
-  for (const [h, row] of res.hood) { const sum = row.reduce((a, b) => a + b, 0); if (!sum) continue; let c;
+  const { cols, B } = LAST;
+  for (const [k] of LAYERS) { map.removeFeatureState({ source: "fl", sourceLayer: k }); map.setLayoutProperty("fill-" + k, "visibility", k === S.layer ? "visible" : "none"); map.setLayoutProperty("line-" + k, "visibility", S.lines.includes(k) ? "visible" : "none"); }
+  for (const [id, row] of units()) { const sum = row.reduce((a, b) => a + b, 0); if (!sum) continue; let c;
     if (S.show === "win") { const o = order(row); c = mix(cols[o[0]], 0.25 + 0.75 * Math.min(1, (row[o[0]] - (row[o[1]] || 0)) / sum / 0.3)); }
     else c = mix(cols[+S.show], Math.min(1, row[+S.show] / sum / (B.n > 2 ? 0.6 : 0.9)));
-    map.setFeatureState({ source: "fl", sourceLayer: "hood", id: T.hoods[h][0] }, { c }); }
+    map.setFeatureState({ source: "fl", sourceLayer: S.layer, id }, { c }); }
+  const far = ["house", "senate", "congress"].includes(S.layer), id = PICK ? layer()[2](T.hoods[PICK.hood]) : null;
+  map.setLayoutProperty("picked", "visibility", id === null ? "none" : "visible");
+  if (id !== null) { map.removeLayer("picked"); map.addLayer({ id: "picked", type: "line", source: "fl", "source-layer": S.layer, filter: ["==", ["get", far ? "n" : "id"], id], paint: { "line-color": "#202122", "line-width": 2.5 } }); }
   $("legend").innerHTML = S.cands.map((c, j) => `<div><i style="background:${cols[j]}"></i>${esc(label(c, j))}</div>`).join("");
+  document.querySelectorAll("#linebar .btn").forEach((b) => b.setAttribute("aria-pressed", S.lines.includes(b.dataset.line)));
 }
 function fit() {
   if (!mapReady) return; const test = inPlace(OFFICES[S.office][1], S.place), seen = new Set(); let b = null;
@@ -200,7 +214,10 @@ function ledger() {
   if (!row) return `<div class="foot">${esc(hood[0])} is outside this race</div>`;
   if (!pops.includes(PICK.pop)) PICK.pop = pops[0];
   const sum = row.reduce((a, b) => a + b, 0) || 1, i = PICK.pop, n = B.n;
-  let h = `<h3>${esc(hood[0])} · ${esc(T.counties[hood[1]][1])}</h3><div class="mb">${order(row).map((j) => `<div class="mbar"><span>${esc(label(S.cands[j], j))}</span>${bar(row[j] / sum, cols[j])}<span class="v">${pct(row[j] / sum)}</span></div>`).join("")}</div>
+  let h = "";
+  if (S.layer !== "hood" && layer()[2](hood) !== null) { const urow = units().get(layer()[2](hood)), us = urow.reduce((a, b) => a + b, 0) || 1;
+    h += `<h3>${esc(layer()[3](hood))}</h3><div class="mb">${order(urow).map((j) => `<div class="mbar"><span>${esc(label(S.cands[j], j))}</span>${bar(urow[j] / us, cols[j])}<span class="v">${pct(urow[j] / us)}</span></div>`).join("")}</div>`; }
+  h += `<h3>${esc(hood[0])} · ${esc(T.counties[hood[1]][1])}</h3><div class="mb">${order(row).map((j) => `<div class="mbar"><span>${esc(label(S.cands[j], j))}</span>${bar(row[j] / sum, cols[j])}<span class="v">${pct(row[j] / sum)}</span></div>`).join("")}</div>
     <select id="poppick" aria-label="Pop">${pops.map((p, k) => `<option value="${p}"${p === i ? " selected" : ""}>Pop ${k + 1} · ${esc(describe(p))}</option>`).join("")}</select>`;
   for (const slice of R.slices) { const share = pie(i, slice); if (share <= 0) continue;
     const out = new Float64Array(n), lines = []; points(R, i, slice, B.lean[i] || 0, out, lines);
@@ -261,6 +278,10 @@ function wire() {
   $("many").onclick = many;
   $("reset").onclick = () => { for (const [k, , v] of WEIGHTS) S.w[k] = v; keep(); weightMenu(); run(false); };
   $("show").onchange = (e) => { S.show = e.target.value; paint(); };
+  $("layer").innerHTML = LAYERS.map(([k, name]) => `<option value="${k}"${k === S.layer ? " selected" : ""}>${name}</option>`).join("");
+  $("layer").onchange = (e) => { S.layer = e.target.value; paint(); if (S.tab === "ledger") results(); };
+  $("linebar").innerHTML = LAYERS.map(([k, name]) => `<button class="btn" data-line="${k}">${name}</button>`).join("");
+  $("linebar").onclick = (e) => { const b = e.target.closest("button"); if (!b) return; const k = b.dataset.line; S.lines = S.lines.includes(k) ? S.lines.filter((x) => x !== k) : [...S.lines, k]; paint(); };
   $("tabs").onclick = (e) => { const b = e.target.closest("button"); if (b) { S.tab = b.dataset.tab; results(); } };
   $("weights").oninput = (e) => { const k = e.target.dataset.w, v = parseFloat(e.target.value); if (k && isFinite(v)) { S.w[k] = v; keep(); soon(); } };
   $("out").onchange = (e) => { if (e.target.id === "poppick") { PICK.pop = +e.target.value; results(); } };
@@ -295,12 +316,14 @@ async function start() {
   map.addControl(new maplibregl.NavigationControl({ showCompass: false }), "top-left");
   new ResizeObserver(() => map.resize()).observe($("map"));
   map.on("load", () => {
-    map.addSource("fl", { type: "vector", url: "pmtiles://" + new URL("tiles/game-fl.pmtiles", location.href).href, promoteId: { hood: "id", county: "id" } });
-    map.addLayer({ id: "hood", type: "fill", source: "fl", "source-layer": "hood", paint: { "fill-color": ["to-color", ["feature-state", "c"], "#e7e4da"], "fill-antialias": false } });
-    map.addLayer({ id: "county", type: "line", source: "fl", "source-layer": "county", paint: { "line-color": "#72777d", "line-width": ["interpolate", ["linear"], ["zoom"], 5, 0.3, 11, 1.4] } });
+    map.addSource("fl", { type: "vector", url: "pmtiles://" + new URL("tiles/game-fl.pmtiles", location.href).href, promoteId: { hood: "id", district: "id", muni: "id", county: "id", house: "n", senate: "n", congress: "n" } });
+    const grow = (a, b) => ["interpolate", ["linear"], ["zoom"], 5, a, 11, b], thick = { county: [0.5, 1.8], district: [0.3, 1.2], muni: [0.3, 1.2], hood: [0.1, 0.6], house: [0.4, 1.5], senate: [0.5, 1.8], congress: [0.7, 2.2] };
+    for (const [k] of LAYERS) map.addLayer({ id: "fill-" + k, type: "fill", source: "fl", "source-layer": k, layout: { visibility: "none" }, paint: { "fill-color": ["to-color", ["feature-state", "c"], "#e7e4da"], "fill-antialias": false } });
+    for (const [k] of LAYERS) map.addLayer({ id: "line-" + k, type: "line", source: "fl", "source-layer": k, layout: { visibility: "none" }, paint: { "line-color": { hood: "#72777d", house: "#7a3fb0", senate: "#0b7a75", congress: "#b36b00" }[k] || "#202122", "line-opacity": 0.8, "line-width": grow(...thick[k]) } });
+    map.addLayer({ id: "hit", type: "fill", source: "fl", "source-layer": "hood", paint: { "fill-opacity": 0 } });   // clicks always land on a neighbourhood, whatever layer is shown
     map.addLayer({ id: "picked", type: "line", source: "fl", "source-layer": "hood", filter: ["==", ["get", "id"], ""], paint: { "line-color": "#202122", "line-width": 2.5 } });
-    map.on("click", "hood", (e) => { const id = e.features[0].id, h = T.hoods.findIndex((x) => x[0] === id); if (h < 0) return; PICK = { hood: h, pop: -1 }; S.tab = "ledger"; map.setFilter("picked", ["==", ["get", "id"], id]); results(); });
-    map.on("mousemove", "hood", () => { map.getCanvas().style.cursor = "pointer"; }); map.on("mouseleave", "hood", () => { map.getCanvas().style.cursor = ""; });
+    map.on("click", "hit", (e) => { const id = e.features[0].id, h = T.hoods.findIndex((x) => x[0] === id); if (h < 0) return; PICK = { hood: h, pop: -1 }; S.tab = "ledger"; paint(); results(); });
+    map.on("mousemove", "hit", () => { map.getCanvas().style.cursor = "pointer"; }); map.on("mouseleave", "hit", () => { map.getCanvas().style.cursor = ""; });
     mapReady = true; fit(); paint();
   });
 }

@@ -16,7 +16,7 @@ const OFFICES = [["Governor", "state", 1], ["US Senate", "state", 2], ["US House
 const KINDS = [["dem", "Democratic primary"], ["rep", "Republican primary"], ["general", "General election"]];
 const PARTY = { dem: ["Democrat", "#2f558e"], rep: ["Republican", "#a95450"], ind: ["Independent", "#8a8f94"] };
 const SLICES = ["dem", "ind", "rep"], SLICE_NAME = { dem: "Democrats", ind: "Independents", rep: "Republicans" };
-const SPARE = ["#5b8c5a", "#c9a227", "#7b3fa0", "#1b9e9e", "#d46c1e", "#555555", "#b0527a", "#3a78c9"];
+const SPARE = ["#d46c1e", "#555555", "#c9a227", "#1b9e9e", "#b0527a", "#7b3fa0", "#3a78c9", "#8a1f22", "#2e8b4f", "#9a9a9a", "#6b4f2a", "#0b7a75"];
 const AUDIENCE = { no_college: ["education", [0]], college: ["education", [2]], low_income: ["income", [0]], high_income: ["income", [3]], rural: ["area", [2, 4]], small_town: ["area", [3]],
   urban: ["area", [0]], suburban: ["area", [1]], young: ["age", [0]], old: ["age", [3]], farm: ["work", [6]], blue_collar: ["work", [3, 4, 7]], service: ["work", [2]], government: ["work", [5]] };
 const LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";

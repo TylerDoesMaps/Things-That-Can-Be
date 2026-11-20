@@ -10,7 +10,7 @@ const WEIGHTS = [
   ["steep", "Lead that takes two votes in three", 5, 0.5], ["party", "Their party", 20, 1], ["issues", "Issues, standing exactly with them", 10, 1],
   ["reach", "Distance where an issue turns against", 40, 5], ["closest", "Closest on an issue", 0.25, 0.05], ["furthest", "Furthest on an issue", 0.25, 0.05],
   ["camp", "Same camp", 3, 0.5], ["partner", "Partner camp", 1, 0.5], ["traits", "Traits, multiplied by", 1, 0.25], ["name", "Name ID, fully known", 4, 0.5],
-  ["incumbent", "Incumbent", 2, 0.5], ["home", "Home county", 3, 0.5], ["near", "Miles at which home county counts half", 75, 5], ["state", "Home state", 2, 0.5], ["race", "Same race", 2, 0.5], ["luck", "Luck", 1, 0.25], ["general", "General turnout, multiplied by", 1, 0.05], ["primary", "Primary turnout, multiplied by", 0.35, 0.05]];
+  ["incumbent", "Incumbent", 2, 0.5], ["home", "Home county", 3, 0.5], ["near", "Miles at which home county counts half", 75, 5], ["state", "Home state", 2, 0.5], ["race", "Same race, at full strength", 16, 1], ["raceW", "Same race, share felt by White pops", 0.1, 0.05], ["raceB", "Same race, share felt by Black pops", 0.5, 0.05], ["raceH", "Same race, share felt by Hispanic pops", 0.5, 0.05], ["raceO", "Same race, share felt by Asian and other pops", 0.5, 0.05], ["luck", "Luck", 1, 0.25], ["general", "General turnout, multiplied by", 1, 0.05], ["primary", "Primary turnout, multiplied by", 0.35, 0.05]];
 const OFFICES = [["Governor", "state", 1], ["US Senate", "state", 2], ["US House", "congress", 2], ["State Senate", "senate", 1], ["State House", "house", 1],
   ["County office", "county", 0], ["County commission", "district", 0], ["City office", "muni", 0]];
 const KINDS = [["dem", "Democratic primary"], ["rep", "Republican primary"], ["general", "General election"]];
@@ -29,8 +29,8 @@ const layer = () => LAYERS.find((l) => l[0] === S.layer);
 let T, BOOK, COL = {}, REST, N, NI, map, mapReady = false, LAST = null, PICK = null;
 const S = { kind: "dem", office: 0, place: "", closed: true, w: {}, cands: [], show: "win", layer: "county", lines: ["county"], tab: "result", many: null };
 for (const [k, , v] of WEIGHTS) S.w[k] = v;
-try { const saved = JSON.parse(localStorage.getItem("ttcb-toolbox-2") || "null"); if (saved) { Object.assign(S.w, saved.w || {}); if (typeof saved.closed === "boolean") S.closed = saved.closed; } } catch (e) { /* storage is a convenience only */ }
-const keep = () => { try { localStorage.setItem("ttcb-toolbox-2", JSON.stringify({ w: S.w, closed: S.closed })); } catch (e) { /* ignore */ } };
+try { const saved = JSON.parse(localStorage.getItem("ttcb-toolbox-3") || "null"); if (saved) { Object.assign(S.w, saved.w || {}); if (typeof saved.closed === "boolean") S.closed = saved.closed; } } catch (e) { /* storage is a convenience only */ }
+const keep = () => { try { localStorage.setItem("ttcb-toolbox-3", JSON.stringify({ w: S.w, closed: S.closed })); } catch (e) { /* ignore */ } };
 
 /* ---------- the race ---------- */
 function places(kind) {
@@ -133,7 +133,7 @@ function points(R, i, slice, b, out, lines) {
     else out[j] += c.flat + (c.raceAt === COL.race[i] ? c.same : 0) + (c.party === slice ? c.base : 0) + (slice === "ind" ? c.ind : 0) + c.by.education[COL.education[i]] + c.by.income[COL.income[i]] + c.by.area[COL.area[i]] + c.by.age[COL.age[i]] + c.by.work[COL.work[i]];
     if (lines) { add("Name ID", S.w.name * c.known / 100); add("Incumbent", c.incumbent ? S.w.incumbent : 0); add("Other", +c.extra || 0); } else out[j] += c.fixed;
     add(c.homeAt === county ? "Home county" : "Near home", c.near ? c.near[county] : 0);
-    add("Home state", c.state === "in" ? S.w.state : 0); add("Same race", c.raceAt === COL.race[i] ? S.w.race : 0);
+    add("Home state", c.state === "in" ? S.w.state : 0); add("Same race", c.raceAt === COL.race[i] ? S.w.race * [S.w.raceW, S.w.raceB, S.w.raceH, S.w.raceO, S.w.raceO][COL.race[i]] : 0);
   }
 }
 /* Every set of voters in the race, with its points for each candidate before luck. */

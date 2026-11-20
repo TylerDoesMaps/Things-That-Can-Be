@@ -4,7 +4,8 @@
 docs/data/toolbox.json holds the lists: issues (with each party's pull and usual stop), camps (with the stop each holds on every issue and the camp it folds
 into), neighbourhoods and the places they sit in, counties, and the labels for what a pop is. docs/data/toolbox.bin holds one value per pop for each
 column named in the json's 'columns', then each pop's number on every issue with its party pulls taken out. A party's people inside a pop stand at that
-number plus the party's pull, as in camps.py. Run after camps.py. Usage: toolbox.py DATA_DIR
+number plus the party's pull, as in camps.py. Each neighbourhood also gets a centre point, read from the game shapes in the work folder (work/game/<fips>.gpkg) when that folder is given.
+Run after camps.py. Usage: toolbox.py DATA_DIR [WORK_DIR]
 """
 import json
 import sys
@@ -39,13 +40,25 @@ for c in index:
     for q in places.values():
         if q["kind"] == "hood":
             hood_at[q["id"]] = len(hoods)
-            hoods.append([q["id"], county_at[c["fips"]], q.get("district") or 0, q.get("house") or 0, q.get("senate") or 0, q.get("congress") or 0, -1])
+            hoods.append([q["id"], county_at[c["fips"]], q.get("district") or 0, q.get("house") or 0, q.get("senate") or 0, q.get("congress") or 0, -1, 0, 0])
 muni_list = []
 for mid, (name, county, members) in sorted(munis.items(), key=lambda m: (m[1][1], m[1][0])):
     for h in members:
         if h in hood_at:
             hoods[hood_at[h]][6] = len(muni_list)
     muni_list.append([mid, name, county])
+
+if len(sys.argv) > 2:   # centre points, so a candidate's home neighbourhood can pull by distance
+    import geopandas as gpd
+    for c in index:
+        shapes = gpd.read_file(Path(sys.argv[2]) / "game" / f"{c['fips']}.gpkg")
+        for hid, pt in zip(shapes["id"], shapes.geometry.representative_point()):
+            if hid in hood_at:
+                hoods[hood_at[hid]][7:9] = [round(pt.x, 4), round(pt.y, 4)]
+else:   # without shapes, fall back on the county's centre
+    for h in hoods:
+        b = index[h[1]]["bounds"]
+        h[7:9] = [round((b[0] + b[2]) / 2, 4), round((b[1] + b[3]) / 2, 4)]
 
 cols = {k: array("H") for k in ("hood", "dem", "rep", "vote", "turnout")}
 small = {k: array("B") for k in ("camp_dem", "camp_rep", *LISTS)}

@@ -20,6 +20,8 @@ MIXED = "Duval,Hillsborough,Leon,Manatee,Orange,Pinellas,Volusia".split(",")
 # Who leads the county as a whole and how they get the job. Only Broward is confirmed, by Tyler.
 EXECUTIVE = {"Miami-Dade": ("Mayor", "Elected countywide"), "Orange": ("Mayor", "Elected countywide"), "Duval": ("Mayor", "Elected countywide"),
              "Volusia": ("County Chair", "Elected countywide, not checked"), "Broward": ("Mayor", "By the commission from its members")}
+# Cities the Census list still calls active that no longer exist. Weeki Wachee: dissolved by the state, June 2020.
+GONE = {"WEEKI WACHEE"}
 CROSSES = {"FANNING SPRINGS": "Gilchrist and Levy", "LONGBOAT KEY": "Manatee and Sarasota", "MARINELAND": "Flagler and St. Johns"}
 
 data = json.load(open(OFFICES))
@@ -56,6 +58,8 @@ with open(OUT / "fl-cities.csv", "w", newline="") as f:
         city = r.UNIT_NAME.upper()
         for word in ("CITY OF ", "TOWN OF ", "VILLAGE OF "):
             city = city.replace(word, "")
+        if city in GONE:
+            continue
         real, own = r.people >= CITY_LINE, r.UNIT_NAME in largest or city in HOME
         w.writerow([city.title(), names[r.FIPS_COUNTY], r.people, HOME.get(city) or ("Own content" if real else "Own structure" if own else "Generic"), "Yes" if real else "No",
                     "Not started" if real else "Drawn from neighbourhoods", "Yes" if own else "No", "Yes" if r.people >= AWAKE or city in HOME else "Dormant",

@@ -117,6 +117,9 @@ book = pd.ExcelFile(UNITS)
 gp = book.parse("General Purpose", dtype=str).query("STATE == @ST and IS_ACTIVE == 'Y'")
 sd = book.parse("Special District", dtype=str).query("STATE == @ST and IS_ACTIVE == 'Y'")
 sc = book.parse("School District", dtype=str).query("STATE == @ST and IS_ACTIVE == 'Y'")
+# Governments the Census list still calls active that no longer exist. Weeki Wachee: dissolved by the state, June 2020.
+GONE = {"FL": ["WEEKI WACHEE"]}
+gp = gp[~gp.UNIT_NAME.str.upper().str.contains("|".join(GONE.get(ST, ["\\x00"])))]
 gp = gp.assign(people=gp.POPULATION.fillna(0).astype(float).astype(int), kind=gp.UNIT_TYPE.str[0])
 big = set(gp[gp.kind == "2"].sort_values("people", ascending=False).head(CAP).query("people > @CUTOFF").UNIT_NAME) | {u for u in gp.UNIT_NAME if "MONTICELLO" in u and ST == "FL"}
 

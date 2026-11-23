@@ -180,6 +180,23 @@ def quota(v, n):
 
 
 rows, cols = quota(M.sum(axis=1), total), quota(M.sum(axis=0), total)
+
+# ---- every city holds at least one pop. A city left with none takes one from the neighbourhood outside it that it
+# shares the longest border with (the nearest, if it touches none that can spare one), so the county total never moves.
+drawn = gpd.GeoDataFrame.from_features(json.load(open(OUT.parent.parent / "neighbourhoods" / OUT.name))["shapes"]["features"], crs=4326).set_index("code").to_crs(5070)
+at = {h: i for i, h in enumerate(hoods)}
+floored = []
+for city, g in drawn[drawn.city.fillna("") != ""].groupby("city"):
+    mine = [h for h in g.index if h in at]
+    if not mine or sum(rows[at[h]] for h in mine):
+        continue
+    to, ground = max(mine, key=lambda h: M[at[h]].sum()), g.geometry.union_all()
+    spare = [h for h in drawn.index if h in at and h not in mine and rows[at[h]] > 1]
+    edge = {h: ground.buffer(30).intersection(drawn.geometry[h]).area for h in spare}
+    donor = max(edge, key=edge.get) if max(edge.values()) > 0 else min(spare, key=lambda h: ground.distance(drawn.geometry[h]))
+    rows[at[to]] += 1
+    rows[at[donor]] -= 1
+    floored.append([city, to, donor])
 left, pops = M.copy(), []
 for _ in range(total):
     ok = left * (rows[:, None] > 0) * (cols[None, :] > 0)
@@ -267,6 +284,8 @@ places = [{"hood": h, "pops": seen[h], "area": meta[h]["area"], "dem2024": round
 name = gpd.read_file(f"zip://{RAW}/geo/cb_county.zip", engine="pyogrio", read_geometry=False).query("STATEFP == @SF and COUNTYFP == @CF").NAMELSAD.iloc[0]
 state = gpd.read_file(f"zip://{RAW}/geo/cb_state.zip", engine="pyogrio", read_geometry=False).query("STATEFP == @SF").NAME.iloc[0]
 summary = {"name": f"{name}, {state}", "fips": SF + CF, "pops": len(pops), "people": len(pops) * SIZE, "neighbourhoods": len(hoods)}
+if floored:
+    summary["floored"] = floored  # cities under one pop: [city, its neighbourhood, the neighbourhood that gave the pop]
 OUT.parent.mkdir(parents=True, exist_ok=True)
 OUT.write_text(json.dumps({"summary": summary, "pops": pops, "neighbourhoods": places}, separators=(",", ":")))
 print(summary, dict(Counter(p["work"] for p in pops).most_common()))

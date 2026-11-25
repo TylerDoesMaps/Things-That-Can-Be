@@ -1,0 +1,14 @@
+/* The legislation toolbox. Builds on the game's stylesheets and the old build's bill screen. */
+.billwrap .bhead select { font: inherit; padding: 4px 6px; max-width: 260px; }
+.billwrap .ent-tabs { margin-top: 8px; }
+.tsum { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 12px 36px; padding: 12px 0 2px; }
+.tsum .vkey { margin-left: auto; }
+table.tax td { vertical-align: top; } table.tax td.n { text-align: right; }
+table.tax th:nth-child(1) { width: 21%; } table.tax th:nth-child(2) { width: 9%; } table.tax th:nth-child(4) { width: 9%; } table.tax th:nth-child(5) { width: 24%; }
+table.tax tr.absent td { background: #fff; color: var(--muted); }
+.subv { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; padding: 1px 0; }
+.pbar { height: 10px; margin: 3px 0 2px; } .pos1 { font-weight: 600; } .ideal { font-size: 11.5px; }
+.vbar.two i + i { left: auto; right: 0; } .vsup b { width: 52px; }
+.roll { display: flex; flex-wrap: wrap; gap: 3px 14px; font-size: 12.5px; } .roll i { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 5px; }
+.bsec .pt { margin-top: 4px; }
+@media (max-width: 800px) { .vchart { transform-origin: left top; transform: scale(.8); } .tsum .vkey { margin-left: 0; } table.tax { display: block; overflow-x: auto; } }
